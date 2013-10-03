@@ -1,0 +1,42 @@
+<head>
+  <title>fantasybiathlon</title>
+</head>
+
+<body>
+  {{> hello}}
+<div class="row">
+  <div class="large-12 columns">
+    <h1>TEAM NAME</h1>
+  </div>
+</div>
+<div class="row">
+  <div class="large-3 columns">
+    <h1 class="subheader"><div class="button expand">TEAM</div></h1>
+  </div>
+  <div class="large-9 columns">
+    <div class="panel" style="height: 140px;">team deets</div>
+  </div>
+</div>
+<div class="row">
+  <div class="large-9 columns">
+    <div class="panel">next race deets</div>
+  </div>
+  <div class="large-3 columns">
+    <h1 class="subheader"><div class="button expand">NEXT RACE</div></h1>
+  </div>
+</div>
+<div class="row">
+  <div class="large-3 columns">
+    <h1 class="subheader"><div class="button expand">POINTS</div></h1>
+  </div>
+  <div class="large-9 columns">
+    <div class="panel">points graph</div>
+  </div>
+</div>
+</body>
+
+<template name="hello">
+  <h1>Hello World!</h1>
+  {{greeting}}
+  <input type="button" value="Click" />
+</template>
