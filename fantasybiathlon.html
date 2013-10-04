@@ -5,16 +5,14 @@
 <body>
   {{> hello}}
 <div class="row">
-  <div class="large-12 columns">
-    <h1>TEAM NAME</h1>
-  </div>
+{{> teamname}}
 </div>
 <div class="row">
   <div class="large-3 columns">
     <h1 class="subheader"><div class="button expand">TEAM</div></h1>
   </div>
   <div class="large-9 columns">
-    <div class="panel" style="height: 140px;">team deets</div>
+    <div class="panel" style="height: 140px;">{{> team }}</div>
   </div>
 </div>
 <div class="row">
@@ -39,4 +37,28 @@
   <h1>Hello World!</h1>
   {{greeting}}
   <input type="button" value="Click" />
+</template>
+
+<template name="teamname">
+  <div class="large-12 columns">
+    <h1>NAME: {{team.Name}}</h1>
+  </div>  
+</template>
+
+<template name="team">
+  <div class="row">
+    {{#each athletes}}
+       {{> player}}
+    {{/each}}
+  </div>
+</template>    
+
+<template name="athlete">
+  <div class="panel large-3 columns">
+    <ul>
+      <li>{{Name}}</li>
+      <li>{{Nat}}</li>
+      <li>{{Gender}}</li>
+    </ul>
+  </div>
 </template>
