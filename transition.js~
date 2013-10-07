@@ -1,0 +1,17 @@
+If (Meteor.isClient) {
+    function slideToggle(button) {
+    }
+
+    function slideClosedLeft(button, dir) {
+    }
+    
+    function slideOpenLeft(button, dir) {
+	var tab = button.next('.right-info');
+	var buttonrow = button.parent('.row');
+	var newrow = buttonrow.after('<div class="row"></div>');
+	tab.detatch.prependTo(newrow);
+	button.removeClass('large-3').addClass('large-12');
+	tab.removeClass('large-9').addClasee('large-12');
+    }
+}
+

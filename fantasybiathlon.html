@@ -3,62 +3,227 @@
 </head>
 
 <body>
-  {{> hello}}
-<div class="row">
-{{> teamname}}
-</div>
-<div class="row">
-  <div class="large-3 columns">
-    <h1 class="subheader"><div class="button expand">TEAM</div></h1>
-  </div>
-  <div class="large-9 columns">
-    <div class="panel" style="height: 140px;">{{> team }}</div>
-  </div>
-</div>
-<div class="row">
-  <div class="large-9 columns">
-    <div class="panel">next race deets</div>
-  </div>
-  <div class="large-3 columns">
-    <h1 class="subheader"><div class="button expand">NEXT RACE</div></h1>
-  </div>
-</div>
-<div class="row">
-  <div class="large-3 columns">
-    <h1 class="subheader"><div class="button expand">POINTS</div></h1>
-  </div>
-  <div class="large-9 columns">
-    <div class="panel">points graph</div>
-  </div>
-</div>
+  <nav class="top-bar">
+  <ul class="title-area">
+    <!-- Title Area -->
+    <li class="name">
+      <h1><a href="#">Top Bar Title </a></h1>
+    </li>
+    <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+  </ul>
+
+  <section class="top-bar-section">
+    <!-- Left Nav Section -->
+    <ul class="left">
+      <li class="divider"></li>
+      <li class="active"><a href="#">Main Item 1</a></li>
+      <li class="divider"></li>
+      <li><a href="#">Main Item 2</a></li>
+      <li class="divider"></li>
+      <li class="has-dropdown"><a href="#">Main Item 3</a>
+
+        <ul class="dropdown">
+          <li class="has-dropdown"><a href="#">Dropdown Level 1a</a>
+
+            <ul class="dropdown">
+              <li><label>Dropdown Level 2 Label</label></li>
+              <li><a href="#">Dropdown Level 2a</a></li>
+              <li><a href="#">Dropdown Level 2b</a></li>
+              <li class="has-dropdown"><a href="#">Dropdown Level 2c</a>
+
+                <ul class="dropdown">
+                  <li><label>Dropdown Level 3 Label</label></li>
+                  <li><a href="#">Dropdown Level 3a</a></li>
+                  <li><a href="#">Dropdown Level 3b</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#">Dropdown Level 3c</a></li>
+                </ul>
+              </li>
+              <li><a href="#">Dropdown Level 2d</a></li>
+              <li><a href="#">Dropdown Level 2e</a></li>
+              <li><a href="#">Dropdown Level 2f</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Dropdown Level 1b</a></li>
+          <li><a href="#">Dropdown Level 1c</a></li>
+          <li class="divider"></li>
+          <li><a href="#">Dropdown Level 1d</a></li>
+          <li><a href="#">Dropdown Level 1e</a></li>
+          <li><a href="#">Dropdown Level 1f</a></li>
+          <li class="divider"></li>
+          <li><a href="#">See all &rarr;</a></li>
+        </ul>
+      </li>
+      <li class="divider"></li>
+    </ul>
+
+    <!-- Right Nav Section -->
+    <ul class="right">
+      <li class="divider hide-for-small"></li>
+      <li class="has-dropdown"><a href="#">Main Item 4</a>
+
+        <ul class="dropdown">
+          <li><label>Dropdown Level 1 Label</label></li>
+          <li class="has-dropdown"><a href="#" class="">Dropdown Level 1a</a>
+
+            <ul class="dropdown">
+              <li><a href="#">Dropdown Level 2a</a></li>
+              <li><a href="#">Dropdown Level 2b</a></li>
+              <li class="has-dropdown"><a href="#">Dropdown Level 2c</a>
+
+                <ul class="dropdown">
+                  <li><a href="#">Dropdown Level 3a</a></li>
+                  <li><a href="#">Dropdown Level 3b</a></li>
+                  <li><a href="#">Dropdown Level 3c</a></li>
+                </ul>
+              </li>
+              <li><a href="#">Dropdown Level 2d</a></li>
+              <li><a href="#">Dropdown Level 2e</a></li>
+              <li><a href="#">Dropdown Level 2f</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Dropdown Level 1b</a></li>
+          <li><a href="#">Dropdown Level 1c</a></li>
+          <li class="divider"></li>
+          <li><label>Dropdown Level 1 Label</label></li>
+          <li><a href="#">Dropdown Level 1d</a></li>
+          <li><a href="#">Dropdown Level 1e</a></li>
+          <li><a href="#">Dropdown Level 1f</a></li>
+          <li class="divider"></li>
+          <li><a href="#">See all &rarr;</a></li>
+        </ul>
+      </li>
+      <li class="divider"></li>
+      <li class="has-form">
+        <form>
+          <div class="row collapse">
+            <div class="small-8 columns">
+              <input type="text">
+            </div>
+            <div class="small-4 columns">
+              <a href="#" class="alert button">Search</a>
+            </div>
+          </div>
+        </form>
+      </li>
+      <li class="divider show-for-small"></li>
+      <li class="has-form">
+        <a class="button" href="#">Button!</a>
+      </li>
+    </ul>
+  </section>
+  </nav>
+
+  <section class="row">
+    {{> teamname}}
+  </section>
+  <section class="row">
+    <div class="twelve columns topbar">
+      <div class="large-3 columns">
+	<h1 class="subheader">
+	  <div class="button expand" style="height: 200px;" id="teambutton">
+	    TEAM
+	  </div>
+	</h1>
+      </div>
+      <div class="large-9 columns">
+	<div style="height: 140px;">{{> team}}</div>
+      </div>
+    </div>
+    <div class="twelve columns dropbar" id="teamdrop" style="display: none">
+      <div class="large-12 columns">
+	<div class="large-3 columns">
+	  {{> athleteform}}
+	</div>
+	<div class="large-9 columns panel">
+	  {{> athletelist}}
+	</div>
+      </div>
+    </div>
+  </section>
+  <section class="row">
+    <div class="twelve columns">
+      <div class="large-9 columns">
+	<div class="panel">next race deets</div>
+      </div>
+      <div class="large-3 columns">
+	<h1 class="subheader"><div class="button expand">NEXT RACE</div></h1>
+      </div>
+    </div>
+  </section>
+  <section class="row">
+    <div class="twelve columns">
+      <div class="large-3 columns">
+	<h1 class="subheader"><div class="button expand">POINTS</div></h1>
+      </div>
+      <div class="large-9 columns">
+	<div class="panel">points graph</div>
+      </div>
+    </div>
+  </section>
 </body>
 
-<template name="hello">
-  <h1>Hello World!</h1>
-  {{greeting}}
-  <input type="button" value="Click" />
-</template>
-
 <template name="teamname">
-  <div class="large-12 columns">
-    <h1>NAME: {{team.Name}}</h1>
+  <div class="large-9 columns large-centered">
+    <h1>NAME: {{team.Name}} - POINTS: 0</h1>
   </div>  
 </template>
 
 <template name="team">
   <div class="row">
     {{#each athletes}}
-       {{> player}}
+       {{> athlete}}
     {{/each}}
   </div>
 </template>    
 
 <template name="athlete">
-  <div class="panel large-3 columns">
-    <ul>
-      <li>{{Name}}</li>
-      <li>{{Nat}}</li>
-      <li>{{Gender}}</li>
+  <div class="large-3 columns">
+    <ul class="pricing-table">
+      <li class="title" style="background-image:url('{{avatar}}'), url('{{flag}}');
+			   background-size: cover;
+			   background-repeat: no-repeat;
+			   background-position: center center;
+			   height: 8em;
+			   "></li>
+      <li class="title" style="height: 4em;">{{#if ShortName}}{{ShortName}}{{else}}<br>{{/if}}</li>
+      <li class="bullet-item">{{#if ShortName}}{{GenderLong}}, {{Nat}}{{else}}</br>{{/if}}</li>
+      <li class="description">{{#if ShortName}}000 points, 200EUR{{else}}<br>{{/if}}</li>
     </ul>
   </div>
+</template>
+
+<template name="athleteform">
+  <form class="custom">
+    <fieldset>
+      <div class="row">
+	<input type="text" placeholder="Name" id="namefilter">
+      </div>
+      <div class="row">
+	<div class="large-6 columns" id="mfradiomaster">
+	  <label for="mfradio"><input name="mfradio" type="radio" id="mfradio" style="display: none;" CHECKED><span class="custom radio checked" id="MW"></span>All</label>
+	  <label for="mfradiom"><input name="mfradio" type="radio" id="mfradiom" style="display: none;"><span class="custom radio" id="M"></span>Male</label>
+	  <label for="mfradiof"><input name="mfradio" type="radio" id="mfradiof" style="display: none;"><span class="custom radio" id="W"></span>Female</label>
+	</div>
+	<div class="large-6 columns">
+	  <label for="natdropdown">Nation</label>
+	  <select id="natdropdown" class="medium">
+	    <option></option>
+	    {{#each nations}}
+	      <option>{{this}}</option>
+	    {{/each}}
+	  </select>
+	</div>
+      </div>
+    </fieldset>
+  </form>
+</template>
+
+<template name="athletelist">
+  THESE ARE THE MATCHING ATHLETES:
+  {{athleteset}}
+</template>
+
+<template name="map">
 </template>
