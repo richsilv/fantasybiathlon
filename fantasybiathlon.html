@@ -120,15 +120,8 @@
   </section>
   <section class="row">
     <div class="twelve columns topbar">
-      <div class="large-3 columns">
-	<h1 class="subheader">
-	  <div class="button expand" style="height: 200px;" id="teambutton">
-	    TEAM
-	  </div>
-	</h1>
-      </div>
-      <div class="large-9 columns">
-	<div style="height: 140px;">{{> team}}</div>
+      <div class="large-12 columns" id="teamdisplay">
+	<div>{{> team}}</div>
       </div>
     </div>
     <div class="twelve columns dropbar" id="teamdrop" style="display: none">
@@ -136,7 +129,7 @@
 	<div class="large-3 columns">
 	  {{> athleteform}}
 	</div>
-	<div class="large-9 columns panel">
+	<div class="large-9 columns panel" style="height: 15.5em; overflow-x: scroll; overflow-y: hidden">
 	  {{> athletelist}}
 	</div>
       </div>
@@ -180,12 +173,12 @@
 
 <template name="athlete">
   <div class="large-3 columns">
-    <ul class="pricing-table">
+    <ul class="pricing-table teammember">
       <li class="title" style="background-image:url('{{avatar}}'), url('{{flag}}');
 			   background-size: cover;
 			   background-repeat: no-repeat;
 			   background-position: center center;
-			   height: 8em;
+			   height: 10em;
 			   "></li>
       <li class="title" style="height: 4em;">{{#if ShortName}}{{ShortName}}{{else}}<br>{{/if}}</li>
       <li class="bullet-item">{{#if ShortName}}{{GenderLong}}, {{Nat}}{{else}}</br>{{/if}}</li>
@@ -221,8 +214,7 @@
 </template>
 
 <template name="athletelist">
-  THESE ARE THE MATCHING ATHLETES:
-  {{athleteset}}
+  {{{athleteset}}}
 </template>
 
 <template name="map">

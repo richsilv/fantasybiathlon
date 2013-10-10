@@ -1,1 +1,6 @@
 /* CSS declarations go here */
+.tile {
+    margin: 0.2em;
+    width: 15.8em;
+    height: 1.5em;
+}
