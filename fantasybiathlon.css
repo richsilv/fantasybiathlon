@@ -4,3 +4,85 @@
     width: 15.8em;
     height: 1.5em;
 }
+
+#athletefields {
+    margin-top: 0;
+}
+
+#teamdrop td {
+    height: 1.2em;
+    padding: 0.2em;
+    margin-left: 0.1em;
+    margin-right: 0.1em;
+}
+
+#teamdrop .athlete {
+    width: 20em;
+}
+
+.flagholder {
+    vertical-align: bottom;
+}
+
+.smallflag {
+    background-size: 2em 1.2em;
+    background-position: center center;
+    border: 1px solid black;
+    background-repeat: no-repeat;
+    width: 2em;
+    height: 1.2em;
+}
+
+.male {
+    background-color: #2ba6cb;
+    color: #fff;
+}
+
+.female {
+    background-color: #e285bd;
+    color: #fff;
+}
+
+.large {
+    font-size: 1.2em;
+    max-width: 9em;
+    white-space: normal;
+}
+
+.teammember li.athletename {
+    padding: 0.6em;
+}
+
+.athletepic {
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    height: 10em;
+}
+
+.pricelabel {
+    display: inline-table;
+    position: absolute;
+    top: 7em;
+    right: 5em;
+    background-color: rgba(200, 200, 200, 0.5);
+    width: 5em;
+    height: 1.5em;
+    border-radius: 0.5em;
+}
+
+.pricelabel h2 {
+    margin: 0;
+}
+
+.cross {
+    display: none;
+    float: right;
+    background-image: url('cross.png');
+    width: 2em;
+    height: 2em;
+    background-size: cover;
+    margin-top: -0.5em;
+    margin-right: -0.5em;
+}
+

@@ -1,14 +1,14 @@
 # IP or URL of the server you want to deploy to
-APP_HOST=meteor.julien-c.fr
+APP_HOST=ec2-54-229-11-184.eu-west-1.compute.amazonaws.com
 
 # If you want a different ROOT_URL, when using a load balancer for instance, set it here
 #ROOT_URL=mycustom.url.com
 
 # Comment this if your host is not an EC2 instance
-EC2_PEM_FILE=~/.ssh/proxynet.pem
+EC2_PEM_FILE=~/.ssh/richsilvireland.pem
 
 # What's your project's Git repo?
-GIT_URL=git://github.com/SachaG/Microscope.git
+GIT_URL=git://github.com/richsilv/fantasybiathlon.git
 
 # Does your project use meteorite, or plain meteor?
 METEORITE=true
@@ -20,7 +20,7 @@ METEOR_RELEASE=0.6.4
 #MAIL_URL=smtp://USERNAME:PASSWORD@smtp.googlemail.com:465
 
 # What's your app name?
-APP_NAME=microscope
+APP_NAME=fantasybiathlon
 
 # If your app is not on the repository root, set this
 APP_PATH=.

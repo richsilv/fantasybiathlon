@@ -174,22 +174,26 @@
 <template name="athlete">
   <div class="large-3 columns">
     <ul class="pricing-table teammember">
-      <li class="title" style="background-image:url('{{avatar}}'), url('{{flag}}');
-			   background-size: cover;
-			   background-repeat: no-repeat;
-			   background-position: center center;
-			   height: 10em;
-			   "></li>
-      <li class="title" style="height: 4em;">{{#if ShortName}}{{ShortName}}{{else}}<br>{{/if}}</li>
-      <li class="bullet-item">{{#if ShortName}}{{GenderLong}}, {{Nat}}{{else}}</br>{{/if}}</li>
-      <li class="description">{{#if ShortName}}000 points, 200EUR{{else}}<br>{{/if}}</li>
+      <li class="title athletepic" style="background-image:url('{{avatar}}'), url('{{flag}}');">
+	<div class="cross" id="{{IBUId}}">
+	</div>
+	{{#if ShortName}}<div class="pricelabel"><h2>{{Price}}</h2></div>{{/if}}
+      </li>
+      <li class="title athletename" style="height: 4em;">{{#if ShortName}}<div class="radius label large {{GenderLongLower}}">{{ShortName}}</div<{{else}}<br>{{/if}}</li>
+      <li class="bullet-item">{{#if ShortName}}{{NatLong}}{{else}}</br>{{/if}}</li>
+      <li class="bullet-item">{{#if ShortName}}000 points{{else}}<br>{{/if}}</li>
     </ul>
   </div>
 </template>
 
 <template name="athleteform">
   <form class="custom">
-    <fieldset>
+    <fieldset id="athletefields">
+      <div class="row">
+	<h4>
+	  Total Cost: {{teamprice}}
+	</h4>
+      </div>
       <div class="row">
 	<input type="text" placeholder="Name" id="namefilter">
       </div>
@@ -210,6 +214,14 @@
 	</div>
       </div>
     </fieldset>
+    <row>
+      <div class="large-6 columns">
+	<a href="#" id="resettransfers" class="small button">Reset</a>
+      </div>
+      <div class="large-6 columns">
+	<a href="#" id="savetransfers" class="small button success">Save</a>
+      </div>
+    </row>
   </form>
 </template>
 
