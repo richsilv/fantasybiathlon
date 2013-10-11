@@ -127,9 +127,10 @@
     <div class="twelve columns dropbar" id="teamdrop" style="display: none">
       <div class="large-12 columns">
 	<div class="large-3 columns">
+	  {{> pricebox}}
 	  {{> athleteform}}
 	</div>
-	<div class="large-9 columns panel" style="height: 15.5em; overflow-x: scroll; overflow-y: hidden">
+	<div class="large-9 columns panel" id="athletelist">
 	  {{> athletelist}}
 	</div>
       </div>
@@ -175,7 +176,7 @@
   <div class="large-3 columns">
     <ul class="pricing-table teammember">
       <li class="title athletepic" style="background-image:url('{{avatar}}'), url('{{flag}}');">
-	<div class="cross" id="{{IBUId}}">
+	<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
 	</div>
 	{{#if ShortName}}<div class="pricelabel"><h2>{{Price}}</h2></div>{{/if}}
       </li>
@@ -186,14 +187,19 @@
   </div>
 </template>
 
+<template name="pricebox">
+  <div class="row">
+    <div class="large-12 columns">
+      <div class="alert-box">
+	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span>
+      </div>
+    </div>
+  </div>
+</template>
+
 <template name="athleteform">
   <form class="custom">
     <fieldset id="athletefields">
-      <div class="row">
-	<h4>
-	  Total Cost: {{teamprice}}
-	</h4>
-      </div>
       <div class="row">
 	<input type="text" placeholder="Name" id="namefilter">
       </div>

@@ -36,17 +36,29 @@
 .male {
     background-color: #2ba6cb;
     color: #fff;
+    cursor: pointer;
 }
 
 .female {
     background-color: #e285bd;
     color: #fff;
+    cursor: pointer;
+}
+
+.unavailable {
+    background-color: #888888;
+    color: #fff;
 }
 
 .large {
     font-size: 1.2em;
-    max-width: 9em;
+    max-width: 10em;
     white-space: normal;
+    word-wrap: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .teammember li.athletename {
@@ -86,3 +98,19 @@
     margin-right: -0.5em;
 }
 
+.alert-box .under {
+    color: #e9e9e9;
+    font-size: 1.4em;
+}
+
+.alert-box .over {
+    color: #c60f13;
+    font-size: 1.4em;
+}
+
+#athletelist {
+    height: 16.5em;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-top: 0.5em;
+}

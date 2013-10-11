@@ -1,3 +1,4 @@
+/*jshint smarttabs:true */
 FantasyTeams = new Meteor.Collection("fantasyteams");
 Athletes = new Meteor.Collection("athletes");
 Races = new Meteor.Collection("races");
@@ -6,7 +7,7 @@ Nations = new Meteor.Collection("nations");
 ThisTeam = new Meteor.Collection();
 
 var systemDate = new Date(2013, 01, 11);
-
+var maxPoints = 25;
 var userid = 1;
 
 if (Meteor.isServer) {
@@ -33,6 +34,7 @@ if (Meteor.isServer) {
 }
 
 if (Meteor.isClient) {
+    Session.set('cross', false);
     var thisteam = null;
     Session.set('natchoice', undefined);
     Session.set('namechoice', '');
@@ -43,27 +45,26 @@ if (Meteor.isClient) {
 	$('#teamdisplay').on('click', '.teammember', function(e) {
 	    if (e.target.className !== 'cross') {
 		$('#teamdrop').slideToggle();
-		$('.cross').toggle();
+		Session.set('cross', !Session.get('cross'));
 	    }
 	});
 	$('#teamdisplay').on('click', '.cross', function() {
-	    var team = ThisTeam.findOne();
-	    if (team.Athletes.indexOf($(this).attr('id')) > -1) {
-		team.Athletes[team.Athletes.indexOf($(this).attr('id'))] = "DUMMY";
-		ThisTeam.update({}, {$set: {Athletes: team.Athletes}});
+	    var team = Session.get('athletes');
+	    if (team.indexOf($(this).attr('id')) > -1) {
+		team[team.indexOf($(this).attr('id'))] = "DUMMY";
+		Session.set('athletes', team);
 	    }
-	    $('.cross').show();
 	});
 	$('#teamdrop').on('click', '.athlete', function() {
-	    var team = ThisTeam.findOne();
-	    var addpos = team.Athletes.indexOf("DUMMY");
-	    if (addpos > -1) {
-		team.Athletes[addpos] = $(this).children('span').attr('id');
-		ThisTeam.update({}, {$set: {Athletes: team.Athletes}});
+	    var team = Session.get('athletes');
+	    var addpos = team.indexOf("DUMMY");
+	    if (addpos > -1 && !$(this).children(':first').hasClass('unavailable')) {
+		team[addpos] = $(this).children('span').attr('id');
+		Session.set('athletes', team);
 	    }
 	});
 	$('#teamdrop').on('click', '#resettransfers', function() {
-	   ThisTeam.remove({}); 
+	   ThisTeam.remove({});
 	});
 	$('#natdropdown').change(function() {
 	    Session.set('natchoice', $(this).val());
@@ -95,50 +96,62 @@ if (Meteor.isClient) {
     };
     Template.athleteform.nations = function() {
 	var nations = [];
-	var natlist = Athletes.find({})
+	var natlist = Athletes.find({});
 	natlist.forEach(function(ath) {
 	    if (nations.indexOf(ath.Nat) < 0) {
 		nations.push(ath.Nat);
-	    }		
+	    }
 	});
 	return nations.sort();
-    }
-    Template.athleteform.teamprice = function() {
-	return getteamprice(ThisTeam.findOne());
-    }
-    
+    };
+    Template.pricebox.teamprice = function() {
+	return Session.get('teamprice');
+    };
+    Template.pricebox.pricetarget = function() {
+	if (getteamprice(ThisTeam.findOne()) <= maxPoints) {
+	    return "under";
+	}
+	else {
+	    return "over";
+	}
+    };
+
     Template.athletelist.helpers({
 	athleteset: function() {
-	    var ROWS = 8;
+	    var ROWS = 9;
 	    var aths = filterathletes(Session.get('genderchoice'), Session.get('natchoice'), Session.get('namechoice'));
 	    var cols = Math.ceil(aths.length/ROWS);
-	    var athtable = []
+	    var athtable = [];
 	    for (var i = 0; i < ROWS; i++) {athtable.push('<tr style="white-space:nowrap;">');}
-	    for (var i = 0; i < aths.length; i++) {
-		var flag = aths[i].Nat + '.gif'
+	    for (i = 0; i < aths.length; i++) {
+		var flag = aths[i].Nat + '.gif';
 		var gender = (aths[i].Gender === "M") ? "male" : "female";
+		if (Session.get('blacklist') && Session.get('fullgenders') && Session.get('teamprice')) {
+		    if (Session.get('blacklist').indexOf(aths[i].Nat) > -1 ||
+			Session.get('fullgenders').indexOf(aths[i].Gender) > -1 ||
+			Session.get('teamprice') + aths[i].Price > maxPoints) {
+			gender = "unavailable";
+		    }
+		}
 		athtable[i % ROWS] += '<td><strong>' +aths[i].Price + '</strong></td>';
 		athtable[i % ROWS] += '<td class="flagholder"><div class="smallflag" ' +
 		    'style="background-image: url(\'' + flag + '\');"></div></td>';
 		athtable[i % ROWS] += '<td class="athlete"><span class="radius label ' + gender + '" id="' + aths[i].IBUId + '">' + aths[i].Name + '</span></td>';
 		athtable[i % ROWS] += '<td><div style="width: 1em;"></div></td>';
 	    }
-	    for (var i = 0; i < ROWS; i++) {athtable[i] += '</tr>';}
+	    for (i = 0; i < ROWS; i++) {athtable[i] += '</tr>';}
 	    return athtable.join('');
-	},
- 	athlete: function() {
-	    
 	},
 	render: function() {
 	    return this.Name;
 	},
 	nations: function() {
 	var nations = [];
-	var natlist = Athletes.find({})
+	var natlist = Athletes.find({});
 	natlist.forEach(function(ath) {
 	    if (nations.indexOf(ath.Nat) < 0) {
 		nations.push(ath.Nat);
-	    }		
+	    }
 	});
 	return nations.sort();
     }
@@ -153,6 +166,9 @@ if (Meteor.isClient) {
 	flag: function() {
 	    return this.Nat + '.gif';
 	},
+	cross: function() {
+	    return Session.get("cross");
+	},
 	GenderLong: function() {
 	    if (this.Gender === "M") {return "Male";}
 	    else {return "Female";}
@@ -163,7 +179,13 @@ if (Meteor.isClient) {
 	},
 	NatLong: function() {
 	    if (!this) {return "";}
-	    return Nations.findOne({Nat: this.Nat}).LongName;
+	    var nation = Nations.findOne({Nat: this.Nat});
+	    if (nation) {
+		return nation.LongName;
+	    }
+	    else {
+		return "";
+	    }
 	}
     });
 
@@ -177,7 +199,47 @@ if (Meteor.isClient) {
     Deps.autorun(function() {
 	ThisTeam.update({}, {$set: {Athletes: Session.get('athletes')}});
     });
-	
+    Deps.autorun(function() {
+	var athletes = Session.get('athletes');
+	nations = [];
+	blacklist = [];
+	if (athletes) {
+	    for (var i = 0; i < athletes.length; i++) {
+		ath = Athletes.findOne({IBUId: athletes[i]});
+		if (ath) {
+		    if (nations.indexOf(ath.Nat) > -1) {
+			blacklist.push(ath.Nat);
+		    }
+		    else {
+			nations.push(ath.Nat);
+		    }
+		    Session.set('blacklist', blacklist);
+		}
+	    }
+	}
+    });
+    Deps.autorun(function() {
+	var athletes = Session.get('athletes');
+	genders = [];
+	fullgenders = [];
+	if (athletes) {
+	    for (var i = 0; i < athletes.length; i++) {
+		ath = Athletes.findOne({IBUId: athletes[i]});
+		if (ath) {
+		    if (genders.indexOf(ath.Gender) > -1) {
+			fullgenders.push(ath.Gender);
+			}
+		    else {
+			genders.push(ath.Gender);
+		    }
+		    Session.set('fullgenders', fullgenders);
+		}
+	    }
+	}
+    });
+    Deps.autorun(function() {
+	Session.set('teamprice', getteamprice(ThisTeam.findOne()));
+    });
 }
 
 function filterathletes(gender, nation, name) {
@@ -210,7 +272,9 @@ function getteamprice(getteam) {
 	var team = getathletes(getteam.Athletes);
 	var total = 0;
 	for (var i = 0; i < team.length; i++) {
-	    total += team[i].Price;
+	    if (team[i]) {
+		total += team[i].Price;
+	    }
 	}
 	return Math.round(total*10)/10;
     }
@@ -232,4 +296,3 @@ function getteamtotal(getteam) {
 	return 0;
     }
 }
-    
