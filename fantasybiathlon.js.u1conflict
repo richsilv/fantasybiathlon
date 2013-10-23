@@ -5,15 +5,13 @@ Races = new Meteor.Collection("races");
 Meetings = new Meteor.Collection("meetings");
 Nations = new Meteor.Collection("nations");
 ThisTeam = new Meteor.Collection();
-Results = new Meteor.Collection("results");
 
 seasonStart = new Date(2012, 10, 15);
 systemDate = new Date(2013, 0, 16);
 lastUpdate = systemDate;
 var maxPoints = 25;
 var userid = 1;
-var finishpoints = [0, 30, 25, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-var smallpoints = [0, 10, 7, 5, 3, 1];
+
 var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -37,9 +35,6 @@ if (Meteor.isServer) {
     });
     Meteor.publish("nations", function() {
 	return Nations.find();
-    });
-    Meteor.publish("results", function() {
-	return Results.find();
     });
 }
 
@@ -77,8 +72,8 @@ if (Meteor.isClient) {
 	    }
 	});
 	$('#teamdisplay').on('hover', '.cross', function() {
-	    $(this).effect("shake");
-	});
+	    $(this).effect("shake", {distance:2});
+	});	
 	$('#teamdrop').on('click', '.athlete', function() {
 	    var team = Session.get('athletes');
 	    var addpos = team.indexOf("DUMMY");
@@ -104,6 +99,7 @@ if (Meteor.isClient) {
 	    $('#transfermodal').foundation('reveal', 'close');
 	    var transfers = getchanges();
 	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
+	    ThisTeam.update({}, {$push: {teamHistory: [ThisTeam.findOne().Athletes, Session.get('date')]}});
 	    var team = ThisTeam.findOne();
 	    FantasyTeams.update({_id: Session.get('teamID')}, team);
 	});
@@ -114,7 +110,6 @@ if (Meteor.isClient) {
     var nationhandle = Meteor.subscribe("nations", function() {});
     var raceshandle = Meteor.subscribe("races", function() {});
     var meetingshandle = Meteor.subscribe("meetings", function() {});
-    var resultshandle = Meteor.subscribe("results", function() {});
 
     Template.teamname.team = function() {
 	return FantasyTeams.findOne({UserID: userid});
@@ -218,10 +213,6 @@ if (Meteor.isClient) {
 	    else {
 		return "";
 	    }
-	},
-	pointtotal: function() {
-	    var theseres = Results.find({IBUId: this.IBUId, RaceTime: {$gte: seasonStart, $lte: Session.get('date')}});
-	    return addpoints(theseres);
 	}
     });
 
@@ -258,9 +249,9 @@ if (Meteor.isClient) {
 	transferlist: function() {
 	    if (!ThisTeam.findOne()) {return "";}
 	    var transfers = getchanges();
-	    var list = '<table>';
+	    var list = '<table>'
 	    for (var i = 0; i < transfers.length; i++) {
-		list += '<tr>' + athletetile(transfers[i][1]) + '<td> for </td>' + athletetile(transfers[i][0]) + '</tr>';
+		list += '<tr>' + athletetile(transfers[i][1]) + '<td> for </td>' + athletetile(transfers[i][0]) + '</tr>'
 	    }
 	    return list + '</table>';
 	}
@@ -425,7 +416,7 @@ function getchanges() {
 	oldc += 1;
     }
     return changes;
-}
+};
 
 function athletetile(IBUId) {
     var athlete = Athletes.findOne({IBUId: IBUId});
@@ -434,7 +425,7 @@ function athletetile(IBUId) {
     var gender = (athlete.Gender === "M") ? "male" : "female";
     var tile = '<td><strong>' +athlete.Price + '</strong></td>';
     tile += '<td class="flagholder"><div class="smallflag" ' +
-		    'style="background-image: url(\'' + flag + '\');"></div></td>';
+		    'style="background-image: url(\'' + flag + '\');"></div></td>'
     tile += '<td class="athlete"><span class="radius label ' + gender + '">' + athlete.Name + '</span></td>';
     return tile;
 }
@@ -464,48 +455,3 @@ function pad(n, width, z) {
   return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-athleteracepoints = function(r) {
-    var points = 0;
-    if (typeof r == 'undefined') {console.log("no match"); return null;}
-    if (r.ResultOrder > 998) {console.log("DNF"); return null;}
-    else {
-	points += finishpoints[r.ResultOrder] ? finishpoints[r.ResultOrder] : 0;
-//	console.log(finishpoints[r.ResultOrder] + ' points from finish position.');
-	if (r.CourseRank != 'undefined') {
-	    points += smallpoints[r.CourseRank] ? smallpoints[r.CourseRank] : 0;
-//	    console.log(smallpoints[r.CourseRank] + ' points from ski speed.');
-	}
-	points += (r.ShootingTotal === 0 ? 5 : 0);
-//	console.log((r.ShootingTotal === 0 ? 5 : 0) + ' points from shooting clear.');
-	points += (r.Shootings.reduce(function(total, x) {return x == 0 ? total+1 : total}, 0));
-//	console.log((r.Shootings.reduce(function(total, x) {return x == 0 ? total+1 : total}, 0)) + ' points from individual clear shoots.');
-	if (r.RangeTime != 'undefined') {
-	    var minmisses = Results.findOne({RaceId: r.RaceId, ResultOrder: {$lte: 998}}, {fields: {ShootingTotal: 1}, sort: {ShootingTotal: 1}}).ShootingTotal;
-	    var shootorder = Results.find({RaceId: r.RaceId, ShootingTotal: minmisses, ResultOrder: {$lte: 998}}, {sort: {RangeTime: 1}}).fetch();
-	    points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
-//	    console.log(shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0) + ' points from shooting performance.');
-	}
-    }
-    return points;
-};
-
-updateallpoints = function(force) {
-    if (force) {
-	var res = Results.find();
-    }
-    else {
-	var res = Results.find({Points: null});
-    }
-    res.map(function(r) {
-	console.log(r.IBUId + ' - ' + r.RaceId);
-	Results.update({_id: r._id}, {$set: {Points: athleteracepoints(r)}});
-    });
-}
-
-clearallpoints = function() {
-    Results.update({}, {$unset: {Price: ""}}, {multi: true});
-}
-
-addpoints = function(results) {
-    return results.reduce(function(tot, res) {return tot + (res.Points ? res.Points : 0);}, 0);
-}

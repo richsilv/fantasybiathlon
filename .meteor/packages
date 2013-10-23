@@ -8,3 +8,7 @@ insecure
 preserve-inputs
 foundation
 jquery
+
+jquery-ui
+accounts-password
+accounts-ui

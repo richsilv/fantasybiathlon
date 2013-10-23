@@ -2,13 +2,19 @@
   "meteor": {},
   "dependencies": {
     "basePackages": {
-      "foundation": {}
+      "foundation": {},
+      "jquery-ui": {}
     },
     "packages": {
       "foundation": {
         "git": "https://github.com/ewall/meteor-foundation.git",
         "tag": "v4.3.2",
         "commit": "4cd0dc6ac5c69bf7477917a836d9078262d273a0"
+      },
+      "jquery-ui": {
+        "git": "https://github.com/TimHeckel/meteor-jquery-ui.git",
+        "tag": "v1.9.2",
+        "commit": "c437d45edcf1367df8d5ffa8bad2867758030bd2"
       }
     }
   }

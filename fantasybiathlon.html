@@ -7,7 +7,7 @@
   <ul class="title-area">
     <!-- Title Area -->
     <li class="name">
-      <h1><a href="#">Top Bar Title </a></h1>
+      {{> dateForm}}
     </li>
     <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
     <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
@@ -17,9 +17,9 @@
     <!-- Left Nav Section -->
     <ul class="left">
       <li class="divider"></li>
-      <li class="active"><a href="#">Main Item 1</a></li>
+      <li class="active" id="datefwd"><a href="#">Fwd</a></li>
       <li class="divider"></li>
-      <li><a href="#">Main Item 2</a></li>
+      <li><a href="#" id="dateback">Back</a></li>
       <li class="divider"></li>
       <li class="has-dropdown"><a href="#">Main Item 3</a>
 
@@ -115,23 +115,45 @@
   </section>
   </nav>
 
-  <section class="row">
-    {{> teamname}}
-  </section>
-  <section class="row">
-    <div class="twelve columns topbar">
-      <div class="large-12 columns" id="teamdisplay">
-	<div>{{> team}}</div>
-      </div>
+{{#if currentUser}}
+  {{> loggedinscreen}}
+{{else}}
+  {{> welcomescreen}}
+{{/if}}
+
+</body>
+
+<template name="welcomescreen">
+  <section class="row" id="welcome">
+    <div class="large-12 columns">
+      <h1>Welcome to Fantasy Biathlon</h1>
+      {{loginButtons}}
     </div>
-    <div class="twelve columns dropbar" id="teamdrop" style="display: none">
-      <div class="large-12 columns">
-	<div class="large-3 columns">
-	  {{> pricebox}}
-	  {{> athleteform}}
+  </section>
+</template>
+
+<template name="loggedinscreen">
+  <section id="teamname">
+    <div class="row">
+      {{> teamtitle}}
+    </div>
+  </section>
+  <section id="athletes">
+    <div class="row">
+      <div class="twelve columns topbar">
+	<div class="large-12 columns" id="teamdisplay">
+	  <div>{{> team}}</div>
 	</div>
-	<div class="large-9 columns panel" id="athletelist">
-	  {{> athletelist}}
+      </div>
+      <div class="twelve columns dropbar" id="teamdrop" style="display: none">
+	<div class="large-12 columns">
+	  <div class="large-3 columns">
+	    {{> pricebox}}
+	    {{> athleteform}}
+	  </div>
+	  <div class="large-9 columns panel" id="athletelist">
+	    {{> athletelist}}
+	  </div>
 	</div>
       </div>
     </div>
@@ -139,7 +161,7 @@
   <section class="row">
     <div class="twelve columns">
       <div class="large-9 columns">
-	<div class="panel">next race deets</div>
+	{{> nextrace}}
       </div>
       <div class="large-3 columns">
 	<h1 class="subheader"><div class="button expand">NEXT RACE</div></h1>
@@ -156,12 +178,35 @@
       </div>
     </div>
   </section>
-</body>
+
+  <div id="transfermodal" class="reveal-modal small" style="width: auto;">
+    {{> transfermodal}}
+  </div>
+
+  <div id="roundscoresmodal" class="reveal-modal small" style="width: auto;">
+    {{> resultslist}}
+  </div>
+</template>
+
+<template name="teamtitle">
+  <div class="large-8 columns">
+    <h3 class="subheader">TEAM NAME:</h3>
+    <h1 style="text-align: center; margin-top: -0.5em;">{{> teamname}}</h1>
+  </div>
+  <div class="large-3 large-offset-1 columns">
+    <h3 class="subheader">POINTS:</h3>
+    <h1 style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}data-reveal-id="roundscoresmodal"{{/if}}>{{teamPoints}}</a></h1>
+  </div>
+</template>
 
 <template name="teamname">
-  <div class="large-9 columns large-centered">
-    <h1>NAME: {{team.Name}} - POINTS: 0</h1>
-  </div>  
+  {{#if teamnameedit}}
+  <div class="large-8 large-offset-2 centered columns">
+    <input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: 0.2em; height: 1.2em;">
+  </div>
+  {{else}}
+  <div id="teamname">{{team.Name}}</div>
+  {{/if}}
 </template>
 
 <template name="team">
@@ -176,13 +221,13 @@
   <div class="large-3 columns">
     <ul class="pricing-table teammember">
       <li class="title athletepic" style="background-image:url('{{avatar}}'), url('{{flag}}');">
-	<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
-	</div>
+	{{#if ShortName}}<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
+	</div>{{/if}}
 	{{#if ShortName}}<div class="pricelabel"><h2>{{Price}}</h2></div>{{/if}}
       </li>
       <li class="title athletename" style="height: 4em;">{{#if ShortName}}<div class="radius label large {{GenderLongLower}}">{{ShortName}}</div<{{else}}<br>{{/if}}</li>
       <li class="bullet-item">{{#if ShortName}}{{NatLong}}{{else}}</br>{{/if}}</li>
-      <li class="bullet-item">{{#if ShortName}}000 points{{else}}<br>{{/if}}</li>
+      <li class="bullet-item">{{#if ShortName}}{{pointtotal}} points{{else}}<br>{{/if}}</li>
     </ul>
   </div>
 </template>
@@ -191,7 +236,7 @@
   <div class="row">
     <div class="large-12 columns">
       <div class="alert-box">
-	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span>
+	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 25.0
       </div>
     </div>
   </div>
@@ -225,7 +270,7 @@
 	<a href="#" id="resettransfers" class="small button">Reset</a>
       </div>
       <div class="large-6 columns">
-	<a href="#" id="savetransfers" class="small button success">Save</a>
+	<a href="#" id="savetransfers" class="small button success" data-reveal-id="transfermodal">Save</a>
       </div>
     </row>
   </form>
@@ -236,4 +281,43 @@
 </template>
 
 <template name="map">
+</template>
+
+<template name="transfermodal">
+  {{#if okay}}
+  <h3>Confirm Changes?</h3>
+  <p class="lead">You will have {{remtrans}} remaining.
+    {{{transferlist}}}
+  <a class="close-reveal-modal">&#215;</a>
+  <a class="small success button" id="confirmtransferbutton">Confirm</a>
+  {{else}}
+  <h3>Too Many Changes!</h3>
+  <p class="lead">Sorry, but you only have {{hastrans}} to use!<p>
+  <p>You can reset your changes with the blue button.<p>
+  <a class="close-reveal-modal">&#215;</a>
+  {{/if}}
+</template>
+
+<template name="dateForm">
+  <h1><a href="#">{{systemDate}} </a></h1>
+</template>
+
+<template name="nextrace">
+  <div class="panel">
+    <h4 class="subheader">{{date}}</h4>
+    <h3>{{type}}</h3>
+    <h4 class="subheader">{{location}}</h4>
+  </div>
+</template>
+
+<template name="resultslist">
+  {{#if okay}}
+  {{#each results}}
+    <tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>
+  {{/each}}
+{{/if}}
+</template>
+
+<template name="result">
+  <td>{{this.Name}}, <strong>{{this.Points}}</strong> pts in the {{racedeets}} <em>({{racetime}})</em></td>
 </template>

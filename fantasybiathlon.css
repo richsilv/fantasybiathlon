@@ -46,8 +46,8 @@
 }
 
 .unavailable {
-    background-color: #888888;
-    color: #fff;
+    color: #bbb;
+    cursor: default !important;
 }
 
 .large {
@@ -96,6 +96,7 @@
     background-size: cover;
     margin-top: -0.5em;
     margin-right: -0.5em;
+    cursor: pointer;
 }
 
 .alert-box .under {
