@@ -8,14 +8,15 @@ ThisTeam = new Meteor.Collection();
 Results = new Meteor.Collection("results");
 
 seasonStart = new Date(2012, 10, 15);
-systemDate = new Date(2013, 0, 16);
+systemDate = new Date(2012, 10, 29);
+dateoffset = -335;
 lastUpdate = systemDate;
-var maxPoints = 25;
+var maxPoints = 15;
 var userid = 1;
 var finishpoints = [0, 30, 25, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 var relaypoints = [0, 15, 10, 8, 6, 4, 3, 2, 1];
 var smallpoints = [0, 10, 7, 5, 3, 1];
-var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 if (Meteor.isServer) {
@@ -23,12 +24,13 @@ if (Meteor.isServer) {
     });
 
     Accounts.onCreateUser(function(options, user) {
-	FantasyTeams.insert({UserID: user._id,
-			     Name: "New Team",
-			     transfers: 8,
-			     Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
-			     teamHistory: []
-			    });
+	var newteam = {UserID: user._id,
+		       Name: "My Team",
+		       transfers: 8,
+		       Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
+		       teamHistory: []
+		      };
+	FantasyTeams.insert(newteam);
 	if (options.profile) user.profile = options.profile;
 	return user;
     });
@@ -60,33 +62,27 @@ if (Meteor.isClient) {
     Session.set('natchoice', undefined);
     Session.set('namechoice', '');
     Session.set('genderchoice', 'MW');
-    Session.set('date', systemDate);
+    var x = new Date();
+    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+    Session.set('datestatic', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
     Session.set('teamnameedit', false);
 
     $(document).ready(function() {
 	$(document).foundation();
-	$('.top-bar-section').on('click', '#datefwd', function() {
-	    var d = Session.get('date');
-	    d.setDate(d.getDate() + 1);
-	    Session.set('date', d);
-	});
-	$('.top-bar-section').on('click', '#dateback', function() {
-	    var d = Session.get('date');
-	    d.setDate(d.getDate() - 1);
-	    Session.set('date', d);
-	});
     });
 
-    var teamhandle = Meteor.subscribe("fantasyteams", userid, function () {});
-    var athletehandle = Meteor.subscribe("athletes", function() {});
-    var nationhandle = Meteor.subscribe("nations", function() {});
-    var raceshandle = Meteor.subscribe("races", function() {});
-    var meetingshandle = Meteor.subscribe("meetings", function() {});
-    var resultshandle = Meteor.subscribe("results", function() {});
-
-    Template.loggedinscreen.created = function() {
-	loggedinlisteners();
-    };
+    Template.topbar.events({
+	'click #datefwd': function() {
+	    dateoffset += 1;
+	    var x = new Date();
+	    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+	},
+	'click #dateback': function() {
+	    dateoffset -= 1;
+	    var x = new Date();
+	    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+	}
+    });
 
     Template.teamname.helpers({
 	team: function() {
@@ -120,6 +116,14 @@ if (Meteor.isClient) {
 	    }
 	}
     });
+
+    Template.loggedinscreen.rendered = function() {
+	var team = ThisTeam.findOne();
+	if (team) team.Athletes.forEach(function(a) {
+	    if (a === "DUMMY") $('#teamdrop').slideDown();
+	});
+    };
+
     Template.teamtitle.helpers({
 	teamPoints: function() {
 	    var team = ThisTeam.findOne();
@@ -130,34 +134,57 @@ if (Meteor.isClient) {
 	    }
 	}
     });
-    Template.team.teamdeets = function() {
-	return FantasyTeams.findOne({UserID: userid});
-    };
-    Template.team.athletes = function() {
-	if (ThisTeam.findOne()) {return getathletes(ThisTeam.findOne().Athletes);}
-	else {return [];}
-    };
-    Template.athleteform.nations = function() {
-	var nations = [];
-	var natlist = Athletes.find({});
-	natlist.forEach(function(ath) {
-	    if (nations.indexOf(ath.Nat) < 0) {
-		nations.push(ath.Nat);
+
+    Template.team.helpers({
+	teamdeets: function() {
+	    return FantasyTeams.findOne({UserID: userid});
+	},
+	athletes: function() {
+	    if (ThisTeam.findOne()) {return getathletes(ThisTeam.findOne().Athletes);}
+	    else {return [];}
+	}
+    });
+
+    Template.athleteform.helpers({
+	nations: function() {
+	    var nations = [];
+	    var natlist = Athletes.find({});
+	    natlist.forEach(function(ath) {
+		if (nations.indexOf(ath.Nat) < 0) {
+		    nations.push(ath.Nat);
+		}
+	    });
+	    return nations.sort();
+	}
+    });
+    Template.athleteform.events({
+	'click #resettransfers': function() {
+	    ThisTeam.remove({});
+	},
+	'change #natdropdown': function(e) {
+	    Session.set('natchoice', e.currentTarget.value);
+	},
+	'keyup #namefilter': function(e) {
+	    Session.set('namechoice', e.currentTarget.value);
+	},
+	'click #mfradiomaster label': function(e) {
+	    Session.set('genderchoice', $(e.target).children('span').attr('id'));
+	}
+    });
+
+    Template.pricebox.helpers({
+	teamprice: function() {
+	    return Session.get('teamprice');
+	},
+	pricetarget: function() {
+	    if (getteamprice(ThisTeam.findOne()) <= maxPoints) {
+		return "under";
 	    }
-	});
-	return nations.sort();
-    };
-    Template.pricebox.teamprice = function() {
-	return Session.get('teamprice');
-    };
-    Template.pricebox.pricetarget = function() {
-	if (getteamprice(ThisTeam.findOne()) <= maxPoints) {
-	    return "under";
+	    else {
+		return "over";
+	    }
 	}
-	else {
-	    return "over";
-	}
-    };
+    });
 
     Template.athletelist.helpers({
 	athleteset: function() {
@@ -172,7 +199,8 @@ if (Meteor.isClient) {
 		if (Session.get('blacklist') && Session.get('fullgenders') && Session.get('teamprice')) {
 		    if (Session.get('blacklist').indexOf(aths[i].Nat) > -1 ||
 			Session.get('fullgenders').indexOf(aths[i].Gender) > -1 ||
-			Session.get('teamprice') + aths[i].Price > maxPoints) {
+			Session.get('teamprice') + aths[i].Price > maxPoints ||
+			ThisTeam.findOne().Athletes.indexOf(aths[i].IBUId) > -1) {
 			gender += " unavailable";
 		    }
 		}
@@ -197,8 +225,17 @@ if (Meteor.isClient) {
 	    }
 	});
 	return nations.sort();
-    }
-
+	}
+    });
+    Template.athletelist.events({
+	'click .athlete': function(e) {
+	    var team = Session.get('athletes');
+	    var addpos = team.indexOf("DUMMY");
+	    if (addpos > -1 && !$(e.currentTarget).children(":first").hasClass('unavailable')) {
+		team[addpos] = e.currentTarget.firstChild.id;
+		Session.set('athletes', team);
+	    }
+	}
     });
 
     Template.athlete.helpers({
@@ -234,6 +271,24 @@ if (Meteor.isClient) {
 	    var theseres = Results.find({IBUId: this.IBUId, RaceTime: {$gte: seasonStart, $lte: Session.get('date')}});
 	    return addpoints(theseres);
 	},
+    });
+    Template.athlete.events({
+	'click .teammember': function(e) {
+	    if (e.target.className !== 'cross') {
+		$('#teamdrop').slideToggle();
+		Session.set('cross', !Session.get('cross'));
+	    }
+	},
+	'click .cross': function(e) {
+	    var team = Session.get('athletes');
+	    if (team.indexOf(e.currentTarget.id) > -1) {
+		team[team.indexOf(e.currentTarget.id)] = "DUMMY";
+		Session.set('athletes', team);
+	    }
+	},
+	'mouseover .cross': function(e) {
+	    $(e.currentTarget).effect("shake", {distance: 2});
+	}
     });
 
     Template.transfermodal.helpers({
@@ -271,11 +326,25 @@ if (Meteor.isClient) {
 	    var transfers = getchanges();
 	    var list = '<table>';
 	    for (var i = 0; i < transfers.length; i++) {
-		list += '<tr>' + athletetile(transfers[i][1]) + '<td> for </td>' + athletetile(transfers[i][0]) + '</tr>';
+		list += '<tr>' + athletetile(transfers[i][1]) + '<td>';
+		if (transfers[i][0] !== "DUMMY") list += 'for </td>' + athletetile(transfers[i][0]);
+		list += '</tr>';
 	    }
 	    return list + '</table>';
 	}
     });
+    Template.transfermodal.events({
+	'click #confirmtransferbutton': function() {
+	    $('#transfermodal').foundation('reveal', 'close');
+	    var transfers = getchanges();
+	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
+	    var team = ThisTeam.findOne();
+	    team.teamHistory.push([team.Athletes, Session.get('date')]);
+	    ThisTeam.update({}, team);
+	    FantasyTeams.update({_id: team._id}, team);
+	}
+    });
+
     Template.resultslist.helpers({
 	okay: function() {
 	    if (!ThisTeam.findOne()) {return false;}
@@ -305,32 +374,51 @@ if (Meteor.isClient) {
 	}
     });
     Template.nextrace.helpers({
-	date: function() {
-	    var nr = nextRace(Session.get('date'));
-	    if (typeof nr == 'undefined') {return null;}
-	    else {return formatDate(nr.StartTime);}
+	lastrace: function() {
+	    var race = lastRace(Session.get('date'));
+	    if (!race) return "----------";
+	    return racedate(race) + ': <em>' + racetype(race) + '</em>, ' + racelocation(race);
 	},
-	type: function() {
-	    var nr = nextRace(Session.get('date'));
-	    if (typeof nr == 'undefined') {return null;}
-	    else {return nr.Description;}
+	nextrace: function() {
+	    var race = nextRace(Session.get('date'));
+	    if (!race) return "----------";
+	    return racedate(race) + ': <em>' + racetype(race) + '</em>, ' + racelocation(race);
 	},
-	location: function() {
-	    var nr = nextRace(Session.get('date'));
-	    if (typeof nr == 'undefined') {return null;}
-	    var eventid = nr.EventId;
-	    var event =  Meetings.findOne({EventId: eventid});
-	    if (typeof event == 'undefined') {return null;}
-	    else {return event.ShortDescription + ', ' + Nations.findOne({Nat: event.Nat}).LongName;}
+	nextnextrace: function() {
+	    var race = nextnextRace(Session.get('date'));
+	    if (!race) return "----------";
+	    return racedate(race) + ': <em>' + racetype(race) + '</em>, ' + racelocation(race);
 	}
     });
 
+    Template.pointsgraph.rendered = function() {
+    }
+
+    Meteor.setInterval(function() {
+	var x = new Date();
+	var newdate = x.getTime() + (dateoffset * 1000 * 60 * 60 * 24);
+	Session.set('date', new Date(newdate));
+	var curstatic = Session.get('datestatic');
+	if (curstatic.getDate() !== (new Date(newdate)).getDate()) Session.set('datestatic', new Date(newdate));
+    }, 5000);
+
     Deps.autorun(function() {
-	var thisteam = FantasyTeams.find({UserID: userid}).fetch();
-	if (thisteam.length > 0 && ThisTeam.find().count() === 0) {
-	    ThisTeam.insert(thisteam[0]);
-	    Session.set('athletes', thisteam[0].Athletes);
-	    Session.set('teamID', thisteam[0]._id);
+	Meteor.subscribe("fantasyteams", Meteor.userId(), function() {});
+	Meteor.subscribe("athletes", function() {});
+	Meteor.subscribe("nations", function() {});
+	Meteor.subscribe("races", function() {});
+	Meteor.subscribe("meetings", function() {});
+	Meteor.subscribe("results", function() {});
+    });
+    Deps.autorun(function() {
+	if (Meteor.userId() && FantasyTeams.findOne()) {
+	    Session.set('userID', Meteor.userId());
+	    var thisteam = FantasyTeams.findOne();
+	    if (ThisTeam.find().count() === 0) {
+		ThisTeam.insert(thisteam);
+		Session.set('athletes', thisteam.Athletes);
+		Session.set('teamID', Meteor.userId());
+	    }
 	}
     });
     Deps.autorun(function() {
@@ -377,55 +465,24 @@ if (Meteor.isClient) {
     Deps.autorun(function() {
 	Session.set('teamprice', getteamprice(ThisTeam.findOne()));
     });
-}
-
-function loggedinlisteners() {
-    $(document).ready(function() {
-	console.log("adding listeners");
-	$('#teamdisplay').on('click', '.teammember', function(e) {
-	    if (e.target.className !== 'cross') {
-		$('#teamdrop').slideToggle();
-		Session.set('cross', !Session.get('cross'));
+    Deps.autorun(function() {
+	var team = ThisTeam.findOne();
+	if (team) {
+	    var dataraw = chartdata(team);
+	    var data = {
+		labels : dataraw[0],
+		datasets: [{
+		    fillColor : "rgba(151,187,205,0.5)",
+		    strokeColor : "rgba(151,187,205,1)",
+		    pointColor : "rgba(151,187,205,1)",
+		    pointStrokeColor : "#fff",
+		    data : dataraw[1]
+		}]
 	    }
-	});
-	$('#teamdisplay').on('click', '.cross', function() {
-	    var team = Session.get('athletes');
-	    if (team.indexOf($(this).attr('id')) > -1) {
-		team[team.indexOf($(this).attr('id'))] = "DUMMY";
-		Session.set('athletes', team);
-	    }
-	});
-	$('#teamdisplay').on('hover', '.cross', function() {
-	    $(this).effect("shake", {distance: 2});
-	});
-	$('#teamdrop').on('click', '.athlete', function() {
-	    var team = Session.get('athletes');
-	    var addpos = team.indexOf("DUMMY");
-	    if (addpos > -1 && !$(this).children(':first').hasClass('unavailable')) {
-		team[addpos] = $(this).children('span').attr('id');
-		Session.set('athletes', team);
-	    }
-	});
-	$('#teamdrop').on('click', '#resettransfers', function() {
-	    ThisTeam.remove({});
-	});
-	$('#natdropdown').change(function() {
-	    Session.set('natchoice', $(this).val());
-	});
-	$('#namefilter').on('keyup', function() {
-	    Session.set('namechoice', $(this).val());
-	});
-	$('#mfradiomaster label').click(function() {
-	    console.log($(this));
-	    Session.set('genderchoice', $(this).children('span').attr('id'));
-	});
-	$('#transfermodal').on('click', '#confirmtransferbutton', function() {
-	    $('#transfermodal').foundation('reveal', 'close');
-	    var transfers = getchanges();
-	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
-	    var team = ThisTeam.findOne();
-	    FantasyTeams.update({_id: Session.get('teamID')}, team);
-	});
+	    var ctx = $("#pointschart").get(0).getContext("2d");
+	    var pointsChart = new Chart(ctx);
+	    new Chart(ctx).Line(data);
+	}	
     });
 }
 
@@ -529,10 +586,34 @@ nextRace = function(date) {
     return next;
 };
 
+nextnextRace = function(date) {
+    if (typeof date == 'undefined') {date = new Date();}
+    var next = Races.find({StartTime: {$gte: date}}, {sort: {StartTime: 1}}).fetch()[1];
+    return next;
+};
+
 lastRace = function(date) {
     if (typeof date == 'undefined') {date = new Date();}
     var prev = Races.findOne({StartTime: {$lte: date}}, {sort: {StartTime: -1}});
     return prev;
+};
+
+racedate = function(race) {
+    if (typeof race == 'undefined') {return "";}
+    else {return formatDate(race.StartTime);}
+};
+
+racetype = function(race) {
+    if (typeof race == 'undefined') {return "";}
+    else {return race.Description;}
+};
+
+racelocation = function(race) {
+    if (typeof race == 'undefined') {return "";}
+    var eventid = race.EventId;
+    var event =  Meetings.findOne({EventId: eventid});
+    if (typeof event == 'undefined') {return "";}
+    else {return event.ShortDescription + ', ' + Nations.findOne({Nat: event.Nat}).LongName;}
 };
 
 formatDate = function(date) {
@@ -620,6 +701,9 @@ function updateracetimes(force) {
 }
 
 getresults = function(team) {
+    var compfunc = function(a, b) {
+	return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
+    }
     if (!team) {return [];}
     results = [];
     for (var i = 0; i < team.teamHistory.length; i++) {
@@ -629,9 +713,78 @@ getresults = function(team) {
 	    dtend = team.teamHistory[i+1][1];
 	}
 	else {
-	    dtend = Session.get('date');
+	    dtend = Session.get('datestatic');
 	}
 	results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
     }
-    return results;
+    return results.sort(compfunc);
 };
+
+chartdata = function(team) {
+    var res = getresults(team);
+    var zs = ['']
+    var ys = [seasonStart];
+    var xs = [0];
+    var runtotal = 0;
+    for (var i = 0; i < res.length; i++) {
+	if (res[i].RaceTime.getTime() - ys[ys.length - 1].getTime() > 43200000) {
+	    runtotal += res[i].Points;
+	    var t = res[i].RaceTime;
+	    ys.push(t);
+	    zs.push(t.getDay() + '/' + t.getMonth() + '/' + (t.getYear() % 100))
+	    xs.push(runtotal);
+	}
+	else {
+	    runtotal += res[i].Points;
+	    xs[xs.length - 1] += res[i].Points;
+	}
+    }
+    return [zs, xs];
+}
+
+bestathletes = function(date) {
+    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;}
+    if (!date) date = new Date();
+    var pointsobj = {};
+    var res = Results.find({Points: {$gt: 0}, RaceStart: {$lte: date}}, {fields: {IBUId: 1, Points: 1}});
+    res.forEach(function(r) {
+	if (r.IBUId in pointsobj) {
+	    pointsobj[r.IBUId] += r.Points;
+	}
+	else {
+	    pointsobj[r.IBUId] = r.Points;
+	}
+    });
+    ibuids = ((Object.keys(pointsobj)).sort(compfunc)).slice(0, 10);
+    points = [];
+    names = [];
+    ibuids.forEach(function(r) {
+	names.push(Athletes.findOne({IBUId: r}).ShortName);
+	points.push(pointsobj[r]);
+    });
+    return [names, points];
+};
+
+contributions = function(date) {
+    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;}
+    team = ThisTeam.findOne();
+    if (!team) return [[], []];
+    var res = getresults(team);
+    var pointsobj = {};
+    res.forEach(function(r) {
+	if (r.IBUId in pointsobj) {
+	    pointsobj[r.IBUId] += r.Points;
+	}
+	else {
+	    pointsobj[r.IBUId] = r.Points;
+	}
+    });
+    ibuids = ((Object.keys(pointsobj)).sort(compfunc)).slice(0, 10);
+    points = [];
+    names = [];
+    ibuids.forEach(function(r) {
+	names.push(Athletes.findOne({IBUId: r}).ShortName);
+	points.push(pointsobj[r]);
+    });
+    return [names, points];
+}    

@@ -1,6 +1,7 @@
 {
   "packages": {
     "foundation": {},
-    "jquery-ui": {}
+    "jquery-ui": {},
+    "chartjs": {}
   }
 }

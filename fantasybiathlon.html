@@ -3,10 +3,22 @@
 </head>
 
 <body>
+
+{{> topbar}}
+
+{{#if currentUser}}
+  {{> loggedinscreen}}
+{{else}}
+  {{> welcomescreen}}
+{{/if}}
+
+</body>
+
+<template name="topbar">
   <nav class="top-bar">
   <ul class="title-area">
     <!-- Title Area -->
-    <li class="name">
+    <li class="name" style="width: 20em;">
       {{> dateForm}}
     </li>
     <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
@@ -114,14 +126,7 @@
     </ul>
   </section>
   </nav>
-
-{{#if currentUser}}
-  {{> loggedinscreen}}
-{{else}}
-  {{> welcomescreen}}
-{{/if}}
-
-</body>
+</template>
 
 <template name="welcomescreen">
   <section class="row" id="welcome">
@@ -159,22 +164,30 @@
     </div>
   </section>
   <section class="row">
+    <ul class="breadcrumbs">
+      <li class="current"><a href="#">Calendar</a></li>
+      <li><a href="#">Venue Map</a></li>
+      <li class="unavailable"><a href="#">Weather</a></li>
+    </ul>
     <div class="twelve columns">
-      <div class="large-9 columns">
 	{{> nextrace}}
-      </div>
-      <div class="large-3 columns">
-	<h1 class="subheader"><div class="button expand">NEXT RACE</div></h1>
-      </div>
     </div>
   </section>
   <section class="row">
     <div class="twelve columns">
       <div class="large-3 columns">
-	<h1 class="subheader"><div class="button expand">POINTS</div></h1>
+	<div class="content">
+	  <ul class="side-nav">
+	    <li class="active"><a href="#">Progress</a></li>
+	    <li><a href="#">Points Scorers</a></li>
+	    <li class="divider"></li>
+	    <li><a href="#">Best Athletes</a></li>
+	    <li><a href="#">Popular Athletes</a></li>
+	  </ul>
+	</div>
       </div>
       <div class="large-9 columns">
-	<div class="panel">points graph</div>
+	{{> pointsgraph}}
       </div>
     </div>
   </section>
@@ -190,8 +203,7 @@
 
 <template name="teamtitle">
   <div class="large-8 columns">
-    <h3 class="subheader">TEAM NAME:</h3>
-    <h1 style="text-align: center; margin-top: -0.5em;">{{> teamname}}</h1>
+    {{> teamname}}
   </div>
   <div class="large-3 large-offset-1 columns">
     <h3 class="subheader">POINTS:</h3>
@@ -200,13 +212,16 @@
 </template>
 
 <template name="teamname">
-  {{#if teamnameedit}}
-  <div class="large-8 large-offset-2 centered columns">
-    <input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: 0.2em; height: 1.2em;">
-  </div>
-  {{else}}
-  <div id="teamname">{{team.Name}}</div>
-  {{/if}}
+    <h3 class="subheader">TEAM NAME:</h3>
+    <h1 style="text-align: center; margin-top: -0.5em;">
+      {{#if teamnameedit}}
+      <div class="large-8 large-offset-2 centered columns">
+	<input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: 0.2em; height: 1.2em;">
+      </div>
+      {{else}}
+      <div id="teamname">{{team.Name}}</div>
+      {{/if}}
+    </h1>
 </template>
 
 <template name="team">
@@ -236,7 +251,7 @@
   <div class="row">
     <div class="large-12 columns">
       <div class="alert-box">
-	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 25.0
+	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 15.0
       </div>
     </div>
   </div>
@@ -250,9 +265,9 @@
       </div>
       <div class="row">
 	<div class="large-6 columns" id="mfradiomaster">
-	  <label for="mfradio"><input name="mfradio" type="radio" id="mfradio" style="display: none;" CHECKED><span class="custom radio checked" id="MW"></span>All</label>
-	  <label for="mfradiom"><input name="mfradio" type="radio" id="mfradiom" style="display: none;"><span class="custom radio" id="M"></span>Male</label>
-	  <label for="mfradiof"><input name="mfradio" type="radio" id="mfradiof" style="display: none;"><span class="custom radio" id="W"></span>Female</label>
+	  <label for="mfradio" id="mfa"><input name="mfradio" type="radio" id="mfradio" style="display: none;" CHECKED><span class="custom radio checked" id="MW"></span>All</label>
+	  <label for="mfradiom" id="mfb"><input name="mfradio" type="radio" id="mfradiom" style="display: none;"><span class="custom radio" id="M"></span>Male</label>
+	  <label for="mfradiof" id="mfc"><input name="mfradio" type="radio" id="mfradiof" style="display: none;"><span class="custom radio" id="W"></span>Female</label>
 	</div>
 	<div class="large-6 columns">
 	  <label for="natdropdown">Nation</label>
@@ -303,21 +318,25 @@
 </template>
 
 <template name="nextrace">
-  <div class="panel">
-    <h4 class="subheader">{{date}}</h4>
-    <h3>{{type}}</h3>
-    <h4 class="subheader">{{location}}</h4>
+  <div class="" style="text-align: center">
+    <h5 class="subheader">{{{lastrace}}}</h5>
+    <h5>{{{nextrace}}}</h5>
+    <h5 class="subheader">{{{nextnextrace}}}</h5>
   </div>
 </template>
 
 <template name="resultslist">
   {{#if okay}}
   {{#each results}}
-    <tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>
+    {{#if this.Points}}<tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>{{/if}}
   {{/each}}
 {{/if}}
 </template>
 
 <template name="result">
   <td>{{this.Name}}, <strong>{{this.Points}}</strong> pts in the {{racedeets}} <em>({{racetime}})</em></td>
+</template>
+
+<template name="pointsgraph">
+  <canvas id="pointschart" width="600" height="250"></canvas>
 </template>
