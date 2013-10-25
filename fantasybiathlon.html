@@ -174,22 +174,7 @@
     </div>
   </section>
   <section class="row">
-    <div class="twelve columns">
-      <div class="large-3 columns">
-	<div class="content">
-	  <ul class="side-nav">
-	    <li class="active"><a href="#">Progress</a></li>
-	    <li><a href="#">Points Scorers</a></li>
-	    <li class="divider"></li>
-	    <li><a href="#">Best Athletes</a></li>
-	    <li><a href="#">Popular Athletes</a></li>
-	  </ul>
-	</div>
-      </div>
-      <div class="large-9 columns">
-	{{> pointsgraph}}
-      </div>
-    </div>
+    {{> chartsection}}
   </section>
 
   <div id="transfermodal" class="reveal-modal small" style="width: auto;">
@@ -337,6 +322,25 @@
   <td>{{this.Name}}, <strong>{{this.Points}}</strong> pts in the {{racedeets}} <em>({{racetime}})</em></td>
 </template>
 
-<template name="pointsgraph">
-  <canvas id="pointschart" width="600" height="250"></canvas>
+<template name="chartsection">
+    <div class="twelve columns">
+      <div class="large-3 columns">
+	<div class="content">
+	  <ul class="side-nav" id="graphchoice">
+	    <li class="active" id="progress"><a href="#">Progress</a></li>
+	    <li id="scorers"><a href="#">Points Scorers</a></li>
+	    <li class="divider"></li>
+	    <li id="bestathletes"><a href="#">Best Athletes</a></li>
+	    <li id="popular"><a href="#">Popular Athletes</a></li>
+	  </ul>
+	</div>
+      </div>
+      <div class="large-9 columns">
+	{{> graphcanvas}}
+      </div>
+    </div>
+</template>
+
+<template name="graphcanvas">
+  <canvas id="graphcanvas" width="600" height="250"></canvas>
 </template>

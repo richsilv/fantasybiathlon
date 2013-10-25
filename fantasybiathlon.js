@@ -66,6 +66,7 @@ if (Meteor.isClient) {
     Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
     Session.set('datestatic', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
     Session.set('teamnameedit', false);
+    Session.set('graphchoice', "progress");
 
     $(document).ready(function() {
 	$(document).foundation();
@@ -391,8 +392,12 @@ if (Meteor.isClient) {
 	}
     });
 
-    Template.pointsgraph.rendered = function() {
-    }
+    Template.chartsection.events({
+	'click li': function() {
+	    var graphchoiceelem = $('#graphchoice').children('.active');
+	    if (Session.get('graphchoice') !== graphchoiceelem.attr('id')) Session.set('graphchoice', graphchoiceelem.attr('id'));
+	}
+    });
 
     Meteor.setInterval(function() {
 	var x = new Date();
@@ -468,20 +473,38 @@ if (Meteor.isClient) {
     Deps.autorun(function() {
 	var team = ThisTeam.findOne();
 	if (team) {
-	    var dataraw = chartdata(team);
-	    var data = {
-		labels : dataraw[0],
-		datasets: [{
-		    fillColor : "rgba(151,187,205,0.5)",
-		    strokeColor : "rgba(151,187,205,1)",
-		    pointColor : "rgba(151,187,205,1)",
-		    pointStrokeColor : "#fff",
-		    data : dataraw[1]
-		}]
+	    var ctx = $("#graphcanvas").get(0).getContext("2d");
+	    var dataChart = new Chart(ctx);
+	    switch(Session.get('graphchoice')) {
+		case "bestathletes":
+		var dataraw = bestathletes();
+		var data = {
+		    labels : dataraw[0],
+		    datasets : [
+			{
+			    fillColor : "rgba(220,220,220,0.5)",
+			    strokeColor : "rgba(220,220,220,1)",
+			    data : dataraw[1]
+			    }
+			]
+		}
+		new Chart(ctx).Bar(data);
+		break;
+
+		default:
+		var dataraw = chartdata(team);
+		var data = {
+		    labels : dataraw[0],
+		    datasets: [{
+			fillColor : "rgba(151,187,205,0.5)",
+			strokeColor : "rgba(151,187,205,1)",
+			pointColor : "rgba(151,187,205,1)",
+			pointStrokeColor : "#fff",
+			data : dataraw[1]
+		    }]
+		}
+		new Chart(ctx).Line(data);
 	    }
-	    var ctx = $("#pointschart").get(0).getContext("2d");
-	    var pointsChart = new Chart(ctx);
-	    new Chart(ctx).Line(data);
 	}	
     });
 }
