@@ -393,9 +393,10 @@ if (Meteor.isClient) {
     });
 
     Template.chartsection.events({
-	'click li': function() {
-	    var graphchoiceelem = $('#graphchoice').children('.active');
-	    if (Session.get('graphchoice') !== graphchoiceelem.attr('id')) Session.set('graphchoice', graphchoiceelem.attr('id'));
+	'click li': function(event) {
+	    $('#graphchoice li').removeClass("active");
+	    $(event.currentTarget).addClass("active");
+	    if (Session.get('graphchoice') !== event.currentTarget.id) Session.set('graphchoice', event.currentTarget.id);
 	}
     });
 
@@ -477,7 +478,7 @@ if (Meteor.isClient) {
 	    var dataChart = new Chart(ctx);
 	    switch(Session.get('graphchoice')) {
 		case "bestathletes":
-		var dataraw = bestathletes();
+		var dataraw = bestathletes(Session.get('datestatic'));
 		var data = {
 		    labels : dataraw[0],
 		    datasets : [
