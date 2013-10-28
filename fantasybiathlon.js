@@ -484,10 +484,12 @@ if (Meteor.isClient) {
 	if (team) {
 	    var ctx = $("#graphcanvas").get(0).getContext("2d");
 	    var dataChart = new Chart(ctx);
+	    var data;
+	    var dataraw;
 	    switch(Session.get('graphchoice')) {
 		case "bestathletes":
-		var dataraw = bestathletes(Session.get('datestatic'));
-		var data = {
+		dataraw = bestathletes(Session.get('datestatic'));
+		data = {
 		    labels : dataraw[0],
 		    datasets : [
 			{
@@ -496,24 +498,26 @@ if (Meteor.isClient) {
 			    data : dataraw[1]
 			    }
 			]
-		}
+		};
 		new Chart(ctx).Bar(data);
 		break;
 
 		case "scorers":
-		var dataraw = contributions(Session.get('datestatic'));
+		dataraw = contributions(Session.get('datestatic'));
 		var colors = [];
-		var data = [];
+		data = [];
 		for (i=0; i < dataraw[0].length; i++) {
 		    colors.push('hsl(' + Math.floor(i * 360 / dataraw[0].length) + ', 30%, 70%)');
-		    data.push({value: dataraw[1][i], color: colors[i]});
+		    data.push({value: dataraw[1][i], color: colors[i], label: dataraw[0][i]});
 		}
-		new Chart(ctx).Doughnut(data);
+		new Chart(ctx).Doughnut(data, { tooltips: { labelTemplate: '<%=label%>: foo' } } );
 		break;
 
+
+
 		default:
-		var dataraw = chartdata(team);
-		var data = {
+		dataraw = chartdata(team);
+		data = {
 		    labels : dataraw[0],
 		    datasets: [{
 			fillColor : "rgba(151,187,205,0.5)",
@@ -522,10 +526,10 @@ if (Meteor.isClient) {
 			pointStrokeColor : "#fff",
 			data : dataraw[1]
 		    }]
-		}
+		};
 		new Chart(ctx).Line(data);
 	    }
-	}	
+	}
     });
 }
 
@@ -741,7 +745,7 @@ function updateracetimes(force) {
 getresults = function(team) {
     var compfunc = function(a, b) {
 	return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
-    }
+    };
     if (!team) {return [];}
     results = [];
     for (var i = 0; i < team.teamHistory.length; i++) {
@@ -760,7 +764,7 @@ getresults = function(team) {
 
 chartdata = function(team) {
     var res = getresults(team);
-    var zs = ['']
+    var zs = [''];
     var ys = [seasonStart];
     var xs = [0];
     var runtotal = 0;
@@ -769,7 +773,7 @@ chartdata = function(team) {
 	    runtotal += res[i].Points;
 	    var t = res[i].RaceTime;
 	    ys.push(t);
-	    zs.push(t.getDay() + '/' + t.getMonth() + '/' + (t.getYear() % 100))
+	    zs.push(t.getDay() + '/' + t.getMonth() + '/' + (t.getYear() % 100));
 	    xs.push(runtotal);
 	}
 	else {
@@ -778,10 +782,10 @@ chartdata = function(team) {
 	}
     }
     return [zs, xs];
-}
+};
 
 bestathletes = function(date) {
-    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;}
+    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;};
     if (!date) date = new Date();
     var pointsobj = {};
     var res = Results.find({Points: {$gt: 0}, RaceTime: {$lte: date}}, {fields: {IBUId: 1, Points: 1}});
@@ -804,7 +808,7 @@ bestathletes = function(date) {
 };
 
 contributions = function(date) {
-    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;}
+    var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;};
     team = ThisTeam.findOne();
     if (!team) return [[], []];
     var res = getresults(team);
@@ -825,4 +829,25 @@ contributions = function(date) {
 	points.push(pointsobj[r]);
     });
     return [names, points];
-}    
+};
+
+popular = function() {
+    var ids = [];
+    var teams = FantasyTeams.find();
+    teams.forEach(function(t) {
+	ids = ids.concat(t.Athletes);
+    });
+    idsobj = {};
+    ids.forEach(function(i) {
+	if (Object.keys(ids).indexOf(i) === -1) idsobj[i] = 1;
+	else idsobj[i] += 1;
+    });
+    var popids = ids.sort(function(a, b) { return idsobj[a] > idsobj[b] ? 1 : 0; }).slice(0,10);
+    var teamcount = [];
+    var names = [];
+    popids.forEach(function(i) {
+	names.push(Athletes.findOne({IBUId: i}).ShortName);
+	teamcount.push(idsobj[i]);
+    });
+    return [names, teamcount];
+};
