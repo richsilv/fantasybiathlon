@@ -178,12 +178,13 @@
     {{> chartsection}}
   </section>
 
-  <div id="transfermodal" class="reveal-modal small" style="width: auto;">
-    {{> transfermodal}}
-  </div>
+  {{> modalrender}}
 
-  <div id="roundscoresmodal" class="reveal-modal small" style="width: auto;">
-    {{> resultslist}}
+</template>
+
+<template name="modalrender">
+  <div id="modal" class="reveal-modal small" style="width: auto;">
+    {{{renderdeets}}}
   </div>
 </template>
 
@@ -193,7 +194,7 @@
   </div>
   <div class="large-3 large-offset-1 columns">
     <h3 class="subheader">POINTS:</h3>
-    <h1 style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}data-reveal-id="roundscoresmodal"{{/if}}>{{teamPoints}}</a></h1>
+    <h1 style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}id="pointslink"{{/if}}>{{teamPoints}}</a></h1>
   </div>
 </template>
 
@@ -271,7 +272,7 @@
 	<a href="#" id="resettransfers" class="small button">Reset</a>
       </div>
       <div class="large-6 columns">
-	<a href="#" id="savetransfers" class="small button success" data-reveal-id="transfermodal">Save</a>
+	<a href="#" id="savetransfers" class="small button success">Save</a>
       </div>
     </row>
   </form>

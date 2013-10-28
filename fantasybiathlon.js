@@ -6,6 +6,7 @@ Meetings = new Meteor.Collection("meetings");
 Nations = new Meteor.Collection("nations");
 ThisTeam = new Meteor.Collection(null);
 Results = new Meteor.Collection("results");
+Statistics = new Meteor.Collection("statistics");
 
 seasonStart = new Date(2012, 10, 15);
 systemDate = new Date(2012, 10, 29);
@@ -35,6 +36,8 @@ if (Meteor.isServer) {
 	return user;
     });
 
+    writepopularathletes();
+
     Meteor.publish("athletes", function() {
 	return Athletes.find();
     });
@@ -56,6 +59,9 @@ if (Meteor.isServer) {
     Meteor.publish("userData", function() {
 	return Meteor.users.find({_id: this.userId}, {fields: {'admin': 1}});
     });
+    Meteor.publish("statistics", function() {
+	return Statistics.find();
+    });
 }
 
 if (Meteor.isClient) {
@@ -72,7 +78,6 @@ if (Meteor.isClient) {
     Session.set('graphchoice', "progress");
 
     $(document).ready(function() {
-	$(document).foundation();
     });
 
     Template.topbar.events({
@@ -125,7 +130,32 @@ if (Meteor.isClient) {
 	}
     });
 
-    Template.loggedinscreen.rendered = function() {
+    Template.modalrender.helpers({
+	renderdeets: function() {
+	    switch(Session.get('modal')) {
+	    case 'transfer':
+		return Template.transfermodal();
+		
+	    case 'results':
+		return Template.resultslist();
+		
+	    default:
+		return "PLACEHOLDER";
+	    }
+	}
+    });
+    Template.modalrender.events({
+	'reveal:close #modal': function() {
+	    console.log('closed');
+	    Session.set('modal', null);
+	}
+    });
+
+    Template.modalrender.rendered = function() {
+	if (Session.get('modal')) $('#modal').foundation('reveal', 'open');
+    };
+
+    Template.team.rendered = function() {
 	var team = ThisTeam.findOne();
 	if (team) team.Athletes.forEach(function(a) {
 	    if (a === "DUMMY") $('#teamdrop').slideDown();
@@ -140,6 +170,11 @@ if (Meteor.isClient) {
 		var res = getresults(team);
 		return res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
 	    }
+	}
+    });
+    Template.teamtitle.events({
+	'click #pointslink': function() {
+	    Session.set('modal', 'results');
 	}
     });
 
@@ -168,6 +203,9 @@ if (Meteor.isClient) {
     Template.athleteform.events({
 	'click #resettransfers': function() {
 	    ThisTeam.remove({});
+	},
+	'click #savetransfers': function() {
+	    Session.set('modal', 'transfer');
 	},
 	'change #natdropdown': function(e) {
 	    Session.set('natchoice', e.currentTarget.value);
@@ -343,7 +381,7 @@ if (Meteor.isClient) {
     });
     Template.transfermodal.events({
 	'click #confirmtransferbutton': function() {
-	    $('#transfermodal').foundation('reveal', 'close');
+	    $('#modal').foundation('reveal', 'close');
 	    var transfers = getchanges();
 	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
 	    var team = ThisTeam.findOne();
@@ -416,6 +454,9 @@ if (Meteor.isClient) {
     }, 5000);
 
     Deps.autorun(function() {
+	if (false) Session.set('modal', '');
+    });
+    Deps.autorun(function() {
 	Meteor.subscribe("fantasyteams", Meteor.userId(), function() {});
 	Meteor.subscribe("athletes", function() {});
 	Meteor.subscribe("nations", function() {});
@@ -423,6 +464,7 @@ if (Meteor.isClient) {
 	Meteor.subscribe("meetings", function() {});
 	Meteor.subscribe("results", function() {});
 	Meteor.subscribe("userData", function() {});
+	Meteor.subscribe("statistics", function() {});
     });
     Deps.autorun(function() {
 	if (Meteor.userId() && FantasyTeams.findOne()) {
@@ -513,7 +555,31 @@ if (Meteor.isClient) {
 		new Chart(ctx).Doughnut(data, { tooltips: { labelTemplate: '<%=label%>: foo' } } );
 		break;
 
+		case "popular":
+		dataraw = getpopular();
+		data = {
+		    labels : dataraw[0],
+		    datasets : [
+			{
+			    fillColor : "rgba(220,220,220,0.5)",
+			    strokeColor : "rgba(220,220,220,1)",
+			    data : dataraw[1]
+			    }
+			]
+		};
+		new Chart(ctx).Bar(data);
+		break;
 
+		case "scorers":
+		dataraw = contributions(Session.get('datestatic'));
+		var colors = [];
+		data = [];
+		for (i=0; i < dataraw[0].length; i++) {
+		    colors.push('hsl(' + Math.floor(i * 360 / dataraw[0].length) + ', 30%, 70%)');
+		    data.push({value: dataraw[1][i], color: colors[i], label: dataraw[0][i]});
+		}
+		new Chart(ctx).Doughnut(data, { tooltips: { labelTemplate: '<%=label%>: foo' } } );
+		break;
 
 		default:
 		dataraw = chartdata(team);
@@ -831,23 +897,39 @@ contributions = function(date) {
     return [names, points];
 };
 
-popular = function() {
+function popular() {
     var ids = [];
     var teams = FantasyTeams.find();
+    if (!teams) return [[], []];
+    var numteams = FantasyTeams.find().count();
     teams.forEach(function(t) {
 	ids = ids.concat(t.Athletes);
     });
     idsobj = {};
     ids.forEach(function(i) {
-	if (Object.keys(ids).indexOf(i) === -1) idsobj[i] = 1;
-	else idsobj[i] += 1;
+	if (i !== "DUMMY") {
+	    if (Object.keys(ids).indexOf(i) === -1) idsobj[i] = 1;
+	    else idsobj[i] += 1;
+	}
     });
-    var popids = ids.sort(function(a, b) { return idsobj[a] > idsobj[b] ? 1 : 0; }).slice(0,10);
+    var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? 1 : 0; }).slice(0,10);
     var teamcount = [];
     var names = [];
     popids.forEach(function(i) {
 	names.push(Athletes.findOne({IBUId: i}).ShortName);
-	teamcount.push(idsobj[i]);
+	teamcount.push(idsobj[i] * 100 / numteams);
     });
     return [names, teamcount];
+};
+
+function writepopularathletes() {
+    var popathletes = popular();
+    Statistics.upsert({Type: "popular"}, {Type: "popular", Data: popathletes}, {}, function(err) {
+	if (!err) console.log("Popular athletes written");
+	else console.log("Error writing popular athletes: " + err);
+    });
+};
+
+getpopular = function() {
+    return Statistics.findOne({Type: "popular"}).Data;
 };

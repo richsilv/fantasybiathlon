@@ -2,6 +2,7 @@
   "packages": {
     "foundation": {},
     "jquery-ui": {},
-    "chartjs": {}
+    "chartjs": {},
+    "cron-tick": {}
   }
 }

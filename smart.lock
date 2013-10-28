@@ -4,7 +4,8 @@
     "basePackages": {
       "foundation": {},
       "jquery-ui": {},
-      "chartjs": {}
+      "chartjs": {},
+      "cron-tick": {}
     },
     "packages": {
       "foundation": {
@@ -21,6 +22,11 @@
         "git": "https://github.com/donskifarrell/meteor-chartjs.git",
         "tag": "v0.0.4",
         "commit": "9d2adcd1de3728c8227e8eb7da0dcb2e0df21d0b"
+      },
+      "cron-tick": {
+        "git": "https://github.com/tmeasday/meteor-cron.git",
+        "tag": "v0.0.4",
+        "commit": "44cff9116af510fe53704fdeeff57c444ceb75ba"
       }
     }
   }
