@@ -4,7 +4,7 @@ Athletes = new Meteor.Collection("athletes");
 Races = new Meteor.Collection("races");
 Meetings = new Meteor.Collection("meetings");
 Nations = new Meteor.Collection("nations");
-ThisTeam = new Meteor.Collection();
+ThisTeam = new Meteor.Collection(null);
 Results = new Meteor.Collection("results");
 
 seasonStart = new Date(2012, 10, 15);
@@ -53,6 +53,9 @@ if (Meteor.isServer) {
     Meteor.publish("results", function() {
 	return Results.find();
     });
+    Meteor.publish("userData", function() {
+	return Meteor.users.find({_id: this.userId}, {fields: {'admin': 1}});
+    });
 }
 
 if (Meteor.isClient) {
@@ -82,6 +85,10 @@ if (Meteor.isClient) {
 	    dateoffset -= 1;
 	    var x = new Date();
 	    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+	},
+	'click #logout': function() {
+	    Meteor.logout();
+	    console.log(Meteor.user());
 	}
     });
 
@@ -415,6 +422,7 @@ if (Meteor.isClient) {
 	Meteor.subscribe("races", function() {});
 	Meteor.subscribe("meetings", function() {});
 	Meteor.subscribe("results", function() {});
+	Meteor.subscribe("userData", function() {});
     });
     Deps.autorun(function() {
 	if (Meteor.userId() && FantasyTeams.findOne()) {
@@ -490,6 +498,17 @@ if (Meteor.isClient) {
 			]
 		}
 		new Chart(ctx).Bar(data);
+		break;
+
+		case "scorers":
+		var dataraw = contributions(Session.get('datestatic'));
+		var colors = [];
+		var data = [];
+		for (i=0; i < dataraw[0].length; i++) {
+		    colors.push('hsl(' + Math.floor(i * 360 / dataraw[0].length) + ', 30%, 70%)');
+		    data.push({value: dataraw[1][i], color: colors[i]});
+		}
+		new Chart(ctx).Doughnut(data);
 		break;
 
 		default:
@@ -670,20 +689,15 @@ function athleteracepoints(r) {
     }
     else {
 	points += finishpoints[r.ResultOrder] ? finishpoints[r.ResultOrder] : 0;
-//	console.log(finishpoints[r.ResultOrder] + ' points from finish position.');
 	if (r.CourseRank != 'undefined') {
 	    points += smallpoints[r.CourseRank] ? smallpoints[r.CourseRank] : 0;
-//	    console.log(smallpoints[r.CourseRank] + ' points from ski speed.');
 	}
 	points += (r.ShootingTotal === 0 ? 5 : 0);
-//	console.log((r.ShootingTotal === 0 ? 5 : 0) + ' points from shooting clear.');
 	points += (r.Shootings.reduce(function(total, x) {return x === 0 ? total+1 : total;}, 0));
-//	console.log((r.Shootings.reduce(function(total, x) {return x === 0 ? total+1 : total}, 0)) + ' points from individual clear shoots.');
 	if (r.RangeTime != 'undefined') {
 	    var minmisses = Results.findOne({RaceId: r.RaceId, ResultOrder: {$lte: 998}}, {fields: {ShootingTotal: 1}, sort: {ShootingTotal: 1}}).ShootingTotal;
 	    var shootorder = Results.find({RaceId: r.RaceId, ShootingTotal: minmisses, ResultOrder: {$lte: 998}}, {sort: {RangeTime: 1}}).fetch();
 	    points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
-//	    console.log(shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0) + ' points from shooting performance.');
 	}
     }
     return points;
@@ -770,7 +784,7 @@ bestathletes = function(date) {
     var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;}
     if (!date) date = new Date();
     var pointsobj = {};
-    var res = Results.find({Points: {$gt: 0}, RaceStart: {$lte: date}}, {fields: {IBUId: 1, Points: 1}});
+    var res = Results.find({Points: {$gt: 0}, RaceTime: {$lte: date}}, {fields: {IBUId: 1, Points: 1}});
     res.forEach(function(r) {
 	if (r.IBUId in pointsobj) {
 	    pointsobj[r.IBUId] += r.Points;

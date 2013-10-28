@@ -33,6 +33,7 @@
       <li class="divider"></li>
       <li><a href="#" id="dateback">Back</a></li>
       <li class="divider"></li>
+      {{#if currentUser.admin}}<li><a><em style="color: darkred;">ADMIN</em></a></li>{{/if}}
       <li class="has-dropdown"><a href="#">Main Item 3</a>
 
         <ul class="dropdown">
@@ -121,7 +122,7 @@
       </li>
       <li class="divider show-for-small"></li>
       <li class="has-form">
-        <a class="button" href="#">Button!</a>
+        <a class="button" href="#" id="logout">Logout</a>
       </li>
     </ul>
   </section>
