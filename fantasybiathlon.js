@@ -11,7 +11,6 @@ SystemVars = new Meteor.Collection("systemvars");
 
 seasonStart = new Date(2012, 10, 15);
 systemDate = new Date(2012, 10, 29);
-dateoffset = -335;
 lastUpdate = systemDate;
 var maxPoints = 15;
 var userid = 1;
@@ -100,8 +99,6 @@ if (Meteor.isClient) {
     Session.set('namechoice', '');
     Session.set('genderchoice', 'MW');
     var x = new Date();
-    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
-    Session.set('datestatic', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
     Session.set('teamnameedit', false);
     Session.set('graphchoice', "progress");
 
@@ -110,14 +107,16 @@ if (Meteor.isClient) {
 
     Template.topbar.events({
 	'click #datefwd': function() {
-	    dateoffset += 1;
+	    var dateoffset = Session.get('dateoffset');
+	    Session.set('dateoffset', dateoffset + (24 * 60));
 	    var x = new Date();
-	    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+	    Session.set('date', new Date(x.getTime() + (Session.get('dateoffset') * 60000)));
 	},
 	'click #dateback': function() {
-	    dateoffset -= 1;
+	    var dateoffset = Session.get('dateoffset');
+	    Session.set('dateoffset', dateoffset - (24 * 60));
 	    var x = new Date();
-	    Session.set('date', new Date(x.getTime() + (dateoffset * 1000 * 60 * 60 * 24)));
+	    Session.set('date', new Date(x.getTime() + (Session.get('dateoffset') * 60000)));
 	},
 	'click #logout': function() {
 	    Meteor.logout();
@@ -493,7 +492,7 @@ if (Meteor.isClient) {
 
     Meteor.setInterval(function() {
 	var x = new Date();
-	var newdate = x.getTime() + (dateoffset * 1000 * 60 * 60 * 24);
+	var newdate = x.getTime() + (Session.get('dateoffset') * 60000);
 	Session.set('date', new Date(newdate));
 	var curstatic = Session.get('datestatic');
 	if (curstatic.getDate() !== (new Date(newdate)).getDate()) Session.set('datestatic', new Date(newdate));
@@ -525,6 +524,15 @@ if (Meteor.isClient) {
 		Session.set('athletes', thisteam.Athletes);
 		Session.set('teamID', Meteor.userId());
 	    }
+	}
+    });
+    Deps.autorun(function() {
+	var dateoffset = SystemVars.findOne({Name: "dateoffset"});
+	if (dateoffset && !Session.get('dateoffset')) {
+	    Session.set('dateoffset', dateoffset.Value);
+	    var newdate = x.getTime() + (Session.get('dateoffset') * 60000);
+	    Session.set('date', new Date(newdate));
+	    Session.set('datestatic', new Date(newdate));
 	}
     });
     Deps.autorun(function() {
