@@ -93,7 +93,14 @@ if (Meteor.isClient) {
 	},
 	'click #logout': function() {
 	    Meteor.logout();
+	    ThisTeam.remove();
 	    console.log(Meteor.user());
+	}
+    });
+    
+    Template.loggedinscreen.helpers({
+	newuser: function() {
+	    return Session.get('newuser');
 	}
     });
 
@@ -139,20 +146,24 @@ if (Meteor.isClient) {
 	    case 'results':
 		return Template.resultslist();
 
+	    case 'calendar':
+		return calendar();
+
 	    default:
 		return "PLACEHOLDER";
 	    }
 	}
     });
-    Template.modalrender.rendered = function() {
-	$('#modal').bind('closed', function() {
-	    Session.set('modal', null);
-	    console.log('closed');
-	});
-    };
 
     Template.modalrender.rendered = function() {
+	$('#modal').bind('close', function() {
+	    Session.set('modal', null);
+	});
+	var width = parseInt($('#modal').css('width'));
+	$('#modal').css('margin-left', Math.floor(($(window).width()/2) - (width/2)) + 'px');
+	$('#modal').css('left', '0px');
 	if (Session.get('modal')) $('#modal').foundation('reveal', 'open');
+	else $('#modal').foundation('reveal', 'close');
     };
 
     Template.team.rendered = function() {
@@ -436,6 +447,11 @@ if (Meteor.isClient) {
 	    return racedate(race) + ': <em>' + racetype(race) + '</em>, ' + racelocation(race);
 	}
     });
+    Template.nextrace.events({
+	'click' : function() {
+	    Session.set('modal', 'calendar');
+	}
+    });
 
     Template.chartsection.events({
 	'click li': function(event) {
@@ -454,7 +470,11 @@ if (Meteor.isClient) {
     }, 5000);
 
     Deps.autorun(function() {
-	if (false) Session.set('modal', '');
+	var team = FantasyTeams.findOne();
+	if (team && team.teamHistory.length === 0) {
+	    Session.set('newuser', true);
+	    $(document).foundation('joyride', 'start');
+	}
     });
     Deps.autorun(function() {
 	Meteor.subscribe("fantasyteams", Meteor.userId(), function() {});
@@ -933,3 +953,16 @@ function writepopularathletes() {
 getpopular = function() {
     return Statistics.findOne({Type: "popular"}).Data;
 };
+
+
+calendar = function() {
+    var races = Races.find();
+    var racetable = '<table class="racetable">';
+    races.forEach(function(r) {
+	racetable += '<tr><td>' + racedate(r) + '</td><td>' + racetype(r) + '</td><td>' + racelocation(r) + '</td></tr>';
+    });
+    racetable += '</table>';
+    return racetable;
+};
+		  
+	

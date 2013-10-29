@@ -139,7 +139,7 @@
 </template>
 
 <template name="loggedinscreen">
-  <section id="teamname">
+  <section id="teambar">
     <div class="row">
       {{> teamtitle}}
     </div>
@@ -180,6 +180,8 @@
 
   {{> modalrender}}
 
+  {{#if newuser}}{{> joyride}}{{/if}}
+
 </template>
 
 <template name="modalrender">
@@ -200,19 +202,19 @@
 
 <template name="teamname">
     <h3 class="subheader">TEAM NAME:</h3>
-    <h1 style="text-align: center; margin-top: -0.5em;">
+    <div style="text-align: center; margin-top: -0.5em;">
       {{#if teamnameedit}}
       <div class="large-8 large-offset-2 centered columns">
-	<input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: 0.2em; height: 1.2em;">
+	<h1><input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: 0.2em; height: 1.2em;"></h1>
       </div>
       {{else}}
-      <div id="teamname">{{team.Name}}</div>
+      <h1 id="teamname">{{team.Name}}</h1>
       {{/if}}
-    </h1>
+    </div>
 </template>
 
 <template name="team">
-  <div class="row">
+  <div class="row" id="athleterow">
     {{#each athletes}}
        {{> athlete}}
     {{/each}}
@@ -345,4 +347,17 @@
 
 <template name="graphcanvas">
   <canvas id="graphcanvas" width="600" height="250"></canvas>
+</template>
+
+<template name="joyride">
+  <ol class="joyride-list" id="joyride" data-joyride>
+    <li data-id="teamname" data-text="Next" data-options="tipLocation:'bottom'">
+      <h4>Team Name</h4>
+      <p>Change your team name by clicking here.</p>
+    </li>
+    <li data-id="athleterow" data-text="Next" data-options="tipLocation:'top'">
+      <h4>Athletes</h4>
+      <p>Add or change athletes by clicking on one of the avatars.</p>
+    </li>
+  </ol>
 </template>
