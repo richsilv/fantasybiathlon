@@ -135,21 +135,21 @@ if (Meteor.isClient) {
 	    switch(Session.get('modal')) {
 	    case 'transfer':
 		return Template.transfermodal();
-		
+
 	    case 'results':
 		return Template.resultslist();
-		
+
 	    default:
 		return "PLACEHOLDER";
 	    }
 	}
     });
-    Template.modalrender.events({
-	'reveal:close #modal': function() {
-	    console.log('closed');
+    Template.modalrender.rendered = function() {
+	$('#modal').bind('closed', function() {
 	    Session.set('modal', null);
-	}
-    });
+	    console.log('closed');
+	});
+    };
 
     Template.modalrender.rendered = function() {
 	if (Session.get('modal')) $('#modal').foundation('reveal', 'open');
