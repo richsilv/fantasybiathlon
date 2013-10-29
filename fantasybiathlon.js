@@ -7,6 +7,7 @@ Nations = new Meteor.Collection("nations");
 ThisTeam = new Meteor.Collection(null);
 Results = new Meteor.Collection("results");
 Statistics = new Meteor.Collection("statistics");
+SystemVars = new Meteor.Collection("systemvars");
 
 seasonStart = new Date(2012, 10, 15);
 systemDate = new Date(2012, 10, 29);
@@ -62,6 +63,33 @@ if (Meteor.isServer) {
     Meteor.publish("statistics", function() {
 	return Statistics.find();
     });
+    Meteor.publish("systemvars", function() {
+	return SystemVars.find();
+    });
+    SystemVars.allow({
+	insert: function(userId) {
+	    return Meteor.users.findOne({_id: userId}).admin;
+	    },
+	update: function(userId) {
+	    return Meteor.users.findOne({_id: userId}).admin;
+	    },
+	remove: function(userId) {
+	    return Meteor.users.findOne({_id: userId}).admin;
+	}
+    });
+    FantasyTeams.allow({
+	insert: function(userId, doc) {
+	    if (doc.admin === true) return false;
+	    return (doc.UserID === userId);
+	    },
+	update: function(userId, doc, fields) {
+	    if (_.contains(fields, 'admin')) return false;
+	    return (doc.UserID === userId);
+	    },
+	remove: function(userId, doc) {
+	    return (doc.UserID === userId);
+	}
+    });
 }
 
 if (Meteor.isClient) {
@@ -93,7 +121,7 @@ if (Meteor.isClient) {
 	},
 	'click #logout': function() {
 	    Meteor.logout();
-	    ThisTeam.remove();
+	    ThisTeam.remove({});
 	    console.log(Meteor.user());
 	}
     });
@@ -396,9 +424,11 @@ if (Meteor.isClient) {
 	    var transfers = getchanges();
 	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
 	    var team = ThisTeam.findOne();
+	    var id = team._id
+	    delete team._id
 	    team.teamHistory.push([team.Athletes, Session.get('date')]);
 	    ThisTeam.update({}, team);
-	    FantasyTeams.update({_id: team._id}, team);
+	    FantasyTeams.update({_id: id}, {$set: team});
 	}
     });
 
@@ -473,7 +503,6 @@ if (Meteor.isClient) {
 	var team = FantasyTeams.findOne();
 	if (team && team.teamHistory.length === 0) {
 	    Session.set('newuser', true);
-	    $(document).foundation('joyride', 'start');
 	}
     });
     Deps.autorun(function() {
@@ -485,6 +514,7 @@ if (Meteor.isClient) {
 	Meteor.subscribe("results", function() {});
 	Meteor.subscribe("userData", function() {});
 	Meteor.subscribe("statistics", function() {});
+	Meteor.subscribe("systemvars", function() {});
     });
     Deps.autorun(function() {
 	if (Meteor.userId() && FantasyTeams.findOne()) {

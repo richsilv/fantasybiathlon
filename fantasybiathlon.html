@@ -170,7 +170,7 @@
       <li><a href="#">Venue Map</a></li>
       <li class="unavailable"><a href="#">Weather</a></li>
     </ul>
-    <div class="twelve columns">
+    <div id="databar" class="twelve columns">
 	{{> nextrace}}
     </div>
   </section>
@@ -196,7 +196,7 @@
   </div>
   <div class="large-3 large-offset-1 columns">
     <h3 class="subheader">POINTS:</h3>
-    <h1 style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}id="pointslink"{{/if}}>{{teamPoints}}</a></h1>
+    <h1 id="pointstitle" style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}id="pointslink"{{/if}}>{{teamPoints}}</a></h1>
   </div>
 </template>
 
@@ -351,13 +351,29 @@
 
 <template name="joyride">
   <ol class="joyride-list" id="joyride" data-joyride>
-    <li data-id="teamname" data-text="Next" data-options="tipLocation:'bottom'">
+    <li data-id="teamname" data-text="Next" data-options="tipLocation:right;nubPosition:left">
       <h4>Team Name</h4>
       <p>Change your team name by clicking here.</p>
     </li>
-    <li data-id="athleterow" data-text="Next" data-options="tipLocation:'top'">
+    <li data-id="athleterow" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
       <h4>Athletes</h4>
       <p>Add or change athletes by clicking on one of the avatars.</p>
+    </li>
+    <li data-id="pointstitle" data-text="Next" data-options="tipLocation:left;nubPosition:right">
+      <h4>Points</h4>
+      <p>Here you can see how many points your team has.</p>
+    </li>
+    <li data-text="Next" data-options="tipLocation:bottom">
+      <h4>Transfers</h4>
+      <p>This shows how many transfers you have available.</p>
+    </li>
+    <li data-id="databar" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
+      <h4>Information</h4>
+      <p>Down here you can access the league table, calendar, charts and other information.</p>
+    </li>
+    <li data-text="Finish" data-options="">
+      <h4>Help</h4>
+      <p>Rules and help can be found here.  Good luck!</p>
     </li>
   </ol>
 </template>
