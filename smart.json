@@ -3,6 +3,7 @@
     "foundation": {},
     "jquery-ui": {},
     "chartjs": {},
-    "cron-tick": {}
+    "cron-tick": {},
+    "zurb-foundation": {}
   }
 }

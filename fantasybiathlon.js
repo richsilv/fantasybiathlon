@@ -105,26 +105,51 @@ if (Meteor.isClient) {
     $(document).ready(function() {
     });
 
-    Template.topbar.events({
-	'click #datefwd': function() {
-	    var dateoffset = Session.get('dateoffset');
-	    Session.set('dateoffset', dateoffset + (24 * 60));
-	    var x = new Date();
-	    Session.set('date', new Date(x.getTime() + (Session.get('dateoffset') * 60000)));
-	},
-	'click #dateback': function() {
-	    var dateoffset = Session.get('dateoffset');
-	    Session.set('dateoffset', dateoffset - (24 * 60));
-	    var x = new Date();
-	    Session.set('date', new Date(x.getTime() + (Session.get('dateoffset') * 60000)));
-	},
-	'click #logout': function() {
-	    Meteor.logout();
-	    ThisTeam.remove({});
-	    console.log(Meteor.user());
+    Template.topbar.helpers({
+	transfers: function() {
+	    var team = ThisTeam.findOne();
+	    if (team) return team.transfers;
+	    else return '-';
 	}
     });
-    
+    Template.topbar.events({
+	'click #datefwd': function() {
+	    var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+	    var id = offsetvar ? offsetvar._id : null;
+	    var value = offsetvar ? offsetvar.Value : 0;
+	    var dateoffset = value + (24 * 60);
+	    SystemVars.update({_id: id}, {$set: {Value: dateoffset}});
+	    var x = new Date();
+	    Session.set('date', new Date(x.getTime() + (dateoffset * 60000)));
+	},
+	'click #dateback': function() {
+	    var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+	    var id = offsetvar ? offsetvar._id : null;
+	    var value = offsetvar ? offsetvar.Value : 0;
+	    var dateoffset = value - (24 * 60);
+	    SystemVars.update({_id: id}, {$set: {Value: dateoffset}});
+	    var x = new Date();
+	    Session.set('date', new Date(x.getTime() + (dateoffset * 60000)));
+	},
+	'click #transfers': function() {
+	    Session.set('modal', 'transfers');
+	},
+	'click #rules': function() {
+	    Session.set('modal', 'rules');
+	},
+	'click #scoring': function() {
+	    Session.set('modal', 'scoring');
+	},
+	'click #logout': function() {
+	    Meteor.logout(function() {
+		ThisTeam.remove({});
+	    });
+	}
+    });
+    Template.topbar.rendered = function() {
+	$(document).foundation();
+    }
+
     Template.loggedinscreen.helpers({
 	newuser: function() {
 	    return Session.get('newuser');
@@ -176,8 +201,17 @@ if (Meteor.isClient) {
 	    case 'calendar':
 		return calendar();
 
+	    case 'rules':
+		return Template.rules();
+
+	    case 'scoring':
+		return Template.scoring();
+
+	    case 'transfers':
+		return Template.transfers();
+
 	    default:
-		return "PLACEHOLDER";
+		return "";
 	    }
 	}
     });
@@ -186,7 +220,7 @@ if (Meteor.isClient) {
 	$('#modal').bind('close', function() {
 	    Session.set('modal', null);
 	});
-	var width = parseInt($('#modal').css('width'));
+	var width = parseInt($('#modal').css('width'), 10);
 	$('#modal').css('margin-left', Math.floor(($(window).width()/2) - (width/2)) + 'px');
 	$('#modal').css('left', '0px');
 	if (Session.get('modal')) $('#modal').foundation('reveal', 'open');
@@ -267,6 +301,28 @@ if (Meteor.isClient) {
 	    else {
 		return "over";
 	    }
+	}
+    });
+
+    Template.transfers.helpers({
+	transfers: function() {
+	    var team = ThisTeam.findOne();
+	    if (team) return team.teamHistory;
+	    else return [];
+	}
+    });
+    
+    Template.transfer.helpers({
+	transferrow: function() {
+	    var aths = getathletes(this[0]);
+	    var transstring = '<tr><td>' + shortDate(this[1]) + '</td>';
+	    aths.forEach(function(a) {
+		var flag = a.Nat + '.gif';
+		var gender = (a.Gender === "M") ? "male" : "female";
+		transstring += '<td class="flagholder"><div class="smallflag" ' +
+		    'style="background-image: url(\'' + flag + '\');"></div></td><td class="athlete"><span class="radius label ' + gender + '">' + a.ShortName + '</span></td>';
+	    });
+	    return transstring + '</tr>';
 	}
     });
 
@@ -423,8 +479,8 @@ if (Meteor.isClient) {
 	    var transfers = getchanges();
 	    ThisTeam.update({}, {$inc: {transfers: -transfers.length}});
 	    var team = ThisTeam.findOne();
-	    var id = team._id
-	    delete team._id
+	    var id = team._id;
+	    delete team._id;
 	    team.teamHistory.push([team.Athletes, Session.get('date')]);
 	    ThisTeam.update({}, team);
 	    FantasyTeams.update({_id: id}, {$set: team});
@@ -492,10 +548,14 @@ if (Meteor.isClient) {
 
     Meteor.setInterval(function() {
 	var x = new Date();
-	var newdate = x.getTime() + (Session.get('dateoffset') * 60000);
-	Session.set('date', new Date(newdate));
-	var curstatic = Session.get('datestatic');
-	if (curstatic.getDate() !== (new Date(newdate)).getDate()) Session.set('datestatic', new Date(newdate));
+	var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+	var value = offsetvar ? offsetvar.Value : 0;
+	if (offsetvar) {
+	    var newdate = x.getTime() + (value * 60000);
+	    Session.set('date', new Date(newdate));
+	    var curstatic = Session.get('datestatic');
+	    if (curstatic.getDate() !== (new Date(newdate)).getDate()) Session.set('datestatic', new Date(newdate));
+	}
     }, 5000);
 
     Deps.autorun(function() {
@@ -528,9 +588,8 @@ if (Meteor.isClient) {
     });
     Deps.autorun(function() {
 	var dateoffset = SystemVars.findOne({Name: "dateoffset"});
-	if (dateoffset && !Session.get('dateoffset')) {
-	    Session.set('dateoffset', dateoffset.Value);
-	    var newdate = x.getTime() + (Session.get('dateoffset') * 60000);
+	if (dateoffset) {
+	    var newdate = x.getTime() + (dateoffset.Value * 60000);
 	    Session.set('date', new Date(newdate));
 	    Session.set('datestatic', new Date(newdate));
 	}
@@ -586,6 +645,7 @@ if (Meteor.isClient) {
 	    var dataChart = new Chart(ctx);
 	    var data;
 	    var dataraw;
+	    var colors;
 	    switch(Session.get('graphchoice')) {
 		case "bestathletes":
 		dataraw = bestathletes(Session.get('datestatic'));
@@ -604,7 +664,7 @@ if (Meteor.isClient) {
 
 		case "scorers":
 		dataraw = contributions(Session.get('datestatic'));
-		var colors = [];
+		colors = [];
 		data = [];
 		for (i=0; i < dataraw[0].length; i++) {
 		    colors.push('hsl(' + Math.floor(i * 360 / dataraw[0].length) + ', 30%, 70%)');
@@ -630,7 +690,7 @@ if (Meteor.isClient) {
 
 		case "scorers":
 		dataraw = contributions(Session.get('datestatic'));
-		var colors = [];
+		colors = [];
 		data = [];
 		for (i=0; i < dataraw[0].length; i++) {
 		    colors.push('hsl(' + Math.floor(i * 360 / dataraw[0].length) + ', 30%, 70%)');
@@ -978,7 +1038,7 @@ function popular() {
 	teamcount.push(idsobj[i] * 100 / numteams);
     });
     return [names, teamcount];
-};
+}
 
 function writepopularathletes() {
     var popathletes = popular();
@@ -986,7 +1046,7 @@ function writepopularathletes() {
 	if (!err) console.log("Popular athletes written");
 	else console.log("Error writing popular athletes: " + err);
     });
-};
+}
 
 getpopular = function() {
     return Statistics.findOne({Type: "popular"}).Data;
@@ -995,12 +1055,10 @@ getpopular = function() {
 
 calendar = function() {
     var races = Races.find();
-    var racetable = '<table class="racetable">';
+    var racetable = '<h2>CALENDAR</h2><table class="racetable">';
     races.forEach(function(r) {
 	racetable += '<tr><td>' + racedate(r) + '</td><td>' + racetype(r) + '</td><td>' + racelocation(r) + '</td></tr>';
     });
     racetable += '</table>';
     return racetable;
 };
-		  
-	

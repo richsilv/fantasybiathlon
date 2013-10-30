@@ -16,67 +16,46 @@
 
 <template name="topbar">
   <nav class="top-bar">
-  <ul class="title-area">
-    <!-- Title Area -->
-    <li class="name" style="width: 20em;">
-      {{> dateForm}}
-    </li>
-    <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-  </ul>
-
-  <section class="top-bar-section">
-    <!-- Left Nav Section -->
-    <ul class="left">
-      <li class="divider"></li>
-      <li class="active" id="datefwd"><a href="#">Fwd</a></li>
-      <li class="divider"></li>
-      <li><a href="#" id="dateback">Back</a></li>
-      <li class="divider"></li>
-      {{#if currentUser.admin}}<li><a><em style="color: darkred;">ADMIN</em></a></li>{{/if}}
-    </ul>
-    <!-- Right Nav Section -->
-    <ul class="right">
-      <li class="divider hide-for-small"></li>
-      <li class="has-dropdown"><a href="#">Main Item 4</a>
-
-        <ul class="dropdown">
-          <li><label>Dropdown Level 1 Label</label></li>
-          <li class="has-dropdown"><a href="#" class="">Dropdown Level 1a</a>
-
-            <ul class="dropdown">
-              <li><a href="#">Dropdown Level 2a</a></li>
-              <li><a href="#">Dropdown Level 2b</a></li>
-              <li class="has-dropdown"><a href="#">Dropdown Level 2c</a>
-
-                <ul class="dropdown">
-                  <li><a href="#">Dropdown Level 3a</a></li>
-                  <li><a href="#">Dropdown Level 3b</a></li>
-                  <li><a href="#">Dropdown Level 3c</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Dropdown Level 2d</a></li>
-              <li><a href="#">Dropdown Level 2e</a></li>
-              <li><a href="#">Dropdown Level 2f</a></li>
-            </ul>
-          </li>
-          <li><a href="#">Dropdown Level 1b</a></li>
-          <li><a href="#">Dropdown Level 1c</a></li>
-          <li class="divider"></li>
-          <li><label>Dropdown Level 1 Label</label></li>
-          <li><a href="#">Dropdown Level 1d</a></li>
-          <li><a href="#">Dropdown Level 1e</a></li>
-          <li><a href="#">Dropdown Level 1f</a></li>
-          <li class="divider"></li>
-          <li><a href="#">See all &rarr;</a></li>
-        </ul>
+    <ul class="title-area">
+      <!-- Title Area -->
+      <li class="name" style="width: 20em;">
+	{{> dateForm}}
       </li>
-      <li class="divider show-for-small"></li>
-      <li class="has-form">
-        <a class="button" href="#" id="logout">Logout</a>
-      </li>
+      <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
     </ul>
-  </section>
+
+    <section class="top-bar-section">
+      <!-- Left Nav Section -->
+      <ul class="left">
+	{{#if currentUser.admin}}
+	<li><a href="#" id="datefwd">Fwd</a></li>
+	<li class="divider"></li>
+	<li><a href="#" id="dateback">Back</a></li>
+	<li class="divider"></li>
+	<li><a><em style="color: darkred;">ADMIN</em></a></li>
+	{{/if}}
+	{{#if currentUser}}
+	<li class="divider"></li>
+	<li id="transfers"><a style="color: yellow;">Transfers: {{transfers}}</a></li>
+	{{/if}}
+	<li class="divider"></li>
+      </ul>
+      <!-- Right Nav Section -->
+      <ul class="right">
+	<li class="divider"></li>
+	<li class="has-dropdown"><a href="#">Help</a>
+          <ul class="dropdown">
+            <li><label>Dropdown Level 1 Label</label></li>
+            <li><a href="#" id="rules">Rules</a></li>
+            <li><a href="#" id="scoring">Scoring</a></li>
+          </ul>
+	</li>
+	<li class="divider show-for-small"></li>
+	<li class="has-form">
+          <a class="button" href="#" id="logout">Logout</a>
+	</li>
+      </ul>
+    </section>
   </nav>
 </template>
 
@@ -266,6 +245,7 @@
 </template>
 
 <template name="resultslist">
+  <h2>POINTS SCORERS</h2>
   {{#if okay}}
   {{#each results}}
     {{#if this.Points}}<tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>{{/if}}
@@ -327,4 +307,57 @@
       <p>Rules and help can be found here.  Good luck!</p>
     </li>
   </ol>
+</template>
+
+<template name="rules">
+  <div class="row">
+    <h2>RULES</h2>
+    <div class="large-6 columns">
+      <h3 class="subheader">Team Selection</h3>
+      <p>To score points in any race, you must have a valid team saved:</p>
+      <ul style="line-height: 300%;">
+	<li>A team consists of <strong>two male</strong> athletes and <strong>two female</strong> athletes.</li>
+	<li>You can choose a maximum of <strong>two</strong> athletes from any <strong>nation</strong>.</li>
+	<li>The total value of your team can be no more than <strong>15.0</strong>.
+      </ul>
+    </div>
+    <div class="large-6 columns">
+      <h3 class="subheader">Transfers</h3>
+      <p>Transfers can be made at any time, but transfers made after a race has started will only become effective as of the next race, even if the transferred athlete hasn't started his or her race.</p>
+      <p><strong>Two transfers</strong> will be granted following every meeting, and these can be used before, during or after any subsequent meeting.</p>
+      <p>Transfers can be saved, but you can store no more than <strong>four transfers</strong> at any time.</p>
+    </div>
+</template>
+
+<template name="scoring">
+  <div id="scoringdiv" class="row">
+    <h2>SCORING</h2>
+    <h3 class="subheader">Sprint, Pursuit, Mass Start & Individual Races</h3>
+    <p>In all non-relay races, points will be scored for the following:</p>
+    <ul>
+      <li><h6>Finishing Position:</h6> points awarded for finishing position from 1st to 20th as follows: 30, 25, 22, 20, 18, 16, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 and 1.</li>
+      <li><h6>Fastest Skiers:</h6> the fastest five course times will receive an additional 10, 7, 5, 3, and 1 points respectively.</li>
+      <li><h6>Best Shooting:</h6> the best five shooting performances will also receive an additional 10, 7, 5, 3 and 1 points.  Performances are determined <em>firstly</em> by number of targets missed and <em>then</em> by overall range time.</li>
+      <li><h6>Clear Shoots:</h6> an additional point is awarded to all athletes for every clear visit to the range.  An additional <em>five points</em> are awarded for shooting clear throughout a race.  These are in addition to best shooting scores (above).</li>
+    </ul>
+    <h3 class="subheader">Men's, Women's and Mixed Relay Races</h3>
+    <p>In all relay races, points will be awarded for the following:</p>
+    <ul>
+      <li><h6>Team Finishing Position:</h6> points awarded for being a member of the team finishing from first to eighth as follows: 15, 10, 8, 6, 4, 3, 2 and 1.</li>
+      <li><h6>Clear Sheets:</h6> an additional five points are awarded to any athlete who uses no spre rounds during their leg of the relay.</li>
+    </ul>
+  </div>
+</template>
+
+<template name="transfers">
+  <h2>TRANSFER HISTORY</h2>
+  <table>
+    {{#each transfers}}
+      {{> transfer this}}
+    {{/each}}
+  </table>
+</template>
+
+<template name="transfer">
+  {{{transferrow}}}
 </template>

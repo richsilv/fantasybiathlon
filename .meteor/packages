@@ -5,7 +5,6 @@
 
 standard-app-packages
 preserve-inputs
-foundation
 jquery
 
 jquery-ui
@@ -14,3 +13,5 @@ accounts-ui
 
 chartjs
 cron-tick
+foundation
+

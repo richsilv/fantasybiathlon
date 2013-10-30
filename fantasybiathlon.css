@@ -117,6 +117,10 @@
 }
 
 #modal {
-    max-height: 20em;
+    max-height: 30em;
     overflow-y: scroll;
+}
+
+#scoringdiv h6 {
+    display: inline;
 }
