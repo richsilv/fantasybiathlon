@@ -10,6 +10,7 @@ Statistics = new Meteor.Collection("statistics");
 SystemVars = new Meteor.Collection("systemvars");
 
 seasonStart = new Date(2012, 10, 15);
+makeDate = new Date(2013, 1, 8);
 systemDate = new Date(2012, 10, 29);
 lastUpdate = systemDate;
 var maxPoints = 15;
@@ -37,6 +38,16 @@ if (Meteor.isServer) {
     });
 
     writepopularathletes();
+//    console.log(averageperformance());
+//    updatepointstable();
+//    removefloatingteams();
+//    for (var i = 0; i < 1000; i++) {
+//	var t = randomteam(seasonStart, makeDate);
+//	t.UserID = i;
+//	FantasyTeams.insert(t, function() {
+//	    console.log("Inserted team " + (i) + ": " + t.Name);
+//	});
+//    }
 
     Meteor.publish("athletes", function() {
 	return Athletes.find();
@@ -148,7 +159,7 @@ if (Meteor.isClient) {
     });
     Template.topbar.rendered = function() {
 	$(document).foundation();
-    }
+    };
 
     Template.loggedinscreen.helpers({
 	newuser: function() {
@@ -311,7 +322,7 @@ if (Meteor.isClient) {
 	    else return [];
 	}
     });
-    
+
     Template.transfer.helpers({
 	transferrow: function() {
 	    var aths = getathletes(this[0]);
@@ -702,7 +713,7 @@ if (Meteor.isClient) {
 		default:
 		dataraw = chartdata(team);
 		data = {
-		    labels : dataraw[0],
+		    labels : dataraw[0].map(function(t) {return t.getDay() + '/' + t.getMonth() + '/' + (t.getYear() % 100);}),
 		    datasets: [{
 			fillColor : "rgba(151,187,205,0.5)",
 			strokeColor : "rgba(151,187,205,1)",
@@ -711,6 +722,23 @@ if (Meteor.isClient) {
 			data : dataraw[1]
 		    }]
 		};
+		average = Statistics.findOne({Type: "averagepoints"});
+		if (average) {
+		    var avedata = [];
+		    dataraw[0].forEach(function(d) {
+			if (average.Data[0].indexOf(d) > -1) {
+			    avedata.push(average.Data[1][average.Data[0].indexOf(d)]);
+			    console.log(d);
+			}
+		    });
+		    data.datasets.push({
+			fillColor : "rgba(220,220,220,0.5)",
+			strokeColor : "rgba(220,220,220,1)",
+			pointColor : "rgba(220,220,220,1)",
+			pointStrokeColor : "#fff",
+			data : avedata
+		    });
+		}
 		new Chart(ctx).Line(data);
 	    }
 	}
@@ -926,11 +954,11 @@ function updateracetimes(force) {
     });
 }
 
-getresults = function(team) {
+function getresults(team, enddate) {
     var compfunc = function(a, b) {
 	return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
     };
-    if (!team) {return [];}
+    if (!team || !team.teamHistory) {return [];}
     results = [];
     for (var i = 0; i < team.teamHistory.length; i++) {
 	var dtstart = team.teamHistory[i][1];
@@ -939,12 +967,13 @@ getresults = function(team) {
 	    dtend = team.teamHistory[i+1][1];
 	}
 	else {
-	    dtend = Session.get('datestatic');
+	    if (enddate) dtend = enddate;
+	    else dtend = Session.get('datestatic');
 	}
 	results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
     }
     return results.sort(compfunc);
-};
+}
 
 chartdata = function(team) {
     var res = getresults(team);
@@ -965,7 +994,7 @@ chartdata = function(team) {
 	    xs[xs.length - 1] += res[i].Points;
 	}
     }
-    return [zs, xs];
+    return [ys, xs];
 };
 
 bestathletes = function(date) {
@@ -1021,16 +1050,16 @@ function popular() {
     if (!teams) return [[], []];
     var numteams = FantasyTeams.find().count();
     teams.forEach(function(t) {
-	ids = ids.concat(t.Athletes);
+	ids = ids.concat(t.Athletes.map(function(a) {return a.IBUId;}));
     });
     idsobj = {};
     ids.forEach(function(i) {
-	if (i !== "DUMMY") {
-	    if (Object.keys(ids).indexOf(i) === -1) idsobj[i] = 1;
+	if (i && i !== "DUMMY") {
+	    if (Object.keys(idsobj).indexOf(i) === -1) idsobj[i] = 1;
 	    else idsobj[i] += 1;
 	}
     });
-    var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? 1 : 0; }).slice(0,10);
+    var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
     var teamcount = [];
     var names = [];
     popids.forEach(function(i) {
@@ -1061,4 +1090,139 @@ calendar = function() {
     });
     racetable += '</table>';
     return racetable;
+};
+
+function updatepointstable() {
+    var teams = FantasyTeams.find();
+    var tableobj = {Table: []};
+    var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+    var enddate = new Date();
+    enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
+    console.log(enddate);
+    teams.forEach(function(t) {
+	var res = getresults(t, enddate);
+	var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
+	console.log(p);
+	var user = Meteor.users.findOne({_id: t.UserID});
+	if (user) {
+	    tableobj.Table.push({Name: t.Name,
+				 Country: user.Country,
+				 ID: t.UserID,
+				 Points: p
+				});
+	}
+	else {
+	    tableobj.Table.push({Name: t.Name,
+				 Country: "UNKNOWN",
+				 ID: t.UserID,
+				 Points: p
+				});
+	}
+    });
+    Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
+	if (!err) console.log("Points table updated");
+	else console.log("Error writing points table: " + err);
+    });
+}
+
+function randomteam(startdate, enddate) {
+    var namewords = [randomword(4 + Math.floor(Math.random()*5))];
+    while (Math.random() < 0.33) {
+	namewords.push(randomword(4 + Math.floor(Math.random()*5)));
+    }
+    startathletes = randomathletes();
+    team = {Name: namewords.join(' '), Athletes: startathletes, teamHistory: [[startathletes.map(function(a) {return a.IBUId;}), startdate]]};
+    var date = startdate;
+    while (date < enddate) {
+	if (Math.random() < 0.05) {
+	    newathletes = randomathletes();
+	    team.Athletes = newathletes;
+	    team.teamHistory.push([newathletes.map(function(a) {return a.IBUId;}), date]);
+	}
+	date = new Date(date.getTime() + (3600000 * 24));
+    }
+    return team;
+};
+
+function removefloatingteams() {
+    var teams = FantasyTeams.find();
+    teams.forEach(function(t) {
+	var u = Meteor.users.findOne({_id: t.UserID});
+	if (!u) {
+	    console.log("Removing floating team: " + t.Name);
+	    FantasyTeams.remove(t);
+	}
+    });
+}
+
+function randomathletes() {
+    var athletes = [];
+    var ptemp;
+    var price = false;
+    var country = false;
+    var gender = false;
+    var athnum = Athletes.find().count();
+    var rand = function(){return Math.floor(Math.random() * athnum);};
+    var redfunc = function(tot, a) {return tot + a.Price;};
+    while(!price || !gender || !country) {
+	athletes = [];
+	for (var i = 0; i < 4; i++) {
+	    athletes.push(Athletes.findOne({}, {skip: rand()}));
+	}
+	ptemp = athletes.reduce(redfunc, 0);
+	price = (ptemp <= 15 && ptemp >= 13);
+	country = (maxcount(athletes, 'Nat') <= 2);
+	gender = (maxcount(athletes, 'Gender') <= 2);
+    }
+    return athletes;
+};
+
+function maxcount(arr, field) {
+    counts = {};
+    arr.forEach(function(a) {
+	if (Object.keys(counts).indexOf(a[field]) === -1) counts[a[field]] = 1;
+	else counts[a[field]] += 1;
+    });
+    return Object.keys(counts).reduce(function(max, o) {
+	return (counts[o] > max) ? counts[o] : max;
+    }, 0);
+}
+
+function randomword(n) {
+    var vowels = ['a', 'e', 'i', 'o', 'u'];
+    var consts =  ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'qu', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z', 'th', 'ch', 'sh'];
+    var word = '';
+    var vownext = false;
+    for (var i = 0; i < n; i++) {
+	arr = vownext ? vowels : consts;
+	word += arr[Math.floor(Math.random()*(arr.length))];
+	if (Math.random() > 0.15) vownext = !vownext;
+    }
+    return word.slice(0,1).toUpperCase() + word.slice(1);
+};
+
+function averageperformance(enddate) {
+    if (!enddate) enddate = new Date();
+    var races = Races.find({StartTime: {$lte: enddate}});
+    var teamnum = FantasyTeams.find().count();
+    var dates = [];
+    var avg = [];
+    var aths;
+    var total;
+    races.forEach(function(race) {
+	console.log(race.RaceId);
+	total = 0;
+	FantasyTeams.find().forEach(function(team) {
+	    if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
+		return (cur[1] > pre[1] && cur[1] <= race.StartTime) ? cur : pre;
+	    });
+	    else aths = [[], []];
+	    total += Results.find({RaceId: race.RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
+		return tot + r.Points;
+	    }, 0);
+	});
+	dates.push(race.StartTime);
+	avg.push(avg[avg.length - 1] + (total / teamnum));
+    });
+    return [dates, avg];
 };
