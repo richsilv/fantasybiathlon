@@ -8,6 +8,7 @@ ThisTeam = new Meteor.Collection(null);
 Results = new Meteor.Collection("results");
 Statistics = new Meteor.Collection("statistics");
 SystemVars = new Meteor.Collection("systemvars");
+Minileagues = new Meteor.Collection("minileagues");
 
 seasonStart = new Date(2012, 10, 15);
 makeDate = new Date(2013, 1, 8);
@@ -76,6 +77,10 @@ if (Meteor.isServer) {
     Meteor.publish("systemvars", function() {
 	return SystemVars.find();
     });
+    Meteor.publish("minileagues", function(userid) {
+//	return Minileagues.find({userid: userid});
+	return Minileagues.find();
+    });
     SystemVars.allow({
 	insert: function(userId) {
 	    return Meteor.users.findOne({_id: userId}).admin;
@@ -112,6 +117,7 @@ if (Meteor.isClient) {
     var x = new Date();
     Session.set('teamnameedit', false);
     Session.set('graphchoice', "progress");
+    Session.set('league', "overall");
 
     $(document).ready(function() {
     });
@@ -557,6 +563,25 @@ if (Meteor.isClient) {
 	}
     });
 
+    Template.leaguetable.events({
+	'click li': function(event) {
+	    $('#leaguechoice li').removeClass("active");
+	    $(event.currentTarget).addClass("active");
+	    if (Session.get('league') !== event.currentTarget.id) Session.set('league', event.currentTarget.id);
+	}
+    });
+
+    Template.leaguetable.helpers({
+	myleagues: function() {
+	    return Minileagues.find({});
+	},
+	summmary: function() {
+	    var league = Session.get('league');
+	    var table = gettable(league);
+	    return tablesummary(table);
+	}
+    });
+
     Meteor.setInterval(function() {
 	var x = new Date();
 	var offsetvar = SystemVars.findOne({Name: "dateoffset"});
@@ -585,6 +610,7 @@ if (Meteor.isClient) {
 	Meteor.subscribe("userData", function() {});
 	Meteor.subscribe("statistics", function() {});
 	Meteor.subscribe("systemvars", function() {});
+	Meteor.subscribe("minileagues", Meteor.userId(), function() {});
     });
     Deps.autorun(function() {
 	if (Meteor.userId() && FantasyTeams.findOne()) {
@@ -1107,14 +1133,14 @@ function updatepointstable() {
 	if (user) {
 	    tableobj.Table.push({Name: t.Name,
 				 Country: user.Country,
-				 ID: t.UserID,
+				 ID: t._id,
 				 Points: p
 				});
 	}
 	else {
 	    tableobj.Table.push({Name: t.Name,
 				 Country: "UNKNOWN",
-				 ID: t.UserID,
+				 ID: t._id,
 				 Points: p
 				});
 	}
@@ -1142,7 +1168,7 @@ function randomteam(startdate, enddate) {
 	date = new Date(date.getTime() + (3600000 * 24));
     }
     return team;
-};
+}
 
 function removefloatingteams() {
     var teams = FantasyTeams.find();
@@ -1175,7 +1201,7 @@ function randomathletes() {
 	gender = (maxcount(athletes, 'Gender') <= 2);
     }
     return athletes;
-};
+}
 
 function maxcount(arr, field) {
     counts = {};
@@ -1199,7 +1225,7 @@ function randomword(n) {
 	if (Math.random() > 0.15) vownext = !vownext;
     }
     return word.slice(0,1).toUpperCase() + word.slice(1);
-};
+}
 
 function averageperformance(enddate) {
     if (!enddate) enddate = new Date();
@@ -1225,4 +1251,53 @@ function averageperformance(enddate) {
 	avg.push(avg[avg.length - 1] + (total / teamnum));
     });
     return [dates, avg];
+}
+
+gettable = function(id) {
+    var data = Statistics.findOne({Type: "pointstable"});
+    if (!data) return [];
+    if (id === "overall") return rawdata.Data.Table;
+    else {
+	var league = Minileagues.findOne({"_id._str": id});
+	if (!league) return [];
+	else {
+	    return data.Data.Table.filter(function(p) {
+		return (league.Teams.indexOf(p.ID) > -1);});
+	}
+    }
+};
+
+tablesummary = function(table, teamid) {
+    table = table.sort(function(a, b) {return b.Points - a.Points;});
+    var prettify = function(entry, rank) {
+	var country = Nations.findOne({Nat: entry.Nat});
+	if (country) return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>' + country.LongName + '</td><td>' + entry.Points + '</td></tr>';
+	else return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
+    };
+    if (!teamid) {
+	teamid = ThisTeam.findOne()._id;
+    }
+    var mypos = table.map(function(r) {return r.ID;}).indexOf(teamid);
+    var output = [];
+    var i;
+    if (mypos < 3 || mypos > table.length - 4) {
+	for (i = 0; i < Math.min(3, table.length); i++) {
+	    output.push(prettify(table[i], i+1));
+	}
+	if (table.length > 6) output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	var tailitems = Math.min(table.length - 3, 3);
+	for (i = table.length - tailitems; i < table.length; i++) {
+	    output.push(prettify(table[i], i+1));
+	}
+    }
+    else {
+	output.push(prettify(table[0], 1));
+	output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	for (i = mypos - 2; i < mypos + 3; i++) {
+	    output.push(prettify(table[i], i+1));
+	}
+	output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	output.push(prettify(table[table.length-1], table.length));
+    }
+    return output.join('');
 };

@@ -15,54 +15,56 @@
 </body>
 
 <template name="topbar">
-  <nav class="top-bar">
-    <ul class="title-area">
-      <!-- Title Area -->
-      <li class="name" style="width: 20em;">
-	{{> dateForm}}
-      </li>
-      <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-    </ul>
+  <div class="contain-to-grid sticky">
+    <nav class="top-bar">
+      <ul class="title-area">
+	<!-- Title Area -->
+	<li class="name" style="width: 20em;">
+	  {{> dateForm}}
+	</li>
+	<!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+      </ul>
 
-    <section class="top-bar-section">
-      <!-- Left Nav Section -->
-      <ul class="left">
-	{{#if currentUser.admin}}
-	<li><a href="#" id="datefwd">Fwd</a></li>
-	<li class="divider"></li>
-	<li><a href="#" id="dateback">Back</a></li>
-	<li class="divider"></li>
-	<li><a><em style="color: darkred;">ADMIN</em></a></li>
-	{{/if}}
-	{{#if currentUser}}
-	<li class="divider"></li>
-	<li id="transfers"><a style="color: yellow;">Transfers: {{transfers}}</a></li>
-	{{/if}}
-	<li class="divider"></li>
-      </ul>
-      <!-- Right Nav Section -->
-      <ul class="right">
-	<li class="divider"></li>
-	<li class="has-dropdown"><a href="#">Help</a>
-          <ul class="dropdown">
-            <li><label>Dropdown Level 1 Label</label></li>
-            <li><a href="#" id="rules">Rules</a></li>
-            <li><a href="#" id="scoring">Scoring</a></li>
-          </ul>
-	</li>
-	<li class="divider show-for-small"></li>
-	<li class="has-form">
-          <a class="button" href="#" id="logout">Logout</a>
-	</li>
-      </ul>
-    </section>
-  </nav>
+      <section class="top-bar-section">
+	<!-- Left Nav Section -->
+	<ul class="left">
+	  {{#if currentUser.admin}}
+	  <li><a href="#" id="datefwd">Fwd</a></li>
+	  <li class="divider"></li>
+	  <li><a href="#" id="dateback">Back</a></li>
+	  <li class="divider"></li>
+	  <li><a><em style="color: darkred;">ADMIN</em></a></li>
+	  {{/if}}
+	  {{#if currentUser}}
+	  <li class="divider"></li>
+	  <li id="transfers"><a style="color: yellow;">Transfers: {{transfers}}</a></li>
+	  {{/if}}
+	  <li class="divider"></li>
+	</ul>
+	<!-- Right Nav Section -->
+	<ul class="right">
+	  <li class="divider"></li>
+	  <li class="has-dropdown"><a href="#">Help</a>
+            <ul class="dropdown">
+              <li><label>Dropdown Level 1 Label</label></li>
+              <li><a href="#" id="rules">Rules</a></li>
+              <li><a href="#" id="scoring">Scoring</a></li>
+            </ul>
+	  </li>
+	  <li class="divider show-for-small"></li>
+	  <li class="has-form">
+            <a class="button" href="#" id="logout">Logout</a>
+	  </li>
+	</ul>
+      </section>
+    </nav>
+  </div>
 </template>
 
 <template name="welcomescreen">
-  <section class="row" id="welcome">
+  <section class="row" id="welcome" style="background-image:url('background2.png'); background-size: cover; background-repeat: no-repeat; height: 30em;">
     <div class="large-12 columns">
-      <h1>Welcome to Fantasy Biathlon</h1>
+      <h1 style="background-color: blue; display: inline;">Welcome to Fantasy Biathlon</h1>
       {{loginButtons}}
     </div>
   </section>
@@ -363,4 +365,23 @@
 </template>
 
 <template name="leaguetable">
+  <div class="row">
+    <div class="large-3 columns" id="leaguechoice">
+      <ul class="side-nav">
+	<li><a href="#" id="overall" class="active">Overall</a></li>
+	<li class="divider"></li>
+	{{#unless myleagues}}
+	<li>No Mini-Leagues</li>
+	{{/unless}}
+	{{#each myleagues}}
+	<li><a href="#" id="{{this._id}}">{{this.Name}}</a></li>
+	{{/each}}
+	<li class="divider"></li>
+	<li><a href="#" id="join">Create or Join Mini-League.</a></li>
+      </ul>
+    </div>
+    <div class="large-9 columns">
+      {{summary}}
+    </div>
+  </div>
 </template>
