@@ -103,7 +103,7 @@
       <li><a href="#" id="venue">Next Venue Info</a></li>
     </ul>
     <div id="databar" class="twelve columns">
-      {{databarcontent}}
+      {{{databarcontent}}}
     </div>
   </section>
   <section class="row">
@@ -366,22 +366,22 @@
 
 <template name="leaguetable">
   <div class="row">
+    <div class="large-9 columns">
+      <table>{{{summary}}}</table>
+    </div>
     <div class="large-3 columns" id="leaguechoice">
       <ul class="side-nav">
-	<li><a href="#" id="overall" class="active">Overall</a></li>
+	<li id="overall"><a href="#" class="active">Overall</a></li>
 	<li class="divider"></li>
 	{{#unless myleagues}}
 	<li>No Mini-Leagues</li>
 	{{/unless}}
 	{{#each myleagues}}
-	<li><a href="#" id="{{this._id}}">{{this.Name}}</a></li>
+	<li id="{{this._id._str}}"><a href="#">{{this.Name}}</a></li>
 	{{/each}}
 	<li class="divider"></li>
-	<li><a href="#" id="join">Create or Join Mini-League.</a></li>
+	<li id="join"><a href="#">Create or Join Mini-League.</a></li>
       </ul>
-    </div>
-    <div class="large-9 columns">
-      {{summary}}
     </div>
   </div>
 </template>

@@ -589,7 +589,7 @@ if (Meteor.isClient) {
 	myleagues: function() {
 	    return Minileagues.find({});
 	},
-	summmary: function() {
+	summary: function() {
 	    var league = Session.get('league');
 	    var table = gettable(league);
 	    return tablesummary(table);
@@ -1277,7 +1277,7 @@ function averageperformance(enddate) {
 gettable = function(id) {
     var data = Statistics.findOne({Type: "pointstable"});
     if (!data) return [];
-    if (id === "overall") return rawdata.Data.Table;
+    if (id === "overall") return data.Data.Table;
     else {
 	var league = Minileagues.findOne({"_id._str": id});
 	if (!league) return [];
@@ -1296,7 +1296,9 @@ tablesummary = function(table, teamid) {
 	else return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
     };
     if (!teamid) {
-	teamid = ThisTeam.findOne()._id;
+	var team = ThisTeam.findOne();
+	if (team) teamid = team._id;
+	else teamid = "NULL";
     }
     var mypos = table.map(function(r) {return r.ID;}).indexOf(teamid);
     var output = [];
@@ -1305,7 +1307,7 @@ tablesummary = function(table, teamid) {
 	for (i = 0; i < Math.min(3, table.length); i++) {
 	    output.push(prettify(table[i], i+1));
 	}
-	if (table.length > 6) output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	if (table.length > 6) output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
 	var tailitems = Math.min(table.length - 3, 3);
 	for (i = table.length - tailitems; i < table.length; i++) {
 	    output.push(prettify(table[i], i+1));
@@ -1313,11 +1315,11 @@ tablesummary = function(table, teamid) {
     }
     else {
 	output.push(prettify(table[0], 1));
-	output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
 	for (i = mypos - 2; i < mypos + 3; i++) {
 	    output.push(prettify(table[i], i+1));
 	}
-	output.push('<tr><td>=====</td><td>=====</td><td>===</td></tr>');
+	output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
 	output.push(prettify(table[table.length-1], table.length));
     }
     return output.join('');
