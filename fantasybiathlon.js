@@ -118,6 +118,7 @@ if (Meteor.isClient) {
     Session.set('teamnameedit', false);
     Session.set('graphchoice', "progress");
     Session.set('league', "overall");
+    Session.set('databarcontent', "league");
 
     $(document).ready(function() {
     });
@@ -170,6 +171,27 @@ if (Meteor.isClient) {
     Template.loggedinscreen.helpers({
 	newuser: function() {
 	    return Session.get('newuser');
+	}
+    });
+    Template.loggedinscreen.events({
+	'click #databarselect li': function(event) {
+	    $('#databarselect li').removeClass("active");
+	    $(event.currentTarget).addClass("active");
+	    if (Session.get('databarcontent') !== event.currentTarget.id) Session.set('databarcontent', event.currentTarget.id);
+	}
+    });
+    Template.loggedinscreen.helpers({
+	databarcontent: function() {
+	    switch(Session.get('databarcontent')) {
+	    case 'calendar':
+		return Template.nextrace();
+		    
+	    case 'venue':
+		return Template.map();
+
+	    default:
+		return Template.leaguetable();
+	    }
 	}
     });
 
@@ -563,14 +585,6 @@ if (Meteor.isClient) {
 	}
     });
 
-    Template.leaguetable.events({
-	'click li': function(event) {
-	    $('#leaguechoice li').removeClass("active");
-	    $(event.currentTarget).addClass("active");
-	    if (Session.get('league') !== event.currentTarget.id) Session.set('league', event.currentTarget.id);
-	}
-    });
-
     Template.leaguetable.helpers({
 	myleagues: function() {
 	    return Minileagues.find({});
@@ -579,6 +593,13 @@ if (Meteor.isClient) {
 	    var league = Session.get('league');
 	    var table = gettable(league);
 	    return tablesummary(table);
+	}
+    });
+    Template.leaguetable.events({
+	'click li': function(event) {
+	    $('#leaguechoice li').removeClass("active");
+	    $(event.currentTarget).addClass("active");
+	    if (Session.get('league') !== event.currentTarget.id) Session.set('league', event.currentTarget.id);
 	}
     });
 

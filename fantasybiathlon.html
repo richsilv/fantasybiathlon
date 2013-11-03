@@ -97,13 +97,13 @@
     </div>
   </section>
   <section class="row">
-    <ul class="breadcrumbs">
-      <li class="current"><a href="#">League Table</a></li>
-      <li><a href="#">Calendar</a></li>
-      <li><a href="#">Next Venue Info</a></li>
+    <ul class="breadcrumbs" id="databarselect">
+      <li class="current" id="league"><a href="#">League Table</a></li>
+      <li><a href="#" id="calendar">Calendar</a></li>
+      <li><a href="#" id="venue">Next Venue Info</a></li>
     </ul>
     <div id="databar" class="twelve columns">
-	{{> nextrace}}
+      {{databarcontent}}
     </div>
   </section>
   <section class="row">
