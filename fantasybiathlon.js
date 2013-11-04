@@ -1301,13 +1301,13 @@ tablesummary = function(table, teamid) {
 	else teamid = "NULL";
     }
     var mypos = table.map(function(r) {return r.ID;}).indexOf(teamid);
-    var output = [];
+    var output = ['<tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>'];
     var i;
     if (mypos < 3 || mypos > table.length - 4) {
 	for (i = 0; i < Math.min(3, table.length); i++) {
 	    output.push(prettify(table[i], i+1));
 	}
-	if (table.length > 6) output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
+	if (table.length > 6) output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
 	var tailitems = Math.min(table.length - 3, 3);
 	for (i = table.length - tailitems; i < table.length; i++) {
 	    output.push(prettify(table[i], i+1));
@@ -1315,11 +1315,11 @@ tablesummary = function(table, teamid) {
     }
     else {
 	output.push(prettify(table[0], 1));
-	output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
+	output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
 	for (i = mypos - 2; i < mypos + 3; i++) {
 	    output.push(prettify(table[i], i+1));
 	}
-	output.push('<tr><td>=====</td><td>=====</td><td>=====</td><td>===</td></tr>');
+	output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
 	output.push(prettify(table[table.length-1], table.length));
     }
     return output.join('');

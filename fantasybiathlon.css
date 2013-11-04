@@ -124,3 +124,12 @@
 #scoringdiv h6 {
     display: inline;
 }
+
+table tbody .gaprow {
+    height: 0;
+    line-height: 0 !important;
+}
+
+.gaprow td {
+    border-bottom: thin dotted darkgrey;
+}
