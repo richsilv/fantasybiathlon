@@ -105,6 +105,19 @@ if (Meteor.isServer) {
 	    return (doc.UserID === userId);
 	}
     });
+    Minileagues.allow({
+	insert: function(userId, doc) {
+	    return (doc.Admin === userId);
+	},
+	update: function(userId, doc, fields) {
+	    var team = FantasyTeams.findOne({UserID: userId});
+	    if (team) return (_.contains(doc.Teams, team._id));
+	    else return false;
+	},
+	remove: function(userId, doc) {
+	    return (doc.Admin === userId);
+	}
+    });
 }
 
 if (Meteor.isClient) {
@@ -120,6 +133,7 @@ if (Meteor.isClient) {
     Session.set('league', "overall");
     Session.set('databarcontent', "league");
     Session.set('pagenumber', 1);
+    Session.set('createjoin', false);
 
     Meteor.startup(function() {
 	$('#league').addClass('current');
@@ -264,12 +278,26 @@ if (Meteor.isClient) {
 	    case 'transfers':
 		return Template.transfers();
 
+	    case 'league':
+		return Template.fullleague();
+
+	    case 'newleague':
+		var name = $('#leaguename').value;
+		$('#leaguename').value = "";
+		var admin = Meteor.userId();
+		var team = ThisTeam.findOne()._id;
+		console.log({Name: name, Teams: [team], Admin: admin});
+		Minileagues.insert({Name: name, Teams: [team], Admin: admin}, function(err, league) {
+		    if (err) return leaguecreateerror();
+		    else return leaguecreated(league);
+		});
+		return "DONE";
+
 	    default:
 		return "";
 	    }
 	}
     });
-
     Template.modalrender.rendered = function() {
 	$('#modal').bind('close', function() {
 	    Session.set('modal', null);
@@ -281,6 +309,42 @@ if (Meteor.isClient) {
 	if (Session.get('modal')) $('#modal').foundation('reveal', 'open');
 	else $('#modal').foundation('reveal', 'close');
     };
+
+    Template.fullleague.helpers({
+	contents: function() {
+	    var league = Session.get('league');
+	    var table = gettable(league);
+	    var myteam = ThisTeam.findOne();
+	    if (myteam) return fulltable(table, myteam._id, 20, Session.get('pagenumber'));
+	    else return fulltable(table, "", 20, Session.get('pagenumber'));
+	}
+    });
+    Template.fullleague.events({
+	'click .pagination li': function(event) {
+	    var choice = event.currentTarget.id;
+	    var avail = event.currentTarget.className;
+	    var currpage = Session.get('pagenumber');
+	    if (choice.slice(0, 4) === 'page') Session.set('pagenumber', parseInt(choice.slice(4), 10));
+	    else if (choice === 'downarrow' && avail.indexOf('unavailable') === -1) Session.set('pagenumber', currpage - 1);
+	    else if (choice === 'uparrow' && avail.indexOf('unavailable') === -1) Session.set('pagenumber', currpage + 1);
+	}
+    });
+
+    Template.createjoinleague.helpers({
+	create: function() {
+	    return Session.get('createjoin');
+	}
+    });
+    Template.createjoinleague.events({
+	'click dd': function(event) {
+	    var id = event.currentTarget.id;
+	    if (id === 'createsub' && !Session.get('createjoin')) Session.set('createjoin', true);
+	    else if (id === 'joinsub' && Session.get('createjoin')) Session.set('createjoin', false);
+	},
+	'click #createbutton': function() {
+	    Session.set('modal', 'newleague');
+	}
+    });
 
     Template.team.rendered = function() {
 	var team = ThisTeam.findOne();
@@ -608,14 +672,21 @@ if (Meteor.isClient) {
 	summary: function() {
 	    var league = Session.get('league');
 	    var table = gettable(league);
-	    return tablesummary(table);
+	    if (league === 'join') return Template.createjoinleague();
+	    else return tablesummary(table);
 	}
     });
     Template.leaguetable.events({
-	'click li': function(event) {
-	    $('#leaguechoice li').removeClass("active");
-	    $(event.currentTarget).addClass("active");
+	'click .button': function(event) {
+	    if (event.currentTarget.parentNode.id === "noleagues") return false;
+	    else if (Session.get('league') !== event.currentTarget.parentNode.id &&
+		     event.currentTarget.parentNode.id !== "myleagues") Session.set('league', event.currentTarget.parentNode.id);
+	},
+	'click #drop1 li': function(event) {
 	    if (Session.get('league') !== event.currentTarget.id) Session.set('league', event.currentTarget.id);
+	},
+	'click table': function (event) {
+	    Session.set('modal', 'league');
 	}
     });
 
@@ -1304,10 +1375,12 @@ gettable = function(id) {
     }
 };
 
-var prettify = function(entry, rank) {
+prettify = function(entry, rank, myteam) {
+    if (!entry) return '';
     var country = Nations.findOne({Nat: entry.Nat});
-    if (country) return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>' + country.LongName + '</td><td>' + entry.Points + '</td></tr>';
-    else return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
+    var myteamclass = myteam ? ' class="myteam"' : '';
+    if (country) return '<tr' + myteamclass + '><td>' + rank + '.</td><td>' + entry.Name + '</td><td>' + country.LongName + '</td><td>' + entry.Points + '</td></tr>';
+    else return '<tr' + myteamclass + '><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
 };
 
 
@@ -1319,27 +1392,28 @@ tablesummary = function(table, teamid) {
 	else teamid = "NULL";
     }
     var mypos = table.map(function(r) {return r.ID;}).indexOf(teamid);
-    var output = ['<tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>'];
+    var output = ['<table class="leaguetable"><tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>'];
     var i;
     if (mypos < 3 || mypos > table.length - 4) {
 	for (i = 0; i < Math.min(3, table.length); i++) {
-	    output.push(prettify(table[i], i+1));
+	    output.push(prettify(table[i], i+1, (i === mypos)));
 	}
 	if (table.length > 6) output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
 	var tailitems = Math.min(table.length - 3, 3);
 	for (i = table.length - tailitems; i < table.length; i++) {
-	    output.push(prettify(table[i], i+1));
+	    output.push(prettify(table[i], i+1, (i === mypos)));
 	}
     }
     else {
-	output.push(prettify(table[0], 1));
+	output.push(prettify(table[0], 1, (mypos === 0)));
 	output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
 	for (i = mypos - 2; i < mypos + 3; i++) {
-	    output.push(prettify(table[i], i+1));
+	    output.push(prettify(table[i], i+1, (i === mypos)));
 	}
 	output.push('<tr class="gaprow"><td colspan="4"></td></tr>');
-	output.push(prettify(table[table.length-1], table.length));
+	output.push(prettify(table[table.length-1], table.length, (mypos === table.length - 1)));
     }
+    output.push('</table>');
     return output.join('');
 };
 
@@ -1350,18 +1424,20 @@ fulltable = function(table, teamid, perpage, curpage) {
 	if (team) teamid = team._id;
 	else teamid = "NULL";
     }
-    var output = ['<table><tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>'];
-    var i;
     var numpages = Math.ceil(table.length/perpage);
+    var mypos = table.map(function(r) {return r.ID;}).indexOf(teamid);
+    var output = [];
+    if (numpages > 1) output.push(pagination(table.length, perpage, curpage));
+    output.push('<table id="fulltable"><tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>');
+    var i;
     if (curpage < 1) curpage = 1;
     else if (curpage > numpages) curpage = numpages;
     var start = perpage * (curpage - 1);
     var end = Math.min(table.length, start + perpage);
     for (i = start; i < end; i++) {
-	output.push(prettify(table[i], i + 1));
+	output.push(prettify(table[i], i + 1, (i === mypos)));
     }
     output = output.join('') + '</table>';
-    if (numpages > 1) output += pagination(table.length, perpage, curpage);
     return output;
 };
 
@@ -1369,8 +1445,9 @@ pagination = function(numitems, perpage, curpage) {
     var numpages = Math.ceil(numitems/perpage);
     var output = '<ul class="pagination">';
     var indices;
+    var i;
     if (numpages < 6) {
-	for (var i = 1; i <= numpages; i++) {
+	for (i = 1; i <= numpages; i++) {
 	    output += '<li';
 	    if (i === curpage) output += ' class="current"';
 	    output += '><a href="javascript:;">' + indices[i] + '</a></li>';
@@ -1379,22 +1456,33 @@ pagination = function(numitems, perpage, curpage) {
     else {
 	if (curpage < 4) indices = [1, 2, 3, 4, 0, numpages-1, numpages];
 	else if (curpage > numpages - 3) indices = [1, 2, 0, numpages - 3, numpages - 2, numpages - 1, numpages];
-	else indices = [0, curpage - 2, curpage - 1, curpage, curpage + 1, curpage + 2, 0];
-	output += '<li class="arrow';
+	else indices = [1, 0, curpage - 2, curpage - 1, curpage, curpage + 1, curpage + 2, 0, numpages];
+	output += '<li id="downarrow" class="arrow' ;
 	if (curpage === 1) output += ' unavailable';
 	output += '"><a href="javascript:;">&laquo;</a></li>';
-	for (var i = 0; i < indices.length; i++) {
+	for (i = 0; i < indices.length; i++) {
 	    if (indices[i] === 0) output += '<li class="unavailable"><a href="">&hellip;</a></li>';
 	    else {
-		output += '<li';
+		output += '<li id="page' + indices[i] + '"';
 		if (indices[i] === curpage) output += ' class="current"';
 		output += '><a href="javascript:;">' + indices[i] + '</a></li>';
 	    }
 	}
-	output += '<li class="arrow';
+	output += '<li id="uparrow" class="arrow';
 	if (curpage === numpages) output += ' unavailable';
 	output += '"><a href="javascript:;">&raquo;</a></li>';
     }
     output += '</ul>';
     return output;
 };
+
+leaguecreateerror = function() {
+    return '<h2>ERROR</h2><p>Sorry, but there was a problem creating your mini-league.</p>';
+}
+
+leaguecreated = function(league) {
+    var output = '<h2>LEAGUE CREATED</h2><p>Congratulations!  Your new league is now up and running.  To allow your friends to join, they\'ll need the code given below to gain access.<p><div class="callout panel">'
+    output += league._id;
+    output += '</div>'
+    return output;
+}

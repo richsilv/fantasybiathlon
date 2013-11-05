@@ -37,7 +37,7 @@
 	  {{/if}}
 	  {{#if currentUser}}
 	  <li class="divider"></li>
-	  <li id="transfers"><a style="color: yellow;">Transfers: {{transfers}}</a></li>
+	  <li id="transfers"><a>TRANSFERS: {{transfers}}</a></li>
 	  {{/if}}
 	  <li class="divider"></li>
 	</ul>
@@ -98,7 +98,7 @@
   </section>
   <section class="row">
     {{> breadcrumbs}}
-    <div id="databar" class="twelve columns" style="display:none;">
+    <div id="databar" class="twelve columns" style="display:none; height:16em;">
       {{> databarcontents}}
     </div>
   </section>
@@ -127,6 +127,12 @@
 <template name="modalrender">
   <div id="modal" class="reveal-modal small" style="width: auto;">
     {{{renderdeets}}}
+  </div>
+</template>
+
+<template name="fullleague">
+  <div class="pagination-centered row">
+    {{{contents}}}
   </div>
 </template>
 
@@ -225,6 +231,11 @@
 </template>
 
 <template name="map">
+  <div class="row">
+    <div class="large-6 large-centered columns">
+      <h3>COMING SOON</h3>
+    </div>
+  </div>
 </template>
 
 <template name="transfermodal">
@@ -269,7 +280,7 @@
 
 <template name="chartsection">
     <div class="twelve columns">
-      <div class="large-3 columns">
+      <div class="large-3 large-offset-1 columns">
 	<div class="content">
 	  <ul class="side-nav" id="graphchoice">
 	    <li class="active" id="progress"><a>Progress</a></li>
@@ -280,7 +291,7 @@
 	  </ul>
 	</div>
       </div>
-      <div class="large-9 columns">
+      <div class="large-8 columns">
 	{{> graphcanvas}}
       </div>
     </div>
@@ -375,23 +386,65 @@
 <template name="leaguetable">
   <div class="row">
     <div class="large-9 columns">
-      <table class="leaguetable">{{{summary}}}</table>
+      {{{summary}}}
     </div>
     <div class="large-3 columns" id="leaguechoice">
 	<div id="overall"><a href="javascript:;" class="button">Overall</a></div>
 	{{#unless myleagues}}
-	<div><a href"javascript:;" class="button secondary">No Mini-Leagues</a></div>
+	<div id="noleagues"><a href"javascript:;" class="button secondary">No Mini-Leagues</a></div>
 	{{/unless}}
 	{{#if myleagues}}
-	<div><a href="javascript:;" data-dropdown="drop1" class="button dropdown">My Leagues</a>
-	  <ul>
+	<div id="myleagues"><a href="javascript:;" data-dropdown="drop1" class="button dropdown">My Leagues</a>
+	  <ul id="drop1" class="f-dropdown">
 	    {{#each myleagues}}
 	    <li id="{{this._id._str}}"><a href="javascript:;" class="">{{this.Name}}</a></li>
 	    {{/each}}
 	  </ul>
 	</div>
 	{{/if}}
-	<div id="join"><a href="javascript:;" class="button success">Create or Join Mini-League.</a></div>
+	<div id="join"><a href="javascript:;" class="button success">Create or Join Mini-League</a></div>
     </div>
   </div>
+</template>
+
+<template name="createjoinleague">
+  <dl class="sub-nav">
+    <dt>Action:</dt>
+    <dd{{#if create}} class="active"{{/if}} id="createsub"><a href="javascript:;">Create</a></dd>
+    <dd{{#unless create}} class="active"{{/unless}} id="joinsub"><a href="javascript:;">Join</a></dd>
+  </dl>
+  {{#if create}}
+  <form id="createform">
+    <fieldset>
+      <legend>Create Mini-League</legend>
+      <div class="large-8 large-centered columns">
+	<div class="row collapse">
+	  <div class="small-9 columns">
+	    <input type="text" placeholder="League Name" id="leaguename">
+	  </div>
+	  <div class="small-3 columns">
+	    <a href="javascript:;" class="button prefix" id="createbutton">Create</a>
+	  </div>
+	</div>
+      </div>
+   </fieldset>
+  </form>  
+
+  {{else}}
+  <form id="joinform">
+    <fieldset>
+      <legend>Join Mini-League</legend>
+      <div class="large-8 large-centered columns">
+	<div class="row collapse">
+	  <div class="small-9 columns">
+	    <input type="text" placeholder="24-character code" id="leaguecode">
+	  </div>
+	  <div class="small-3 columns">
+	    <a href="javascript:;" class="button prefix" id="joinname">Join</a>
+	  </div>
+	</div>
+      </div>
+   </fieldset>
+  </form>
+  {{/if}}
 </template>

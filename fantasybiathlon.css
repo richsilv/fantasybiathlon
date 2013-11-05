@@ -1,4 +1,10 @@
 /* CSS declarations go here */
+#transfers>a {
+    color: yellow;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
 .tile {
     margin: 0.2em;
     width: 15.8em;
@@ -117,8 +123,12 @@
 }
 
 #modal {
-    max-height: 30em;
+    max-height: 40em;
     overflow-y: scroll;
+}
+
+#fulltable {
+    width: 40em;
 }
 
 #scoringdiv h6 {
@@ -133,6 +143,11 @@
 .leaguetable tbody .gaprow {
 }
 
+.myteam {
+    font-weight: bold;
+    background-color: lightblue !important;
+}
+
 .gaprow td {
     padding-top: 0;
     padding-bottom: 0;
@@ -141,4 +156,9 @@
 
 #leaguechoice .button {
     width: 100%;
+}
+
+#drop1 {
+    max-height: 6em;
+    overflow-y: scroll;
 }
