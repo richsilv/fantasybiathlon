@@ -119,8 +119,10 @@ if (Meteor.isClient) {
     Session.set('graphchoice', "progress");
     Session.set('league', "overall");
     Session.set('databarcontent', "league");
+    Session.set('pagenumber', 1);
 
-    $(document).ready(function() {
+    Meteor.startup(function() {
+	$('#league').addClass('current');
     });
 
     Template.topbar.helpers({
@@ -173,19 +175,16 @@ if (Meteor.isClient) {
 	    return Session.get('newuser');
 	}
     });
-    Template.loggedinscreen.events({
-	'click #databarselect li': function(event) {
-	    $('#databarselect li').removeClass("active");
-	    $(event.currentTarget).addClass("active");
-	    if (Session.get('databarcontent') !== event.currentTarget.id) Session.set('databarcontent', event.currentTarget.id);
-	}
-    });
-    Template.loggedinscreen.helpers({
+    Template.loggedinscreen.rendered = function() {
+	$('#databar').slideDown();
+    };
+
+    Template.databarcontents.helpers({
 	databarcontent: function() {
 	    switch(Session.get('databarcontent')) {
 	    case 'calendar':
 		return Template.nextrace();
-		    
+
 	    case 'venue':
 		return Template.map();
 
@@ -194,6 +193,22 @@ if (Meteor.isClient) {
 	    }
 	}
     });
+
+    Template.breadcrumbs.events({
+	'click #databarselect li': function(event) {
+	    var thisid = event.currentTarget.id;
+	    if (Session.get('databarcontent') !== thisid) {
+		setTimeout(function() {
+		    Session.set('databarcontent', thisid);
+		    $('#databarselect li').removeClass('current');
+		    $('#' + Session.get('databarcontent')).addClass('current');
+		}, 400);
+		$('#databar').slideUp();
+	    }
+	}
+    });
+    Template.breadcrumbs.created = function() {
+    };
 
     Template.teamname.helpers({
 	team: function() {
@@ -258,6 +273,7 @@ if (Meteor.isClient) {
     Template.modalrender.rendered = function() {
 	$('#modal').bind('close', function() {
 	    Session.set('modal', null);
+	    Session.set('pagenumber', 1);
 	});
 	var width = parseInt($('#modal').css('width'), 10);
 	$('#modal').css('margin-left', Math.floor(($(window).width()/2) - (width/2)) + 'px');
@@ -587,7 +603,7 @@ if (Meteor.isClient) {
 
     Template.leaguetable.helpers({
 	myleagues: function() {
-	    return Minileagues.find({});
+	    return Minileagues.find({}).fetch();
 	},
 	summary: function() {
 	    var league = Session.get('league');
@@ -1288,13 +1304,15 @@ gettable = function(id) {
     }
 };
 
+var prettify = function(entry, rank) {
+    var country = Nations.findOne({Nat: entry.Nat});
+    if (country) return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>' + country.LongName + '</td><td>' + entry.Points + '</td></tr>';
+    else return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
+};
+
+
 tablesummary = function(table, teamid) {
     table = table.sort(function(a, b) {return b.Points - a.Points;});
-    var prettify = function(entry, rank) {
-	var country = Nations.findOne({Nat: entry.Nat});
-	if (country) return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>' + country.LongName + '</td><td>' + entry.Points + '</td></tr>';
-	else return '<tr><td>' + rank + '.</td><td>' + entry.Name + '</td><td>Unkown</td><td>' + entry.Points + '</td></tr>';
-    };
     if (!teamid) {
 	var team = ThisTeam.findOne();
 	if (team) teamid = team._id;
@@ -1323,4 +1341,60 @@ tablesummary = function(table, teamid) {
 	output.push(prettify(table[table.length-1], table.length));
     }
     return output.join('');
+};
+
+fulltable = function(table, teamid, perpage, curpage) {
+    table = table.sort(function(a, b) {return b.Points - a.Points;});
+    if (!teamid) {
+	var team = ThisTeam.findOne();
+	if (team) teamid = team._id;
+	else teamid = "NULL";
+    }
+    var output = ['<table><tr><th>Rank</th><th>Team Name</th><th>Country</th><th>Points</th></tr>'];
+    var i;
+    var numpages = Math.ceil(table.length/perpage);
+    if (curpage < 1) curpage = 1;
+    else if (curpage > numpages) curpage = numpages;
+    var start = perpage * (curpage - 1);
+    var end = Math.min(table.length, start + perpage);
+    for (i = start; i < end; i++) {
+	output.push(prettify(table[i], i + 1));
+    }
+    output = output.join('') + '</table>';
+    if (numpages > 1) output += pagination(table.length, perpage, curpage);
+    return output;
+};
+
+pagination = function(numitems, perpage, curpage) {
+    var numpages = Math.ceil(numitems/perpage);
+    var output = '<ul class="pagination">';
+    var indices;
+    if (numpages < 6) {
+	for (var i = 1; i <= numpages; i++) {
+	    output += '<li';
+	    if (i === curpage) output += ' class="current"';
+	    output += '><a href="javascript:;">' + indices[i] + '</a></li>';
+	}
+    }
+    else {
+	if (curpage < 4) indices = [1, 2, 3, 4, 0, numpages-1, numpages];
+	else if (curpage > numpages - 3) indices = [1, 2, 0, numpages - 3, numpages - 2, numpages - 1, numpages];
+	else indices = [0, curpage - 2, curpage - 1, curpage, curpage + 1, curpage + 2, 0];
+	output += '<li class="arrow';
+	if (curpage === 1) output += ' unavailable';
+	output += '"><a href="javascript:;">&laquo;</a></li>';
+	for (var i = 0; i < indices.length; i++) {
+	    if (indices[i] === 0) output += '<li class="unavailable"><a href="">&hellip;</a></li>';
+	    else {
+		output += '<li';
+		if (indices[i] === curpage) output += ' class="current"';
+		output += '><a href="javascript:;">' + indices[i] + '</a></li>';
+	    }
+	}
+	output += '<li class="arrow';
+	if (curpage === numpages) output += ' unavailable';
+	output += '"><a href="javascript:;">&raquo;</a></li>';
+    }
+    output += '</ul>';
+    return output;
 };

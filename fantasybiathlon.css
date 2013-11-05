@@ -125,11 +125,20 @@
     display: inline;
 }
 
-table tbody .gaprow {
-    height: 0;
-    line-height: 0 !important;
+.leaguetable {
+    width: 100%;
+    text-align: center;
+}
+
+.leaguetable tbody .gaprow {
 }
 
 .gaprow td {
+    padding-top: 0;
+    padding-bottom: 0;
     border-bottom: thin dotted darkgrey;
+}
+
+#leaguechoice .button {
+    width: 100%;
 }

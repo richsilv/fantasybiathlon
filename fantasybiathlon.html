@@ -29,9 +29,9 @@
 	<!-- Left Nav Section -->
 	<ul class="left">
 	  {{#if currentUser.admin}}
-	  <li><a href="#" id="datefwd">Fwd</a></li>
+	  <li><a href="javascript:;" id="datefwd">Fwd</a></li>
 	  <li class="divider"></li>
-	  <li><a href="#" id="dateback">Back</a></li>
+	  <li><a href="javascript:;" id="dateback">Back</a></li>
 	  <li class="divider"></li>
 	  <li><a><em style="color: darkred;">ADMIN</em></a></li>
 	  {{/if}}
@@ -44,16 +44,16 @@
 	<!-- Right Nav Section -->
 	<ul class="right">
 	  <li class="divider"></li>
-	  <li class="has-dropdown"><a href="#">Help</a>
+	  <li class="has-dropdown"><a href="javascript:;">Help</a>
             <ul class="dropdown">
               <li><label>Dropdown Level 1 Label</label></li>
-              <li><a href="#" id="rules">Rules</a></li>
-              <li><a href="#" id="scoring">Scoring</a></li>
+              <li><a href="javascript:;" id="rules">Rules</a></li>
+              <li><a href="javascript:;" id="scoring">Scoring</a></li>
             </ul>
 	  </li>
 	  <li class="divider show-for-small"></li>
 	  <li class="has-form">
-            <a class="button" href="#" id="logout">Logout</a>
+            <a class="button" href="javascript:;" id="logout">Logout</a>
 	  </li>
 	</ul>
       </section>
@@ -97,13 +97,9 @@
     </div>
   </section>
   <section class="row">
-    <ul class="breadcrumbs" id="databarselect">
-      <li class="current" id="league"><a href="#">League Table</a></li>
-      <li><a href="#" id="calendar">Calendar</a></li>
-      <li><a href="#" id="venue">Next Venue Info</a></li>
-    </ul>
-    <div id="databar" class="twelve columns">
-      {{{databarcontent}}}
+    {{> breadcrumbs}}
+    <div id="databar" class="twelve columns" style="display:none;">
+      {{> databarcontents}}
     </div>
   </section>
   <section class="row">
@@ -114,6 +110,18 @@
 
   {{#if newuser}}{{> joyride}}{{/if}}
 
+</template>
+
+<template name="breadcrumbs">
+  <ul class="breadcrumbs" id="databarselect">
+    <li id="league"><a href="javascript:;">League Table</a></li>
+    <li id="calendar"><a href="javascript:;">Calendar</a></li>
+    <li id="venue"><a href="javascript:;">Next Venue Info</a></li>
+  </ul>
+</template>
+
+<template name="databarcontents">
+  {{{databarcontent}}}
 </template>
 
 <template name="modalrender">
@@ -203,10 +211,10 @@
     </fieldset>
     <row>
       <div class="large-6 columns">
-	<a href="#" id="resettransfers" class="small button">Reset</a>
+	<a href="javascript:;" id="resettransfers" class="small button">Reset</a>
       </div>
       <div class="large-6 columns">
-	<a href="#" id="savetransfers" class="small button success">Save</a>
+	<a href="javascript:;" id="savetransfers" class="small button success">Save</a>
       </div>
     </row>
   </form>
@@ -235,7 +243,7 @@
 </template>
 
 <template name="dateForm">
-  <h1><a href="#">{{systemDate}} </a></h1>
+  <h1><a href="javascript:;">{{systemDate}} </a></h1>
 </template>
 
 <template name="nextrace">
@@ -367,21 +375,23 @@
 <template name="leaguetable">
   <div class="row">
     <div class="large-9 columns">
-      <table>{{{summary}}}</table>
+      <table class="leaguetable">{{{summary}}}</table>
     </div>
     <div class="large-3 columns" id="leaguechoice">
-      <ul class="side-nav">
-	<li id="overall"><a href="#" class="active">Overall</a></li>
-	<li class="divider"></li>
+	<div id="overall"><a href="javascript:;" class="button">Overall</a></div>
 	{{#unless myleagues}}
-	<li>No Mini-Leagues</li>
+	<div><a href"javascript:;" class="button secondary">No Mini-Leagues</a></div>
 	{{/unless}}
-	{{#each myleagues}}
-	<li id="{{this._id._str}}"><a href="#">{{this.Name}}</a></li>
-	{{/each}}
-	<li class="divider"></li>
-	<li id="join"><a href="#">Create or Join Mini-League.</a></li>
-      </ul>
+	{{#if myleagues}}
+	<div><a href="javascript:;" data-dropdown="drop1" class="button dropdown">My Leagues</a>
+	  <ul>
+	    {{#each myleagues}}
+	    <li id="{{this._id._str}}"><a href="javascript:;" class="">{{this.Name}}</a></li>
+	    {{/each}}
+	  </ul>
+	</div>
+	{{/if}}
+	<div id="join"><a href="javascript:;" class="button success">Create or Join Mini-League.</a></div>
     </div>
   </div>
 </template>
