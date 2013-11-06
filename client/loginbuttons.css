@@ -1,0 +1,15 @@
+#login-form {
+    background-color: rgba(200,200,200,0.8);
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.table {
+    display: table;
+    margin: 0 auto;
+    clear: both;
+}
+
+#forgot {
+	float: right;
+}

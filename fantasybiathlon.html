@@ -67,15 +67,16 @@
 <template name="welcomescreen">
   <section class="row" id="welcome" style="">
     <div style="height: 40px;"></div>
-      <h1 id="welcometitle">Welcome to Fantasy Biathlon</h1>
-      <div style="height: 80px;"></div>
-      <div class="row">
-	<div class="large-4 large-offset-7 columns">
-	  {{loginButtons}}
-	</div>
+    <h1 id="welcometitle">Welcome to Fantasy Biathlon</h1>
+    <div style="height: 60px;"></div>
+    <div class="row">
+      <div class="large-4 large-offset-7 columns">
+        {{> loginButtons}}
+	     </div>
       </div>
     </div>
   </section>
+  {{> modalrender}}
 </template>
 
 <template name="loggedinscreen">

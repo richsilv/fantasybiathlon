@@ -1,0 +1,31 @@
+<template name="loginButtons">
+	<form id="login-form" action="action">
+		<div class="table">
+			<ul class="breadcrumbs" id="actionchoice" style="text-align: center;">
+				<li{{#if login}} class="current"{{/if}} id="login"><a href="javascript:;">Log In</a></li>
+				<li{{#if signup}} class="current"{{/if}} id="signup"><a href="javascript:;">Sign Up</a></li>
+			</ul>
+		</div>
+		<input type="email" id="login-email" placeholder="Email Address" />
+		{{#unless forgot}}
+		<input type="password" id="login-password" placeholder="Password" />
+		{{/unless}}
+		{{#if signup}}
+		<div class="large-8 large-centered columns">
+			<label for="natdropdown">Nation</label>
+			<select id="natdropdown" class="medium">
+				{{#each nations}}<option value="{{this.Nat}}">{{this.LongName}}</option>{{/each}}
+			</select>
+		</div>
+		{{/if}}
+		{{#if login}}
+		<div>
+			<div class="tiny secondary button" id="forgot">Forgot Password</div>
+		</div>
+		{{/if}}
+		<div class="table">
+			<input type="submit" class="button" id="login-button" value="{{#if login}}Sign In{{else}}{{#if signup}}Sign Up{{else}}Send Reminder{{/if}}{{/if}}" />
+		</div>
+		{{#if error}}<div class="alert-box alert">{{error}}</div>{{/if}}
+	</form> 
+</template>
