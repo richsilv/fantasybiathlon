@@ -110,8 +110,7 @@ if (Meteor.isServer) {
 	    return (doc.Admin === userId);
 	},
 	update: function(userId, doc, fields) {
-	    var team = FantasyTeams.findOne({UserID: userId});
-	    if (team) return (_.contains(doc.Teams, team._id));
+	    if (fields.length !== 1 || fields[0]  === 'Teams') return true;
 	    else return false;
 	},
 	remove: function(userId, doc) {
@@ -281,7 +280,20 @@ if (Meteor.isClient) {
 	    case 'league':
 		return Template.fullleague();
 
-	    case 'newleague':
+	    case 'leaguecreated':
+		return Template.leaguecreated();
+
+	    case 'leaguecreatederror':
+		return Template.leagecreatederror();
+
+	    case 'leaguejoined':
+		return Template.leaguejoined();
+	
+	    case 'leaguejoinederror':
+		return Template.leaguejoinederror();
+
+	    case 'leaguejoinedalready':
+		return Template.leaguejoinedalready();
 
 	    default:
 		return "";
@@ -290,8 +302,17 @@ if (Meteor.isClient) {
     });
     Template.modalrender.rendered = function() {
 	$('#modal').bind('close', function() {
-	    Session.set('modal', null);
 	    Session.set('pagenumber', 1);
+	    var oldmodal = Session.get('modal');
+	    if (oldmodal === 'leaguecreated' || oldmodal === 'leaguejoined' || oldmodal ==='leaguejoinedalready') {
+		Session.set('league', Session.get('leagueid'));
+		Session.set('databarcontent', 'league');
+	    }
+	    else if (oldmodal === 'leaguejoinederror' || oldmodal === 'leaguecreatederror') {
+		Session.set('league', 'overall');
+		Session.set('databarcontent', 'league');
+	    }
+	    Session.set('modal', null);
 	});
 	var width = parseInt($('#modal').css('width'), 10);
 	$('#modal').css('margin-left', Math.floor(($(window).width()/2) - (width/2)) + 'px');
@@ -332,16 +353,43 @@ if (Meteor.isClient) {
 	    else if (id === 'joinsub' && Session.get('createjoin')) Session.set('createjoin', false);
 	},
 	'click #createbutton': function() {
-	    var name = $('#leaguename').value;
-	    $('#leaguename').value = "";
+	    var name = $('#leaguename').val();
+	    $('#leaguename').val('');
 	    var admin = Meteor.userId();
 	    var team = ThisTeam.findOne()._id;
-	    console.log({Name: name, Teams: [team], Admin: admin});
 	    Minileagues.insert({Name: name, Teams: [team], Admin: admin}, function(err, league) {
-		if (err) Session.set('leagueid', 'ERR');
-		else Session.set('leagueid', league._id);
+		if (err) Session.set('modal', 'leaguecreatederror');
+		else {
+		    console.log('minileague added - ' + league);
+		    Session.set('leagueid', league);
+		    Session.set('modal', 'leaguecreated');
+		}
+	    });
+	},
+	'click #joinbutton': function() {
+	    var id = $('#leagueid').val();
+	    $('#leagueid').val('');
+	    var team = ThisTeam.findOne()._id;
+	    var league = Minileagues.findOne({_id: id});
+	    if (!league) {
+		Session.set('modal', 'leaguejoinederror');
+		return;
+	    }
+	    if (_.contains(league.Teams, team)) {
+		Session.set('leagueid', id);
+		Session.set('modal', 'leaguejoinedalready');
+		return;
+	    }
+	    Minileagues.update({_id: id}, {$push: {Teams: team}}, {}, function(err, docnum) {
+		if (err || docnum === 0) Session.set('modal', 'leaguejoinederror');
+		else {
+		    console.log('minileague joined - ' + id);
+		    Session.set('leagueid', id);
+		    Session.set('modal', 'leaguejoined');
+		}
 	    });
 	}
+
     });
 
     Template.team.rendered = function() {
@@ -691,6 +739,20 @@ if (Meteor.isClient) {
     Template.leaguecreated.helpers({
 	leagueid: function() {
 	    return Session.get('leagueid');
+	}
+    });
+    Template.leaguejoined.helpers({
+	leaguename: function() {
+	    var league = Minileagues.findOne({_id: Session.get('leagueid')});
+	    if (league) return league.Name;
+	    else return 'UNKNOWN LEAGUE';
+	}
+    });
+    Template.leaguejoinedalready.helpers({
+	leaguename: function() {
+	    var league = Minileagues.findOne({_id: Session.get('leagueid')});
+	    if (league) return league.Name;
+	    else return 'UNKNOWN LEAGUE';
 	}
     });
 

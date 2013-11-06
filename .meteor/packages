@@ -9,9 +9,8 @@ jquery
 
 jquery-ui
 accounts-password
-accounts-ui
 
 chartjs
 cron-tick
 foundation
-
+accounts-ui-bootstrap-3

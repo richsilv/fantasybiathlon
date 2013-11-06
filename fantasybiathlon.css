@@ -1,4 +1,26 @@
 /* CSS declarations go here */
+#login-dropdown-list {
+    background-color: rgba(200,200,200,0.8);
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+#welcome {
+    background-image:url('background3.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 666px;
+}
+
+#welcometitle {
+    background-color: rgba(200, 200, 200, 0.8);
+    display: inline;
+    margin-left: 2em;
+    border-radius: 0.5
+em;
+    padding: 0.5em;
+}
+
 #transfers>a {
     color: yellow;
     font-size: 1.2em;
@@ -161,4 +183,12 @@
 #drop1 {
     max-height: 6em;
     overflow-y: scroll;
+}
+
+.leagueid {
+    display: inline-block;
+}
+
+.centered {
+    text-align: center;
 }

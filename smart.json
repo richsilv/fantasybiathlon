@@ -4,6 +4,7 @@
     "jquery-ui": {},
     "chartjs": {},
     "cron-tick": {},
-    "zurb-foundation": {}
+    "zurb-foundation": {},
+    "accounts-ui-bootstrap-3": {}
   }
 }

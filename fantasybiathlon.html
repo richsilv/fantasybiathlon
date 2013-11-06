@@ -19,7 +19,7 @@
     <nav class="top-bar">
       <ul class="title-area">
 	<!-- Title Area -->
-	<li class="name" style="width: 20em;">
+	<li class="name" style="width: 15em;">
 	  {{> dateForm}}
 	</li>
 	<!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
@@ -46,15 +46,18 @@
 	  <li class="divider"></li>
 	  <li class="has-dropdown"><a href="javascript:;">Help</a>
             <ul class="dropdown">
-              <li><label>Dropdown Level 1 Label</label></li>
+              <li><label></label></li>
+              <li><a href="javascript:;" id="about">About</a></li>
               <li><a href="javascript:;" id="rules">Rules</a></li>
               <li><a href="javascript:;" id="scoring">Scoring</a></li>
             </ul>
 	  </li>
+	  {{#if currentUser}}
 	  <li class="divider show-for-small"></li>
 	  <li class="has-form">
             <a class="button" href="javascript:;" id="logout">Logout</a>
 	  </li>
+	  {{/if}}
 	</ul>
       </section>
     </nav>
@@ -62,10 +65,15 @@
 </template>
 
 <template name="welcomescreen">
-  <section class="row" id="welcome" style="background-image:url('background2.png'); background-size: cover; background-repeat: no-repeat; height: 30em;">
-    <div class="large-12 columns">
-      <h1 style="background-color: blue; display: inline;">Welcome to Fantasy Biathlon</h1>
-      {{loginButtons}}
+  <section class="row" id="welcome" style="">
+    <div style="height: 40px;"></div>
+      <h1 id="welcometitle">Welcome to Fantasy Biathlon</h1>
+      <div style="height: 80px;"></div>
+      <div class="row">
+	<div class="large-4 large-offset-7 columns">
+	  {{loginButtons}}
+	</div>
+      </div>
     </div>
   </section>
 </template>
@@ -402,7 +410,7 @@
 	  </ul>
 	</div>
 	{{/if}}
-	<div id="join"><a href="javascript:;" class="button success">Create or Join Mini-League</a></div>
+	<div id="join"><a href="javascript:;" class="button success">Create or Join<br>Mini-League</a></div>
     </div>
   </div>
 </template>
@@ -437,10 +445,10 @@
       <div class="large-8 large-centered columns">
 	<div class="row collapse">
 	  <div class="small-9 columns">
-	    <input type="text" placeholder="24-character code" id="leaguecode">
+	    <input type="text" placeholder="League ID code" id="leagueid">
 	  </div>
 	  <div class="small-3 columns">
-	    <a href="javascript:;" class="button prefix" id="joinname">Join</a>
+	    <a href="javascript:;" class="button prefix" id="joinbutton">Join</a>
 	  </div>
 	</div>
       </div>
@@ -449,18 +457,42 @@
   {{/if}}
 </template>
 
-<template name="leaguecreateerror">
-  <div id="leaguemodal" class="reveal-modal">
-    <h2>ERROR</h2>
-    <p>Sorry, but there was a problem creating your mini-league.</p>
-  </div>
+<template name="leaguecreatederror">
+  <h2>ERROR</h2>
+  <p>Sorry, but there was a problem creating your mini-league.</p>
+</template>
+
+<template name="leaguejoinederror">
+  <h2>ERROR</h2>
+  <p>Sorry, but we can't find that mini-league!  Please check the id and reenter.</p>
+</template>
+
+<template name="leaguejoinedalready">
+  <h2>ALREADY JOINED</h2>
+  <p>Your team is already entered in this league: </p>
+  <div class="centered">
+      <span class="callout panel leagueid">
+	<strong>{{leaguename}}<strong>
+      </span>
+  </div>  
 </template>
 
 <template name="leaguecreated">
-  <div id="leaguemodal" class="reveal-modal">
-    <h2>LEAGUE CREATED</h2>
-    <p>Congratulations!  Your new league is now up and running.  To allow your friends to join, they\'ll need the code given below to gain access.</p>
-    <div class="callout panel">
-      {{leagueid}}
-    </div>
+  <h2>LEAGUE CREATED</h2>
+  <p>Congratulations!  Your new league is now up and running.<br>To allow your friends to join, they'll need the following code to gain access:</p>
+  <div class="centered">
+      <span class="callout panel leagueid">
+	<strong>{{leagueid}}<strong>
+      </span>
+  </div>
+</template>
+
+<template name="leaguejoined">
+  <h2>LEAGUE JOINED</h2>
+  <p>Congratulations!  Your team has been successfully entered into the league:</p>
+  <div class="centered">
+      <span class="callout panel leagueid">
+	<strong>{{leaguename}}<strong>
+      </span>
+  </div>
 </template>
