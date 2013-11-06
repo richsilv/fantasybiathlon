@@ -282,16 +282,6 @@ if (Meteor.isClient) {
 		return Template.fullleague();
 
 	    case 'newleague':
-		var name = $('#leaguename').value;
-		$('#leaguename').value = "";
-		var admin = Meteor.userId();
-		var team = ThisTeam.findOne()._id;
-		console.log({Name: name, Teams: [team], Admin: admin});
-		Minileagues.insert({Name: name, Teams: [team], Admin: admin}, function(err, league) {
-		    if (err) return leaguecreateerror();
-		    else return leaguecreated(league);
-		});
-		return "DONE";
 
 	    default:
 		return "";
@@ -342,7 +332,15 @@ if (Meteor.isClient) {
 	    else if (id === 'joinsub' && Session.get('createjoin')) Session.set('createjoin', false);
 	},
 	'click #createbutton': function() {
-	    Session.set('modal', 'newleague');
+	    var name = $('#leaguename').value;
+	    $('#leaguename').value = "";
+	    var admin = Meteor.userId();
+	    var team = ThisTeam.findOne()._id;
+	    console.log({Name: name, Teams: [team], Admin: admin});
+	    Minileagues.insert({Name: name, Teams: [team], Admin: admin}, function(err, league) {
+		if (err) Session.set('leagueid', 'ERR');
+		else Session.set('leagueid', league._id);
+	    });
 	}
     });
 
@@ -687,6 +685,12 @@ if (Meteor.isClient) {
 	},
 	'click table': function (event) {
 	    Session.set('modal', 'league');
+	}
+    });
+
+    Template.leaguecreated.helpers({
+	leagueid: function() {
+	    return Session.get('leagueid');
 	}
     });
 

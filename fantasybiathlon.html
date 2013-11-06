@@ -448,3 +448,19 @@
   </form>
   {{/if}}
 </template>
+
+<template name="leaguecreateerror">
+  <div id="leaguemodal" class="reveal-modal">
+    <h2>ERROR</h2>
+    <p>Sorry, but there was a problem creating your mini-league.</p>
+  </div>
+</template>
+
+<template name="leaguecreated">
+  <div id="leaguemodal" class="reveal-modal">
+    <h2>LEAGUE CREATED</h2>
+    <p>Congratulations!  Your new league is now up and running.  To allow your friends to join, they\'ll need the code given below to gain access.</p>
+    <div class="callout panel">
+      {{leagueid}}
+    </div>
+</template>
