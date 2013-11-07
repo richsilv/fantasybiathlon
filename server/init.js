@@ -4,6 +4,8 @@ Meteor.startup(function () {
 	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25'
 });
 
+Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+
 Accounts.validateNewUser(function (user) {
 	var thatemail = Meteor.users.findOne({"emails.address":user.email});
   	if (thatemail) throw new Meteor.Error(403, "Email already registered");
@@ -11,8 +13,6 @@ Accounts.validateNewUser(function (user) {
 });
 
 Accounts.onCreateUser(function(options, user) {
-	console.log(user);
-	Accounts.sendVerificationEmail(user._id);
 	var newteam = {UserID: user._id,
 		Name: "My Team",
 		transfers: 0,
