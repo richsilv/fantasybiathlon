@@ -11,16 +11,28 @@ Accounts.validateNewUser(function (user) {
 });
 
 Accounts.onCreateUser(function(options, user) {
+	console.log(user);
 	Accounts.sendVerificationEmail(user._id);
 	var newteam = {UserID: user._id,
 		Name: "My Team",
-		transfers: 8,
+		transfers: 0,
 		Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
 		teamHistory: []
 	};
 	FantasyTeams.insert(newteam);
 	if (options.profile) user.profile = options.profile;
 	return user;
+});
+
+FantasyTeams.find().observe({
+	changed: function(newdoc, olddoc) {
+		var changes = 0;
+		for (var i = 0; i < 4; i++) {
+			if (newdoc.Athletes.indexOf(olddoc.Athletes[i]) === -1) changes += 1;
+		}
+		seasonstart = SystemVars.findOne({Name: "seasonstart"}).Value;
+		if ((new Date()).getTime() < seasonstart.getTime()) FantasyTeams.update(newdoc, {$inc: {transfers: -changes}});
+	}
 });
 
 writepopularathletes();

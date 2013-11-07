@@ -41,6 +41,9 @@
 	  <li id="transfers"><a>TRANSFERS: {{transfers}}</a></li>
 	  {{/if}}
 	  <li class="divider"></li>
+    {{#if unsavedchanges}}
+    <li id="unsavedchanges"><a>Unsaved changes!</a><li>
+    {{/if}}
 	</ul>
 	<!-- Right Nav Section -->
 	<ul class="right">

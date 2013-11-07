@@ -23,6 +23,11 @@
     font-weight: bold;
 }
 
+#unsavedchanges>a {
+    color: red;
+    font-weight: bold;
+}
+
 .tile {
     margin: 0.2em;
     width: 15.8em;
