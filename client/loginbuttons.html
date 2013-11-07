@@ -2,7 +2,7 @@
 	<form id="login-form" action="action">
 		<div class="table">
 			<ul class="breadcrumbs" id="actionchoice" style="text-align: center;">
-				<li{{#if login}} class="current"{{/if}} id="login"><a href="javascript:;">Log In</a></li>
+				<li{{#unless signup}} class="current"{{/unless}} id="login"><a href="javascript:;">Log In</a></li>
 				<li{{#if signup}} class="current"{{/if}} id="signup"><a href="javascript:;">Sign Up</a></li>
 			</ul>
 		</div>
