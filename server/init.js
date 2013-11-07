@@ -1,5 +1,7 @@
 
 Meteor.startup(function () {
+	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
+	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25'
 });
 
 Accounts.validateNewUser(function (user) {
@@ -9,6 +11,7 @@ Accounts.validateNewUser(function (user) {
 });
 
 Accounts.onCreateUser(function(options, user) {
+	Accounts.sendVerificationEmail(user._id);
 	var newteam = {UserID: user._id,
 		Name: "My Team",
 		transfers: 8,

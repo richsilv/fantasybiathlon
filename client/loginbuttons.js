@@ -1,6 +1,21 @@
 Session.set('action', 'login');
 Session.set('error', '');
 
+Deps.autorun(function() {
+	if (Accounts._resetPasswordToken) {
+		Session.set('resetPassword', Accounts._resetPasswordToken);
+		Session.set('action', 'reset');
+	}
+	if (Accounts._verifyEmailToken) {
+    	Accounts.verifyEmail(Accounts._verifyEmailToken, function(err) {
+    		if (err) {
+    			Session.set('error', err.reason);
+    			Session.set('action', 'login');
+    		};
+    	})
+  	}
+});
+
 Template.loginButtons.helpers({
 	login: function() {
 		return (Session.get('action') === 'login');
@@ -11,12 +26,18 @@ Template.loginButtons.helpers({
 	forgot: function() {
 		return (Session.get('action') === 'forgot');
 	},
+	reset: function() {
+		return (Session.get('action') === 'reset');
+	},
 	nations: function() {
 		var nations = Nations.find().fetch();
 		return nations;
 	},
 	error: function() {
 		return Session.get('error');
+	},
+	loggingin: function() {
+		return Meteor.loggingIn();
 	}
 })
 
@@ -50,14 +71,29 @@ Template.loginButtons.events({
 					else Session.set('error', 'Could not create user!');
 					console.log(err);
 				}
+				else {
+					Session.set('action', 'login');
+				}
 			});
 		}
 		else if (Session.get('action') === 'forgot') {
-			Accounts.forgotPassword($('#login-email'), function(err) {
-				if (err) console.log(err);
+			Accounts.forgotPassword({email: $('#login-email').val()}, function(err) {
+				if (err) Session.set('error', 'Please enter a valid e-mail.');
+				else {
+					Session.set('error', 'Password reset mail sent.');
+					Session.set('action', 'login');
+				}
 			});
-			Session.set('error', 'Password reset mail sent.')
 			return false;
+		}
+		else if (Session.get('action') === 'reset') {
+			Accounts.resetPassword(Session.get('resetPassword'), $('#login-password').val(), function(err) {
+				if (err) { 
+					console.log(err);
+					Session.set('error', 'Cannot reset password!');
+				}
+				else Session.set('action', 'login');
+			});
 		}
 		return false;
 	},

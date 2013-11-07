@@ -6,9 +6,11 @@
 				<li{{#if signup}} class="current"{{/if}} id="signup"><a href="javascript:;">Sign Up</a></li>
 			</ul>
 		</div>
+		{{#unless reset}}
 		<input type="email" id="login-email" placeholder="Email Address" />
+		{{/unless}}
 		{{#unless forgot}}
-		<input type="password" id="login-password" placeholder="Password" />
+		<input type="password" id="login-password" placeholder="{{#if reset}}New {{/if}}Password" />
 		{{/unless}}
 		{{#if signup}}
 		<div class="large-8 large-centered columns">
@@ -24,8 +26,15 @@
 		</div>
 		{{/if}}
 		<div class="table">
-			<input type="submit" class="button" id="login-button" value="{{#if login}}Sign In{{else}}{{#if signup}}Sign Up{{else}}Send Reminder{{/if}}{{/if}}" />
+			<input type="submit" class="button{{#if loggingin}} disabled{{/if}}" id="login-button" value=
+			{{#if loggingin}}"Signing In"
+			{{else}}{{#if login}}"Sign In"
+			{{else}}{{#if signup}}"Sign Up"
+			{{else}}{{#if reset}}"Reset Password"
+			{{else}}"Send Reminder"
+			{{/if}}{{/if}}{{/if}}{{/if}} />
 		</div>
 		{{#if error}}<div class="alert-box alert">{{error}}</div>{{/if}}
+		{{#if loggingin}}<div class="container"><div class="floater loading style-2"></div></div>{{/if}}
 	</form> 
 </template>

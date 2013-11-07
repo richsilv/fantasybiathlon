@@ -1,5 +1,6 @@
 <head>
-  <title>fantasybiathlon</title>
+  <title>Fantasy Biathlon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 </head>
 
 <body>
@@ -228,8 +229,8 @@
       <div class="large-6 small-6 columns">
 	<a href="javascript:;" id="resettransfers" class="small button">Reset</a>
       </div>
-      <div class="large-6 small-6 columns">
-	<a href="javascript:;" id="savetransfers" class="small button success">Save</a>
+      <div class="large-6 small-6 columns"{{#if unverified}} text="You need to respond to your verification e-mail before you can save your team."{{/if}}>
+	<a href="javascript:;" id="savetransfers" class="small button success{{#if unverified}} disabled{{/if}}">Save</a>
       </div>
     </row>
   </form>
@@ -496,4 +497,9 @@
 	<strong>{{leaguename}}<strong>
       </span>
   </div>
+</template>
+
+<template name="unverified">
+  <h2>PLEASE VERIFY EMAIL</h2>
+  <p>Check your inbox for the email we've just sent.  You'll need to follow the link it contains to verify your address, otherwise you won't be able to save your team.</p>
 </template>
