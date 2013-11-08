@@ -1,7 +1,11 @@
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
-	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25'
+	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
+//	updatepointstable();
+	setInterval(function() {
+		updatepointstable();
+	}, 120000);
 });
 
 if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
@@ -159,5 +163,60 @@ function writepopularathletes() {
     Statistics.upsert({Type: "popular"}, {Type: "popular", Data: popathletes}, {}, function(err) {
 	if (!err) console.log("Popular athletes written");
 	else console.log("Error writing popular athletes: " + err);
+    });
+}
+
+function getresults(team, enddate) {
+	var compfunc = function(a, b) {
+		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
+	};
+	enddate = enddate ? enddate : (Session.get('datestatic') ? Session.get('datestatic') : new Date());
+	if (!team || !team.teamHistory) {return [];}
+	results = [];
+	for (var i = 0; i < team.teamHistory.length; i++) {
+		var dtstart = team.teamHistory[i][1];
+		if (dtstart.getTime() > enddate.getTime()) continue;
+		var dtend;
+		if (i < team.teamHistory.length - 1) {
+			dtend = (team.teamHistory[i+1][1].getTime() > enddate.getTime()) ? enddate : team.teamHistory[i+1][1];
+		}
+		else {
+			if (enddate) dtend = enddate;
+			else dtend = Session.get('datestatic');
+		}
+		results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
+	}
+	return results.sort(compfunc);
+}
+
+function updatepointstable() {
+    var teams = FantasyTeams.find();
+    var tableobj = {Table: []};
+    var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+    var enddate = new Date();
+    enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
+    console.log(enddate);
+    teams.forEach(function(t) {
+	var res = getresults(t, enddate);
+	var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
+	var user = Meteor.users.findOne({_id: t.UserID});
+	if (user) {
+	    tableobj.Table.push({Name: t.Name,
+				 Country: user.Country,
+				 ID: t._id,
+				 Points: p
+				});
+	}
+	else {
+	    tableobj.Table.push({Name: t.Name,
+				 Country: "UNKNOWN",
+				 ID: t._id,
+				 Points: p
+				});
+	}
+    });
+    Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
+	if (!err) console.log("Points table updated");
+	else console.log("Error writing points table: " + err);
     });
 }

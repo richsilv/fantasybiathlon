@@ -22,7 +22,7 @@
        <!-- Title Area -->
        <li class="name">
          {{#if currentUser}}
-         <h1 id="transfers"><a>TRANSFERS: {{{transfers}}}</a></h1>
+         {{> titletransfers}}
          {{/if}}
        </li>
         <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a>
@@ -73,6 +73,10 @@
     </section>
   </nav>
 </div>
+</template>
+
+<template name="titletransfers">
+  <h1 id="transfers"><a>TRANSFERS: <span id="titletransfers">-</span></a></h1> 
 </template>
 
 <template name="welcomescreen">
