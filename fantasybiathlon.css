@@ -124,6 +124,7 @@
     margin-top: -0.5em;
     margin-right: -0.5em;
     cursor: pointer;
+    background-repeat: no-repeat;
 }
 
 .custom.dropdown.medium.open ul {
