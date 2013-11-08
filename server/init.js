@@ -7,7 +7,6 @@ MyCron.addJob(120000, function() {
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
 	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
-	updatepointstable();
 });
 
 if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
