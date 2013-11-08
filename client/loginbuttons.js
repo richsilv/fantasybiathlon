@@ -43,7 +43,6 @@ Template.loginButtons.helpers({
 
 Template.loginButtons.events({
 	'click #actionchoice>li': function(event) {
-		console.log("click");
 		if (event.currentTarget.id !== Session.get('action')) {
 			Session.set('error', '');
 			Session.set('action', event.currentTarget.id);
@@ -53,7 +52,6 @@ Template.loginButtons.events({
 		if (Session.get('action') === 'login') {
 			Meteor.loginWithPassword({email: $('#login-email').val()}, $('#login-password').val(), function(err) {
 				if (err) { 
-					console.log(err);
 					if (err.reason === "Incorrect password") Session.set('error', 'Incorrect password!');
 					else Session.set('error', 'Cannot log you in!');
 				}
@@ -69,7 +67,6 @@ Template.loginButtons.events({
 				if (err){
 					if (err.reason === "Email already exists.") Session.set('error', 'Email already registered!');
 					else Session.set('error', 'Could not create user!');
-					console.log(err);
 				}
 				else {
 					Session.set('action', 'login');
@@ -89,7 +86,6 @@ Template.loginButtons.events({
 		else if (Session.get('action') === 'reset') {
 			Accounts.resetPassword(Session.get('resetPassword'), $('#login-password').val(), function(err) {
 				if (err) { 
-					console.log(err);
 					Session.set('error', 'Cannot reset password!');
 				}
 				else Session.set('action', 'login');
