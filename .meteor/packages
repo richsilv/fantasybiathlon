@@ -15,3 +15,5 @@ cron-tick
 foundation
 accounts-base
 email
+
+device-detection

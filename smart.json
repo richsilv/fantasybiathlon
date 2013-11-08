@@ -5,6 +5,7 @@
     "chartjs": {},
     "cron-tick": {},
     "zurb-foundation": {},
-    "accounts-ui-bootstrap-3": {}
+    "accounts-ui-bootstrap-3": {},
+    "device-detection": {}
   }
 }

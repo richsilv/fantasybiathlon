@@ -5,13 +5,13 @@
 
 <body>
 
-{{> topbar}}
+  {{> topbar}}
 
-{{#if currentUser}}
+  {{#if currentUser}}
   {{> loggedinscreen}}
-{{else}}
+  {{else}}
   {{> welcomescreen}}
-{{/if}}
+  {{/if}}
 
 </body>
 
@@ -19,68 +19,75 @@
   <div class="contain-to-grid sticky">
     <nav class="top-bar">
       <ul class="title-area">
-	<!-- Title Area -->
-	<li class="name" style="width: 15em;">
-	  {{> dateForm}}
-	</li>
-	<!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-      </ul>
+       <!-- Title Area -->
+       <li class="name">
+         {{#if currentUser}}
+         <h1 id="transfers"><a>TRANSFERS: {{{transfers}}}</a></h1>
+         {{/if}}
+       </li>
+        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a>
+       <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+     </ul>
 
-      <section class="top-bar-section">
-	<!-- Left Nav Section -->
-	<ul class="left">
-	  {{#if currentUser.admin}}
-	  <li><a href="javascript:;" id="datefwd">Fwd</a></li>
-	  <li class="divider"></li>
-	  <li><a href="javascript:;" id="dateback">Back</a></li>
-	  <li class="divider"></li>
-	  <li><a><em style="color: darkred;">ADMIN</em></a></li>
-	  {{/if}}
-	  {{#if currentUser}}
-	  <li class="divider"></li>
-	  <li id="transfers"><a>TRANSFERS: {{transfers}}</a></li>
-	  {{/if}}
-	  <li class="divider"></li>
-    {{#if unsavedchanges}}
-    <li id="unsavedchanges"><a>Unsaved changes!</a><li>
-    {{/if}}
-	</ul>
-	<!-- Right Nav Section -->
-	<ul class="right">
-	  <li class="divider"></li>
-	  <li class="has-dropdown"><a href="javascript:;">Help</a>
-            <ul class="dropdown">
-              <li><label></label></li>
-              <li><a href="javascript:;" id="about">About</a></li>
-              <li><a href="javascript:;" id="rules">Rules</a></li>
-              <li><a href="javascript:;" id="scoring">Scoring</a></li>
-            </ul>
-	  </li>
-	  {{#if currentUser}}
-	  <li class="divider show-for-small"></li>
-	  <li class="has-form">
-            <a class="button" href="javascript:;" id="logout">Logout</a>
-	  </li>
-	  {{/if}}
-	</ul>
-      </section>
-    </nav>
-  </div>
+     <section class="top-bar-section">
+       <!-- Left Nav Section -->
+       <ul class="left">
+         {{> dateForm}}
+         {{#if currentUser.admin}}
+         <li class="divider"></li>        
+         <li><a href="javascript:;" id="datefwd">Fwd</a></li>
+         <li class="divider"></li>
+         <li><a href="javascript:;" id="dateback">Back</a></li>
+         <li class="divider"></li>
+         <li><a><em style="color: darkred;">ADMIN</em></a></li>
+         {{/if}}
+
+         {{#if unsavedchanges}}
+         <li class="divider"></li>
+         <li id="unsavedchanges">
+          {{#if isPhone}}<a>Unsaved!</a>
+          {{else}}<a>Unsaved changes!</a>{{/if}}
+         <li>
+         <li class="divider"></li>
+          {{/if}}
+        </ul>
+        <!-- Right Nav Section -->
+        <ul class="right">
+         <li class="divider"></li>
+         <li class="has-dropdown"><a href="javascript:;">Help</a>
+          <ul class="dropdown">
+            <li><label>Topics</label></li>
+            <li><a href="javascript:;" id="about">About</a></li>
+            <li><a href="javascript:;" id="rules">Rules</a></li>
+            <li><a href="javascript:;" id="scoring">Scoring</a></li>
+          </ul>
+        </li>
+        {{#if currentUser}}
+        <li class="divider"></li>
+        <li class="has-form">
+          <a class="button" href="javascript:;" id="logout">Logout</a>
+        </li>
+        {{/if}}
+        </li>
+      </ul>
+    </section>
+  </nav>
+</div>
 </template>
 
 <template name="welcomescreen">
   <section class="row" id="welcome" style="">
     <div style="height: 40px;"></div>
-    <h1 id="welcometitle">Welcome to Fantasy Biathlon</h1>
+    <div class="large-8 large-offset-1 small-12 columns"><h1 id="welcometitle">Fantasy&nbspBiathlon</h1></div>
     <div style="height: 60px;"></div>
     <div class="row">
       <div class="large-4 large-offset-7 small-10 small-offset-1 columns">
         {{> loginButtons}}
-	     </div>
       </div>
     </div>
-  </section>
-  {{> modalrender}}
+  </div>
+</section>
+{{> modalrender}}
 </template>
 
 <template name="loggedinscreen">
@@ -92,44 +99,46 @@
   <section id="athletes">
     <div class="row">
       <div class="twelve columns topbar">
-	<div class="large-12 columns" id="teamdisplay">
-	  <div>{{> team}}</div>
-	</div>
-      </div>
-      <div class="twelve columns dropbar" id="teamdrop" style="display: none">
-	<div class="large-12 columns">
-	  <div class="large-3 columns">
-	    {{> pricebox}}
-	    {{> athleteform}}
-	  </div>
-	  <div class="large-9 columns panel" id="athletelist">
-	    {{> athletelist}}
-	  </div>
-	</div>
-      </div>
-    </div>
-  </section>
-  <section class="row">
-    {{> breadcrumbs}}
-    <div id="databar" class="twelve columns" style="display:none;">
-      {{> databarcontents}}
-    </div>
-  </section>
-  <section class="row">
-    {{> chartsection}}
-  </section>
+       <div class="large-12 columns" id="teamdisplay">
+         <div>{{> team}}</div>
+       </div>
+     </div>
+     <div class="twelve columns dropbar" id="teamdrop" style="display: none">
+       <div class="large-12 columns">
+         <div class="large-3 columns">
+           {{> pricebox}}
+           {{> athleteform}}
+         </div>
+         <div class="large-9 columns panel" id="athletelist">
+           {{> athletelist}}
+         </div>
+       </div>
+     </div>
+   </div>
+ </section>
+ <section class="row">
+  {{> breadcrumbs}}
+  <div id="databar" class="twelve columns" style="display:none;">
+    {{> databarcontents}}
+  </div>
+</section>
+{{#unless isPhone}}
+<section class="row">
+  {{> chartsection}}
+</section>
+{{/unless}}
 
-  {{> modalrender}}
+{{> modalrender}}
 
-  {{#if newuser}}{{> joyride}}{{/if}}
+{{#if newuser}}{{> joyride}}{{/if}}
 
 </template>
 
 <template name="breadcrumbs">
   <ul class="breadcrumbs" id="databarselect">
-    <li id="league"><a href="javascript:;">League Table</a></li>
-    <li id="calendar"><a href="javascript:;">Calendar</a></li>
-    <li id="venue"><a href="javascript:;">Next Venue Info</a></li>
+    <li id="league"{{#if league}} class="current"{{/if}}><a href="javascript:;">League Table</a></li>
+    <li id="calendar"{{#if calendar}} class="current"{{/if}}><a href="javascript:;">Calendar</a></li>
+    <li id="venue"{{#if venue}} class="current"{{/if}}><a href="javascript:;">Next Venue Info</a></li>
   </ul>
 </template>
 
@@ -160,22 +169,22 @@
 </template>
 
 <template name="teamname">
-    <h3 class="subheader">TEAM NAME:</h3>
-    <div style="text-align: center; margin-top: -0.5em;">
-      {{#if teamnameedit}}
-      <div class="large-8 large-offset-2 centered columns">
-	<h1><input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: -0.3em 0em 0em; height: 1.2em;"></h1>
-      </div>
-      {{else}}
-      <h1 id="teamname" style="margin: -0.3em 0.1em 0em; display: inline-block">{{team.Name}}</h1>
-      {{/if}}
-    </div>
+  <h3 class="subheader">TEAM NAME:</h3>
+  <div style="text-align: center; margin-top: -0.5em;">
+    {{#if teamnameedit}}
+    <div class="large-8 large-offset-2 centered columns">
+     <h1><input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: -0.3em 0em 0em; height: 1.2em;"></h1>
+   </div>
+   {{else}}
+   <h1 id="teamname" style="margin: -0.3em 0.1em 0em; display: inline-block">{{team.Name}}</h1>
+   {{/if}}
+ </div>
 </template>
 
 <template name="team">
   <div class="row" id="athleterow">
     {{#each athletes}}
-       {{> athlete}}
+    {{> athlete}}
     {{/each}}
   </div>
 </template>    
@@ -184,59 +193,59 @@
   <div class="large-3 small-6 columns">
     <ul class="pricing-table teammember">
       <li class="title athletepic" style="background-image:url('{{avatar}}'), url('{{flag}}');">
-	{{#if ShortName}}<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
-	</div>{{/if}}
-	{{#if ShortName}}<div class="pricelabel"><h2>{{Price}}</h2></div>{{/if}}
-      </li>
-      <li class="title athletename" style="height: 4em;">{{#if ShortName}}<div class="radius label large {{GenderLongLower}}">{{ShortName}}</div<{{else}}<br>{{/if}}</li>
-      <li class="bullet-item">{{#if ShortName}}{{NatLong}}{{else}}</br>{{/if}}</li>
-      <li class="bullet-item">{{#if ShortName}}{{pointtotal}} points{{else}}<br>{{/if}}</li>
-    </ul>
-  </div>
+       {{#if ShortName}}<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
+     </div>{{/if}}
+     {{#if ShortName}}<div class="pricelabel"><div><h2>{{Price}}</h2></div></div>{{/if}}
+   </li>
+   <li class="title athletename" style="height: 4em;">{{#if ShortName}}<div class="radius label large {{GenderLongLower}}">{{ShortName}}</div<{{else}}<br>{{/if}}</li>
+   <li class="bullet-item">{{#if ShortName}}{{NatLong}}{{else}}</br>{{/if}}</li>
+   <li class="bullet-item">{{#if ShortName}}{{pointtotal}} points{{else}}<br>{{/if}}</li>
+ </ul>
+</div>
 </template>
 
 <template name="pricebox">
   <div class="row">
     <div class="large-12 columns">
       <div class="alert-box">
-	Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 15.0
-      </div>
-    </div>
-  </div>
+       Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 15.0
+     </div>
+   </div>
+ </div>
 </template>
 
 <template name="athleteform">
   <form class="custom">
     <fieldset id="athletefields">
       <div class="row">
-	<input type="text" placeholder="Name" id="namefilter">
-      </div>
-      <div class="row">
-	<div class="large-6 small-6 columns" id="mfradiomaster">
-	  <label for="mfradio" id="mfa"><input name="mfradio" type="radio" id="mfradio" style="display: none;" CHECKED><span class="custom radio checked" id="MW"></span>All</label>
-	  <label for="mfradiom" id="mfb"><input name="mfradio" type="radio" id="mfradiom" style="display: none;"><span class="custom radio" id="M"></span>Male</label>
-	  <label for="mfradiof" id="mfc"><input name="mfradio" type="radio" id="mfradiof" style="display: none;"><span class="custom radio" id="W"></span>Female</label>
-	</div>
-	<div class="large-6 small-6 columns">
-	  <label for="natdropdown">Nation</label>
-	  <select id="natdropdown" class="medium">
-	    <option></option>
-	    {{#each nations}}
-	      <option>{{this}}</option>
-	    {{/each}}
-	  </select>
-	</div>
-      </div>
-    </fieldset>
-    <row>
-      <div class="large-6 small-6 columns">
-	<a href="javascript:;" id="resettransfers" class="small button">Reset</a>
-      </div>
-      <div class="large-6 small-6 columns"{{#if unverified}} text="You need to respond to your verification e-mail before you can save your team."{{/if}}>
-	<a href="javascript:;" id="savetransfers" class="small button success{{#if unverified}} disabled{{/if}}">Save</a>
-      </div>
-    </row>
-  </form>
+       <input type="text" placeholder="Name" id="namefilter">
+     </div>
+     <div class="row">
+       <div class="large-6 small-6 columns" id="mfradiomaster">
+         <label for="mfradio" id="mfa"><input name="mfradio" type="radio" id="mfradio" style="display: none;" CHECKED><span class="custom radio checked" id="MW"></span>All</label>
+         <label for="mfradiom" id="mfb"><input name="mfradio" type="radio" id="mfradiom" style="display: none;"><span class="custom radio" id="M"></span>Male</label>
+         <label for="mfradiof" id="mfc"><input name="mfradio" type="radio" id="mfradiof" style="display: none;"><span class="custom radio" id="W"></span>Female</label>
+       </div>
+       <div class="large-6 small-6 columns">
+         <label for="natdropdown">Nation</label>
+         <select id="natdropdown" class="medium">
+           <option></option>
+           {{#each nations}}
+           <option>{{this}}</option>
+           {{/each}}
+         </select>
+       </div>
+     </div>
+   </fieldset>
+   <row>
+    <div class="large-6 small-6 columns">
+     <a href="javascript:;" id="resettransfers" class="small button">Reset</a>
+   </div>
+   <div class="large-6 small-6 columns"{{#if unverified}} text="You need to respond to your verification e-mail before you can save your team."{{/if}}>
+     <a href="javascript:;" id="savetransfers" class="small button success{{#if unverified}} disabled{{/if}}">Save</a>
+   </div>
+ </row>
+</form>
 </template>
 
 <template name="athletelist">
@@ -256,213 +265,213 @@
   <h3>Confirm Changes?</h3>
   <p class="lead">You will have {{remtrans}} remaining.
     {{{transferlist}}}
-  <a class="close-reveal-modal">&#215;</a>
-  <a class="small success button" id="confirmtransferbutton">Confirm</a>
-  {{else}}
-  <h3>Too Many Changes!</h3>
-  <p class="lead">Sorry, but you only have {{hastrans}} to use!<p>
-  <p>You can reset your changes with the blue button.<p>
-  <a class="close-reveal-modal">&#215;</a>
-  {{/if}}
-</template>
+    <a class="close-reveal-modal">&#215;</a>
+    <a class="small success button" id="confirmtransferbutton">Confirm</a>
+    {{else}}
+    <h3>Too Many Changes!</h3>
+    <p class="lead">Sorry, but you only have {{hastrans}} to use!<p>
+      <p>You can reset your changes with the blue button.<p>
+        <a class="close-reveal-modal">&#215;</a>
+        {{/if}}
+      </template>
 
-<template name="dateForm">
-  <h1><a href="javascript:;">{{systemDate}} </a></h1>
-</template>
+      <template name="dateForm">
+        <li><a href="javascript:;" id="titledate">-</a></li>
+      </template>
 
-<template name="nextrace">
-  <div class="" style="text-align: center">
-    <h5 class="subheader">{{{lastrace}}}</h5>
-    <h5>{{{nextrace}}}</h5>
-    <h5 class="subheader">{{{nextnextrace}}}</h5>
-  </div>
-</template>
+      <template name="nextrace">
+        <div class="" style="text-align: center">
+          <h5 class="subheader">{{{lastrace}}}</h5>
+          <h5>{{{nextrace}}}</h5>
+          <h5 class="subheader">{{{nextnextrace}}}</h5>
+        </div>
+      </template>
 
-<template name="resultslist">
-  <h2>POINTS SCORERS</h2>
-  {{#if okay}}
-  {{#each results}}
-    {{#if this.Points}}<tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>{{/if}}
-  {{/each}}
-{{/if}}
-</template>
+      <template name="resultslist">
+        <h2>POINTS SCORERS</h2>
+        {{#if okay}}
+        {{#each results}}
+        {{#if this.Points}}<tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>{{/if}}
+        {{/each}}
+        {{/if}}
+      </template>
 
-<template name="result">
-  <td>{{this.Name}}, <strong>{{this.Points}}</strong> pts in the {{racedeets}} <em>({{racetime}})</em></td>
-</template>
+      <template name="result">
+        <td>{{this.Name}}, <strong>{{this.Points}}</strong> pts in the {{racedeets}} <em>({{racetime}})</em></td>
+      </template>
 
-<template name="chartsection">
-    <div class="twelve columns">
-      <div class="large-3 large-offset-1 columns">
-	<div class="content">
-	  <ul class="side-nav" id="graphchoice">
-	    <li class="active" id="progress"><a>Progress</a></li>
-	    <li id="scorers"><a>Points Scorers</a></li>
-	    <li class="divider"></li>
-	    <li id="bestathletes"><a>Best Athletes</a></li>
-	    <li id="popular"><a>Popular Athletes</a></li>
-	  </ul>
-	</div>
-      </div>
-      <div class="large-8 columns">
-	{{> graphcanvas}}
-      </div>
-    </div>
-</template>
+      <template name="chartsection">
+        <div class="twelve columns">
+          <div class="large-3 large-offset-1 columns">
+           <div class="content">
+             <ul class="side-nav" id="graphchoice">
+               <li class="active" id="progress"><a>Progress</a></li>
+               <li id="scorers"><a>Points Scorers</a></li>
+               <li class="divider"></li>
+               <li id="bestathletes"><a>Best Athletes</a></li>
+               <li id="popular"><a>Popular Athletes</a></li>
+             </ul>
+           </div>
+         </div>
+         <div class="large-8 columns">
+           {{> graphcanvas}}
+         </div>
+       </div>
+     </template>
 
-<template name="graphcanvas">
-  <canvas id="graphcanvas" width="600" height="250"></canvas>
-</template>
+     <template name="graphcanvas">
+      <canvas id="graphcanvas" width="600" height="250"></canvas>
+    </template>
 
-<template name="joyride">
-  <ol class="joyride-list" id="joyride" data-joyride>
-    <li data-id="teamname" data-text="Next" data-options="tipLocation:right;nubPosition:left">
-      <h4>Team Name</h4>
-      <p>Change your team name by clicking here.</p>
-    </li>
-    <li data-id="athleterow" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
-      <h4>Athletes</h4>
-      <p>Add or change athletes by clicking on one of the avatars.</p>
-    </li>
-    <li data-id="pointstitle" data-text="Next" data-options="tipLocation:left;nubPosition:right">
-      <h4>Points</h4>
-      <p>Here you can see how many points your team has.</p>
-    </li>
-    <li data-text="Next" data-options="tipLocation:bottom">
-      <h4>Transfers</h4>
-      <p>This shows how many transfers you have available.</p>
-    </li>
-    <li data-id="databar" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
-      <h4>Information</h4>
-      <p>Down here you can access the league table, calendar, charts and other information.</p>
-    </li>
-    <li data-text="Finish" data-options="">
-      <h4>Help</h4>
-      <p>Rules and help can be found here.  Good luck!</p>
-    </li>
-  </ol>
-</template>
+    <template name="joyride">
+      <ol class="joyride-list" id="joyride" data-joyride>
+        <li data-id="teamname" data-text="Next" data-options="tipLocation:right;nubPosition:left">
+          <h4>Team Name</h4>
+          <p>Change your team name by clicking here.</p>
+        </li>
+        <li data-id="athleterow" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
+          <h4>Athletes</h4>
+          <p>Add or change athletes by clicking on one of the avatars.</p>
+        </li>
+        <li data-id="pointstitle" data-text="Next" data-options="tipLocation:left;nubPosition:right">
+          <h4>Points</h4>
+          <p>Here you can see how many points your team has.</p>
+        </li>
+        <li data-text="Next" data-options="tipLocation:bottom">
+          <h4>Transfers</h4>
+          <p>This shows how many transfers you have available.</p>
+        </li>
+        <li data-id="databar" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
+          <h4>Information</h4>
+          <p>Down here you can access the league table, calendar, charts and other information.</p>
+        </li>
+        <li data-text="Finish" data-options="">
+          <h4>Help</h4>
+          <p>Rules and help can be found here.  Good luck!</p>
+        </li>
+      </ol>
+    </template>
 
-<template name="rules">
-  <div class="row">
-    <h2>RULES</h2>
-    <div class="large-6 columns">
-      <h3 class="subheader">Team Selection</h3>
-      <p>To score points in any race, you must have a valid team saved:</p>
-      <ul style="line-height: 300%;">
-	<li>A team consists of <strong>two male</strong> athletes and <strong>two female</strong> athletes.</li>
-	<li>You can choose a maximum of <strong>two</strong> athletes from any <strong>nation</strong>.</li>
-	<li>The total value of your team can be no more than <strong>15.0</strong>.
-      </ul>
-    </div>
-    <div class="large-6 columns">
-      <h3 class="subheader">Transfers</h3>
-      <p>Transfers can be made at any time, but transfers made after a race has started will only become effective as of the next race, even if the transferred athlete hasn't started his or her race.</p>
-      <p><strong>Two transfers</strong> will be granted following every meeting, and these can be used before, during or after any subsequent meeting.</p>
-      <p>Transfers can be saved, but you can store no more than <strong>four transfers</strong> at any time.</p>
-    </div>
-</template>
+    <template name="rules">
+      <div class="row">
+        <h2>RULES</h2>
+        <div class="large-6 columns">
+          <h3 class="subheader">Team Selection</h3>
+          <p>To score points in any race, you must have a valid team saved:</p>
+          <ul style="line-height: 300%;">
+           <li>A team consists of <strong>two male</strong> athletes and <strong>two female</strong> athletes.</li>
+           <li>You can choose a maximum of <strong>two</strong> athletes from any <strong>nation</strong>.</li>
+           <li>The total value of your team can be no more than <strong>15.0</strong>.
+           </ul>
+         </div>
+         <div class="large-6 columns">
+          <h3 class="subheader">Transfers</h3>
+          <p>Transfers can be made at any time, but transfers made after a race has started will only become effective as of the next race, even if the transferred athlete hasn't started his or her race.</p>
+          <p><strong>Two transfers</strong> will be granted following every meeting, and these can be used before, during or after any subsequent meeting.</p>
+          <p>Transfers can be saved, but you can store no more than <strong>four transfers</strong> at any time.</p>
+        </div>
+      </template>
 
-<template name="scoring">
-  <div id="scoringdiv" class="row">
-    <h2>SCORING</h2>
-    <h3 class="subheader">Sprint, Pursuit, Mass Start & Individual Races</h3>
-    <p>In all non-relay races, points will be scored for the following:</p>
-    <ul>
-      <li><h6>Finishing Position:</h6> points awarded for finishing position from 1st to 20th as follows: 30, 25, 22, 20, 18, 16, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 and 1.</li>
-      <li><h6>Fastest Skiers:</h6> the fastest five course times will receive an additional 10, 7, 5, 3, and 1 points respectively.</li>
-      <li><h6>Best Shooting:</h6> the best five shooting performances will also receive an additional 10, 7, 5, 3 and 1 points.  Performances are determined <em>firstly</em> by number of targets missed and <em>then</em> by overall range time.</li>
-      <li><h6>Clear Shoots:</h6> an additional point is awarded to all athletes for every clear visit to the range.  An additional <em>five points</em> are awarded for shooting clear throughout a race.  These are in addition to best shooting scores (above).</li>
-    </ul>
-    <h3 class="subheader">Men's, Women's and Mixed Relay Races</h3>
-    <p>In all relay races, points will be awarded for the following:</p>
-    <ul>
-      <li><h6>Team Finishing Position:</h6> points awarded for being a member of the team finishing from first to eighth as follows: 15, 10, 8, 6, 4, 3, 2 and 1.</li>
-      <li><h6>Clear Sheets:</h6> an additional five points are awarded to any athlete who uses no spre rounds during their leg of the relay.</li>
-    </ul>
-  </div>
-</template>
+      <template name="scoring">
+        <div id="scoringdiv" class="row">
+          <h2>SCORING</h2>
+          <h3 class="subheader">Sprint, Pursuit, Mass Start & Individual Races</h3>
+          <p>In all non-relay races, points will be scored for the following:</p>
+          <ul>
+            <li><h6>Finishing Position:</h6> points awarded for finishing position from 1st to 20th as follows: 30, 25, 22, 20, 18, 16, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 and 1.</li>
+            <li><h6>Fastest Skiers:</h6> the fastest five course times will receive an additional 10, 7, 5, 3, and 1 points respectively.</li>
+            <li><h6>Best Shooting:</h6> the best five shooting performances will also receive an additional 10, 7, 5, 3 and 1 points.  Performances are determined <em>firstly</em> by number of targets missed and <em>then</em> by overall range time.</li>
+            <li><h6>Clear Shoots:</h6> an additional point is awarded to all athletes for every clear visit to the range.  An additional <em>five points</em> are awarded for shooting clear throughout a race.  These are in addition to best shooting scores (above).</li>
+          </ul>
+          <h3 class="subheader">Men's, Women's and Mixed Relay Races</h3>
+          <p>In all relay races, points will be awarded for the following:</p>
+          <ul>
+            <li><h6>Team Finishing Position:</h6> points awarded for being a member of the team finishing from first to eighth as follows: 15, 10, 8, 6, 4, 3, 2 and 1.</li>
+            <li><h6>Clear Sheets:</h6> an additional five points are awarded to any athlete who uses no spre rounds during their leg of the relay.</li>
+          </ul>
+        </div>
+      </template>
 
-<template name="transfers">
-  <h2>TRANSFER HISTORY</h2>
-  <table>
-    {{#each transfers}}
-      {{> transfer this}}
-    {{/each}}
-  </table>
-</template>
+      <template name="transfers">
+        <h2>TRANSFER HISTORY</h2>
+        <table id="transfertable">
+          {{#each transfers}}
+          {{> transfer this}}
+          {{/each}}
+        </table>
+      </template>
 
-<template name="transfer">
-  {{{transferrow}}}
-</template>
+      <template name="transfer">
+        {{{transferrow}}}
+      </template>
 
-<template name="leaguetable">
-  <div class="row">
-    <div class="large-9 columns">
-      {{{summary}}}
-    </div>
-    <div class="large-3 columns" id="leaguechoice">
-	<div id="overall"><a href="javascript:;" class="button">Overall</a></div>
-	{{#unless myleagues}}
-	<div id="noleagues small-6 columns"><a href"javascript:;" class="button secondary">No Mini-Leagues</a></div>
-	{{/unless}}
-	{{#if myleagues}}
-	<div id="myleagues small-6 columns"><a href="javascript:;" data-dropdown="drop1" class="button dropdown">My Leagues</a>
-	  <ul id="drop1" class="f-dropdown">
-	    {{#each myleagues}}
-	    <li id="{{this._id._str}}"><a href="javascript:;" class="">{{this.Name}}</a></li>
-	    {{/each}}
-	  </ul>
-	</div>
-	{{/if}}
-	<div id="join"><a href="javascript:;" class="button success">Create or Join<wbr> Mini-League</a></div>
-    </div>
-  </div>
-</template>
+      <template name="leaguetable">
+        <div class="row">
+          <div class="large-9 columns">
+            {{{summary}}}
+          </div>
+          <div class="large-3 columns" id="leaguechoice">
+           <div id="overall"><a href="javascript:;" class="button">Overall</a></div>
+           {{#unless myleagues}}
+           <div id="noleagues small-6 columns"><a href"javascript:;" class="button secondary">No Mini-Leagues</a></div>
+           {{/unless}}
+           {{#if myleagues}}
+           <div id="myleagues"><a href="javascript:;" data-dropdown="drop1" class="button dropdown">My Leagues</a>
+             <ul id="drop1" class="f-dropdown">
+               {{#each myleagues}}
+               <li id="{{this._id._str}}"><a href="javascript:;" class="">{{this.Name}}</a></li>
+               {{/each}}
+             </ul>
+           </div>
+           {{/if}}
+           <div id="join"><a href="javascript:;" class="button success">Create or Join<wbr> Mini-League</a></div>
+         </div>
+       </div>
+     </template>
 
-<template name="createjoinleague">
-  <dl class="sub-nav">
-    <dt>Action:</dt>
-    <dd{{#if create}} class="active"{{/if}} id="createsub"><a href="javascript:;">Create</a></dd>
-    <dd{{#unless create}} class="active"{{/unless}} id="joinsub"><a href="javascript:;">Join</a></dd>
-  </dl>
-  {{#if create}}
-  <form id="createform">
-    <fieldset>
-      <legend>Create Mini-League</legend>
-      <div class="large-8 large-centered columns">
-	<div class="row collapse">
-	  <div class="small-9 columns">
-	    <input type="text" placeholder="League Name" id="leaguename">
-	  </div>
-	  <div class="small-3 columns">
-	    <a href="javascript:;" class="button prefix" id="createbutton">Create</a>
-	  </div>
-	</div>
-      </div>
-   </fieldset>
-  </form>  
+     <template name="createjoinleague">
+      <dl class="sub-nav">
+        <dt>Action:</dt>
+        <dd{{#if create}} class="active"{{/if}} id="createsub"><a href="javascript:;">Create</a></dd>
+        <dd{{#unless create}} class="active"{{/unless}} id="joinsub"><a href="javascript:;">Join</a></dd>
+      </dl>
+      {{#if create}}
+      <form id="createform">
+        <fieldset>
+          <legend>Create Mini-League</legend>
+          <div class="large-8 large-centered columns">
+           <div class="row collapse">
+             <div class="small-9 columns">
+               <input type="text" placeholder="League Name" id="leaguename">
+             </div>
+             <div class="small-3 columns">
+               <a href="javascript:;" class="button prefix" id="createbutton">Create</a>
+             </div>
+           </div>
+         </div>
+       </fieldset>
+     </form>  
 
-  {{else}}
-  <form id="joinform">
-    <fieldset>
-      <legend>Join Mini-League</legend>
-      <div class="large-8 large-centered columns">
-	<div class="row collapse">
-	  <div class="small-9 columns">
-	    <input type="text" placeholder="League ID code" id="leagueid">
-	  </div>
-	  <div class="small-3 columns">
-	    <a href="javascript:;" class="button prefix" id="joinbutton">Join</a>
-	  </div>
-	</div>
-      </div>
-   </fieldset>
-  </form>
-  {{/if}}
-</template>
+     {{else}}
+     <form id="joinform">
+      <fieldset>
+        <legend>Join Mini-League</legend>
+        <div class="large-8 large-centered columns">
+         <div class="row collapse">
+           <div class="small-9 columns">
+             <input type="text" placeholder="League ID code" id="leagueid">
+           </div>
+           <div class="small-3 columns">
+             <a href="javascript:;" class="button prefix" id="joinbutton">Join</a>
+           </div>
+         </div>
+       </div>
+     </fieldset>
+   </form>
+   {{/if}}
+ </template>
 
-<template name="leaguecreatederror">
+ <template name="leaguecreatederror">
   <h2>ERROR</h2>
   <p>Sorry, but there was a problem creating your mini-league.</p>
 </template>
@@ -476,33 +485,33 @@
   <h2>ALREADY JOINED</h2>
   <p>Your team is already entered in this league: </p>
   <div class="centered">
-      <span class="callout panel leagueid">
-	<strong>{{leaguename}}<strong>
-      </span>
-  </div>  
-</template>
+    <span class="callout panel leagueid">
+     <strong>{{leaguename}}<strong>
+     </span>
+   </div>  
+ </template>
 
-<template name="leaguecreated">
+ <template name="leaguecreated">
   <h2>LEAGUE CREATED</h2>
   <p>Congratulations!  Your new league is now up and running.<br>To allow your friends to join, they'll need the following code to gain access:</p>
   <div class="centered">
-      <span class="callout panel leagueid">
-	<strong>{{leagueid}}<strong>
-      </span>
-  </div>
-</template>
+    <span class="callout panel leagueid">
+     <strong>{{leagueid}}<strong>
+     </span>
+   </div>
+ </template>
 
-<template name="leaguejoined">
+ <template name="leaguejoined">
   <h2>LEAGUE JOINED</h2>
   <p>Congratulations!  Your team has been successfully entered into the league:</p>
   <div class="centered">
-      <span class="callout panel leagueid">
-	<strong>{{leaguename}}<strong>
-      </span>
-  </div>
-</template>
+    <span class="callout panel leagueid">
+     <strong>{{leaguename}}<strong>
+     </span>
+   </div>
+ </template>
 
-<template name="unverified">
-  <h2>PLEASE VERIFY EMAIL</h2>
-  <p>Check your inbox for the email we've just sent.  You'll need to follow the link it contains to verify your address, otherwise you won't be able to save your team.</p>
+ <template name="unverified">
+  <div class="row"><div class="large-10 columns"><h2>PLEASE VERIFY EMAIL</h2></div><div class="button" id="resendverification">Resend email</div></div>
+  <div class="row"><p>Check your inbox for the email we've sent you.  You'll need to follow the link it contains to verify your address, otherwise you won't be able to save your team.</p></div>
 </template>

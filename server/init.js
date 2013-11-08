@@ -34,6 +34,14 @@ FantasyTeams.find().observe({
 		if ((new Date()).getTime() < seasonstart.getTime()) FantasyTeams.update(newdoc, {$inc: {transfers: -changes}});
 	}
 });
+Meteor.users.find().observeChanges({
+	changed: function(id, fields) {
+		if (fields.sendVerification) {
+			Accounts.sendVerificationEmail(id);
+			Meteor.users.update({_id: id}, {$unset: {sendVerification: false}});
+		}
+	}
+})
 
 writepopularathletes();
 //    console.log(averageperformance());
@@ -107,13 +115,18 @@ Minileagues.allow({
 		return (doc.Admin === userId);
 	},
 	update: function(userId, doc, fields) {
-		if (fields.length !== 1 || fields[0]  === 'Teams') return true;
-		else return false;
+		if (fields.length !== 1 || fields[0]  !== 'Teams') return false;
+		else return true;
 	},
 	remove: function(userId, doc) {
 		return (doc.Admin === userId);
 	}
 });
+Meteor.users.allow({
+	update: function(userId, doc, fields) {
+		if (fields.length === 1 && fields[0] === 'sendVerification') return true;
+	}
+})
 
 
 function popular() {
