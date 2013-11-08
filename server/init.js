@@ -4,7 +4,7 @@ Meteor.startup(function () {
 	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25'
 });
 
-Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
 
 Accounts.validateNewUser(function (user) {
 	var thatemail = Meteor.users.findOne({"emails.address":user.email});

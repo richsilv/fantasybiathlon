@@ -56,7 +56,7 @@
          <li class="divider"></li>
          <li class="has-dropdown"><a href="javascript:;">Help</a>
           <ul class="dropdown">
-            <li><label>Topics</label></li>
+            <li id="helpmenu"><label>Topics</label></li>
             <li><a href="javascript:;" id="about">About</a></li>
             <li><a href="javascript:;" id="rules">Rules</a></li>
             <li><a href="javascript:;" id="scoring">Scoring</a></li>
@@ -163,7 +163,7 @@
     {{> teamname}}
   </div>
   <div class="large-3 large-offset-1 columns">
-    <h3 class="subheader">POINTS:</h3>
+    <h3 class="subheader" id="pointslabel">POINTS:</h3>
     <h1 id="pointstitle" style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}id="pointslink"{{/if}}>{{teamPoints}}</a></h1>
   </div>
 </template>
@@ -331,13 +331,13 @@
         </li>
         <li data-id="athleterow" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
           <h4>Athletes</h4>
-          <p>Add or change athletes by clicking on one of the avatars.</p>
+          <p>Add or change athletes by clicking on one of the avatars.  Available athletes are shown below the avatars.</p>
         </li>
         <li data-id="pointstitle" data-text="Next" data-options="tipLocation:left;nubPosition:right">
           <h4>Points</h4>
           <p>Here you can see how many points your team has.</p>
         </li>
-        <li data-text="Next" data-options="tipLocation:bottom">
+        <li data-id="transfers" data-text="Next" data-options="tipLocation:bottom;nubPosition:top">
           <h4>Transfers</h4>
           <p>This shows how many transfers you have available.</p>
         </li>
@@ -347,7 +347,7 @@
         </li>
         <li data-text="Finish" data-options="">
           <h4>Help</h4>
-          <p>Rules and help can be found here.  Good luck!</p>
+          <p>Rules and help can be found in the menu at the top of the page.  Good luck!</p>
         </li>
       </ol>
     </template>
