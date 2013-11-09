@@ -46,6 +46,19 @@ Meteor.users.find().observeChanges({
 			Meteor.users.update({_id: id}, {$unset: {sendVerification: false}});
 		}
 	}
+});
+Minileagues.find().observeChanges({
+	changed: function(id, fields) {
+		console.log(fields);
+		if (fields.sendCode) {
+			var user = Meteor.users.findOne({_id: fields.Admin});
+			if (user && user.emails) {
+				Email.send({from: 'admin <noreply@biathlonstats.eu>', to: user.emails[0].address, subject: "Your Fantasy Biathlon MiniLeague Code",
+					html: "<p>Here's the code you need to send to your friends to allow them to sign up to your MiniLeague, <strong>" + fields.Name + "</strong>:</p><h3>" + id + "</h3>"})
+			}
+			Minileagues.update({_id: id}, {$unset: {sendCode: false}});
+		}
+	}
 })
 
 writepopularathletes();
@@ -88,8 +101,7 @@ Meteor.publish("systemvars", function() {
 	return SystemVars.find();
 });
 Meteor.publish("minileagues", function(userid) {
-//	return Minileagues.find({userid: userid});
-return Minileagues.find();
+	return Minileagues.find({userid: userid});
 });
 SystemVars.allow({
 	insert: function(userId) {
