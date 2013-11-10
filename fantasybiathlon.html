@@ -186,23 +186,23 @@
 
 <template name="team">
   <div class="row" id="athleterow">
-    {{#each athletes}}
-    {{> athlete}}
-    {{/each}}
+    <div id="0ath">{{> athlete}}</div>
+    <div id="1ath">{{> athlete}}</div>
+    <div id="2ath">{{> athlete}}</div>
+    <div id="3ath">{{> athlete}}</div>
   </div>
 </template>    
 
 <template name="athlete">
   <div class="large-3 small-6 columns">
     <ul class="pricing-table teammember">
-      <li class="title athletepic" style="background-image:url('{{avatar}}'), url('{{flag}}');">
-       {{#if ShortName}}<div class="cross" id="{{IBUId}}"{{#if cross}} style="display: block"{{/if}}>
-     </div>{{/if}}
-     {{#if ShortName}}<div class="pricelabel"><div><h2>{{Price}}</h2></div></div>{{/if}}
+      <li class="title athletepic" style="background-image:url('mavatar.png');">
+      <div class="cross"{{#if cross}} style="display: block"{{/if}}></div>
+     <div class="pricelabel"><div><h2></h2></div></div>
    </li>
-   <li class="title athletename" style="height: 4em;">{{#if ShortName}}<div class="radius label large {{GenderLongLower}}">{{ShortName}}</div<{{else}}<br>{{/if}}</li>
-   <li class="bullet-item">{{#if ShortName}}{{NatLong}}{{else}}</br>{{/if}}</li>
-   <li class="bullet-item">{{#if ShortName}}{{pointtotal}} points{{else}}<br>{{/if}}</li>
+   <li class="title athletename" style="height: 4em;"><div class="radius label large"><br></div></li>
+   <li class="bullet-item pritabnat"><br></li>
+   <li class="bullet-item pritabpts"><br></li>
  </ul>
 </div>
 </template>
