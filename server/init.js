@@ -3,6 +3,7 @@ MyCron.addJob(120000, function() {
 	updatepointstable();
 });
 
+var seasonStart = new Date(2012, 10, 15);
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
@@ -10,6 +11,82 @@ Meteor.startup(function () {
 });
 
 if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+
+Meteor.methods({
+	teamPoints: function (team, date) {
+		var res = getresults(team, date);
+		var output =  res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
+		return output;
+	},
+	getpopular: function() {
+		return Statistics.findOne({Type: "popular"}).Data;
+	},
+	chartdata: function(team, date) {
+		var res = getresults(team, date);
+		var zs = [''];
+		var ys = [seasonStart];
+		var xs = [0];
+		var runtotal = 0;
+		for (var i = 0; i < res.length; i++) {
+			if (res[i].RaceTime.getTime() - ys[ys.length - 1].getTime() > 43200000) {
+				runtotal += res[i].Points;
+				var t = res[i].RaceTime;
+				ys.push(t);
+				zs.push(t.getDay() + '/' + t.getMonth() + '/' + (t.getYear() % 100));
+				xs.push(runtotal);
+			}
+			else {
+				runtotal += res[i].Points;
+				xs[xs.length - 1] += res[i].Points;
+			}
+		}
+		return [ys, xs];
+	},
+	bestathletes: function(date) {
+		var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;};
+		if (!date) date = new Date();
+		var pointsobj = {};
+		var res = Results.find({Points: {$gt: 0}, RaceTime: {$lte: date}}, {fields: {IBUId: 1, Points: 1}});
+		res.forEach(function(r) {
+			if (r.IBUId in pointsobj) {
+				pointsobj[r.IBUId] += r.Points;
+			}
+			else {
+				pointsobj[r.IBUId] = r.Points;
+			}
+		});
+		ibuids = ((Object.keys(pointsobj)).sort(compfunc)).slice(0, 10);
+		points = [];
+		names = [];
+		ibuids.forEach(function(r) {
+			names.push(Athletes.findOne({IBUId: r}).ShortName);
+			points.push(pointsobj[r]);
+		});
+		return [names, points];
+	},
+	contributions: function(team, date) {
+		var compfunc = function(a, b) {return pointsobj[a] > pointsobj[b] ? -1 : 1;};
+		if (!team) return [[], []];
+		var res = getresults(team);
+		var pointsobj = {};
+		res.forEach(function(r) {
+			if (r.IBUId in pointsobj) {
+				pointsobj[r.IBUId] += r.Points;
+			}
+			else {
+				pointsobj[r.IBUId] = r.Points;
+			}
+		});
+		ibuids = ((Object.keys(pointsobj)).sort(compfunc)).slice(0, 10);
+		points = [];
+		names = [];
+		ibuids.forEach(function(r) {
+			names.push(Athletes.findOne({IBUId: r}).ShortName);
+			points.push(pointsobj[r]);
+		});
+		return [names, points];
+	}
+});
 
 Accounts.validateNewUser(function (user) {
 	var thatemail = Meteor.users.findOne({"emails.address":user.email});
@@ -49,7 +126,6 @@ Meteor.users.find().observeChanges({
 });
 Minileagues.find().observeChanges({
 	changed: function(id, fields) {
-		console.log(fields);
 		if (fields.sendCode) {
 			var user = Meteor.users.findOne({_id: fields.Admin});
 			if (user && user.emails) {
@@ -208,7 +284,6 @@ function updatepointstable() {
     var offsetvar = SystemVars.findOne({Name: "dateoffset"});
     var enddate = new Date();
     enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
-    console.log(enddate);
     teams.forEach(function(t) {
 	var res = getresults(t, enddate);
 	var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
@@ -233,3 +308,27 @@ function updatepointstable() {
 	else console.log("Error writing points table: " + err);
     });
 }
+
+function getresults(team, enddate) {
+	var compfunc = function(a, b) {
+		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
+	};
+	enddate = enddate ? enddate : new Date();
+	if (!team || !team.teamHistory) {return [];}
+	results = [];
+	for (var i = 0; i < team.teamHistory.length; i++) {
+		var dtstart = team.teamHistory[i][1];
+		if (dtstart.getTime() > enddate.getTime()) continue;
+		var dtend;
+		if (i < team.teamHistory.length - 1) {
+			dtend = (team.teamHistory[i+1][1].getTime() > enddate.getTime()) ? enddate : team.teamHistory[i+1][1];
+		}
+		else {
+			if (enddate) dtend = enddate;
+			else dtend = new Date();
+		}
+		results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
+	}
+	return results.sort(compfunc);
+}
+

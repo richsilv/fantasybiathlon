@@ -127,7 +127,11 @@
     background-repeat: no-repeat;
 }
 
-.custom.dropdown.medium.open ul {
+.custom.dropdown.tiny {
+    width: 5.5em;
+}
+
+.custom.dropdown.tiny.open ul {
     max-height: 8em;
 }
 
