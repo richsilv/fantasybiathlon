@@ -22,6 +22,10 @@
     font-weight: bold;
 }
 
+.block-75 {
+    min-height: 7.5em;
+}
+
 #unsavedchanges>a {
     color: red;
     font-weight: bold;
@@ -76,6 +80,10 @@
 .unavailable {
     color: #bbb;
     cursor: default !important;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .large {

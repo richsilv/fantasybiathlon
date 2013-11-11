@@ -165,9 +165,9 @@
   <div class="large-8 columns">
     {{> teamname}}
   </div>
-  <div class="large-3 large-offset-1 columns">
+  <div class="large-3 large-offset-1 columns block-75">
     <h3 class="subheader" id="pointslabel">POINTS:</h3>
-    <h1 id="pointstitle" style="text-align: center; margin-top: -0.5em;"><a {{#if teamPoints}}id="pointslink"{{/if}}>{{teamPoints}}</a></h1>
+    <h1 id="pointstitle" style="text-align: center; margin-top: -0.5em;"><a id="pointslink">{{teamPoints}}</a></h1>
   </div>
 </template>
 
@@ -176,10 +176,10 @@
   <div style="text-align: center; margin-top: -0.5em;">
     {{#if teamnameedit}}
     <div class="large-8 large-offset-2 centered columns">
-     <h1><input type="text" value="{{team.Name}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: -0.3em 0em 0em; height: 1.2em;"></h1>
+     <h1><input type="text" value="{{teamname}}" id="teamnameentry" style="text-align: center; padding: 0.2em; margin: -0.3em 0em 0em; height: 1.2em;"></h1>
    </div>
    {{else}}
-   <h1 id="teamname" style="margin: -0.3em 0.1em 0em; display: inline-block">{{team.Name}}</h1>
+   <h1 id="teamname" style="margin: -0.3em 0.1em 0em; display: inline-block">{{teamname}}</h1>
    {{/if}}
  </div>
 </template>
@@ -197,8 +197,8 @@
   <div class="large-3 small-6 columns">
     <ul class="pricing-table teammember">
       <li class="title athletepic" style="background-image:url('mavatar.png');">
-      <div class="cross"{{#if cross}} style="display: block"{{/if}}></div>
-     <div class="pricelabel"><div><h2></h2></div></div>
+      <div class="cross" style="display: none"></div>
+     <div class="pricelabel hidden"><div><h2></h2></div></div>
    </li>
    <li class="title athletename" style="height: 4em;"><div class="radius label large"><br></div></li>
    <li class="bullet-item pritabnat"><br></li>
@@ -211,7 +211,7 @@
   <div class="row">
     <div class="large-12 columns">
       <div class="alert-box">
-       Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 15.0
+       <span id="tipelement" data-tooltip>Total Cost: <span class="{{pricetarget}}">{{teamprice}}</span> / 15.0</span>
      </div>
    </div>
  </div>
