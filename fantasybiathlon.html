@@ -54,7 +54,7 @@
         <!-- Right Nav Section -->
         <ul class="right">
          <li class="divider"></li>
-         <li class="has-dropdown"><a href="javascript:;">Help</a>
+         <li class="has-dropdown"><a href="javascript:;" id="helpmenu">Help</a>
           <ul class="dropdown">
             <li id="helpmenu"><label>Topics</label></li>
             <li><a href="javascript:;" id="about">About</a></li>
@@ -80,16 +80,22 @@
 </template>
 
 <template name="welcomescreen">
-  <section class="row" id="welcome" style="">
+  <section id="welcome" class="row">
     <div style="height: 40px;"></div>
-    <div class="large-8 large-offset-1 small-12 columns"><h1 id="welcometitle">Fantasy&nbspBiathlon</h1></div>
-    <div style="height: 60px;"></div>
+    <div class="large-8 large-offset-2 small-centered columns" id="welcometitlecontainer"><h1 id="welcometitle">Fantasy&nbspBiathlon</h1></div>
+    <div id="buffer"></div>
     <div class="row">
-      <div class="large-4 large-offset-7 small-10 small-offset-1 columns">
+      <div class="large-5 large-offset-1 small-10 small-offset-1 columns">
+        {{> about}}
+      </div>      
+      <div class="large-4 large-offset-1 small-10 small-offset-1 columns">
         {{> loginButtons}}
       </div>
+      <div class="large-1 columns"></div>
     </div>
-</section>
+    </section>
+    </div>
+
 {{> modalrender}}
 </template>
 
@@ -125,11 +131,9 @@
     {{> databarcontents}}
   </div>
 </section>
-{{#unless isPhone}}
 <section class="row">
   {{> chartsection}}
 </section>
-{{/unless}}
 
 {{> modalrender}}
 
@@ -292,11 +296,14 @@
 
       <template name="resultslist">
         <h2>POINTS SCORERS</h2>
+        <div id="resultslist">
+        </div>
         {{#if okay}}
         {{#each results}}
         {{#if this.Points}}<tr style="line-height: 1.5em; text-align: center;">{{> result}}</tr>{{/if}}
         {{/each}}
         {{/if}}
+        <a class="close-reveal-modal">&#215;</a>
       </template>
 
       <template name="result">
@@ -305,7 +312,7 @@
 
       <template name="chartsection">
         <div class="twelve columns">
-          <div class="large-3 large-offset-1 columns">
+          <div class="large-3 large-offset-1 small-12 columns">
            <div class="content">
              <ul class="side-nav" id="graphchoice">
                <li class="active" id="progress"><a>Progress</a></li>
@@ -316,14 +323,14 @@
              </ul>
            </div>
          </div>
-         <div class="large-8 columns">
+         <div class="large-8 small-12 columns">
            {{> graphcanvas}}
          </div>
        </div>
      </template>
 
      <template name="graphcanvas">
-      <canvas id="graphcanvas" width="600" height="250"></canvas>
+      <canvas id="graphcanvas" {{{canvasdeets}}}></canvas>
     </template>
 
     <template name="joyride">
@@ -373,6 +380,7 @@
           <p><strong>Two transfers</strong> will be granted following every meeting, and these can be used before, during or after any subsequent meeting.</p>
           <p>Transfers can be saved, but you can store no more than <strong>four transfers</strong> at any time.</p>
         </div>
+        <a class="close-reveal-modal">&#215;</a>
       </template>
 
       <template name="scoring">
@@ -393,6 +401,7 @@
             <li><h6>Clear Sheets:</h6> an additional five points are awarded to any athlete who uses no spre rounds during their leg of the relay.</li>
           </ul>
         </div>
+        <a class="close-reveal-modal">&#215;</a>
       </template>
 
       <template name="transfers">
@@ -402,6 +411,7 @@
           {{> transfer this}}
           {{/each}}
         </table>
+        <a class="close-reveal-modal">&#215;</a>
       </template>
 
       <template name="transfer">
@@ -448,7 +458,7 @@
                <input type="text" placeholder="League Name" id="leaguename">
              </div>
              <div class="small-3 columns">
-               <input type="submit" href="javascript:;" class="button prefix" id="createbutton">Create</a>
+               <input type="submit" href="javascript:;" class="button prefix" id="createbutton" value="Create"></a>
              </div>
            </div>
          </div>
@@ -465,7 +475,7 @@
              <input type="text" placeholder="League ID code" id="leagueid">
            </div>
            <div class="small-3 columns">
-             <input type="submit" href="javascript:;" class="button prefix" id="joinbutton">Join</a>
+             <input type="submit" href="javascript:;" class="button prefix" id="joinbutton" value="Join"</a>
            </div>
          </div>
        </div>
@@ -477,11 +487,13 @@
  <template name="leaguecreatederror">
   <h2>ERROR</h2>
   <p>Sorry, but there was a problem creating your mini-league.</p>
+  <a class="close-reveal-modal">&#215;</a>
 </template>
 
 <template name="leaguejoinederror">
   <h2>ERROR</h2>
   <p>Sorry, but we can't find that mini-league!  Please check the id and reenter.</p>
+  <a class="close-reveal-modal">&#215;</a>
 </template>
 
 <template name="leaguejoinedalready">
@@ -492,6 +504,7 @@
      <strong>{{leaguename}}<strong>
      </span>
    </div>  
+  <a class="close-reveal-modal">&#215;</a>
  </template>
 
  <template name="leaguecreated">
@@ -502,6 +515,7 @@
      <strong>{{leagueid}}<strong>
      </span>
    </div>
+   <a class="close-reveal-modal">&#215;</a>
  </template>
 
  <template name="leaguejoined">
@@ -512,9 +526,17 @@
      <strong>{{leaguename}}<strong>
      </span>
    </div>
+   <a class="close-reveal-modal">&#215;</a>
  </template>
 
  <template name="unverified">
   <div class="row"><div class="large-10 columns"><h2>PLEASE VERIFY EMAIL</h2></div><div class="button" id="resendverification">Resend email</div></div>
-  <div class="row"><p>Check your inbox for the email we've sent you.  You'll need to follow the link it contains to verify your address, otherwise you won't be able to save your team.</p></div>
+  <div class="row"><p>Check your inbox for the email we've sent you.  You'll need to follow the link it contains to verify your address, otherwise you won't be able to save your team.</p><a class="close-reveal-modal">&#215;</a></div>
+</template>
+
+<template name="about">
+  <div class="welcometext">
+    <p>Welcome to <strong>Fantasy Biathlon</strong>, the FREE-TO-PLAY on-line biathlon game that lets you build a team of your favourite biathletes and pit it against other biathlon enthusiasts around the world.</p>
+    <p>Rules and scoring can be found in the Help menu</a>. Good luck!</p>
+  </div>
 </template>

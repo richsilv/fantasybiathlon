@@ -2,7 +2,7 @@
 
 #welcome {
     background-image:url('background3.png');
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
     height: 666px;
 }
@@ -15,6 +15,17 @@
     border-radius: 0.2em;
     padding: 0.5em;
     line-height: 1.5em;
+}
+
+#welcome .welcometext {
+    background-color: rgba(200,200,200,0.8);
+    padding: 1em;
+    border-radius: 0.5em;
+    margin-top: 50px;
+}
+
+#buffer {
+    height: 60px;
 }
 
 #teamnameentry {
@@ -221,7 +232,34 @@
     text-align: center;
 }
 
+/*canvas{
+    width: 100% !important;
+    max-width: 600px;
+    height: auto !important;
+}
+*/
 @media only screen and (max-width: 767px) {
+
+#welcome {
+    background-image:url('backgroundmob.png');
+    background-size: cover;
+}
+
+#welcometitlecontainer {
+    text-align: center;
+}
+
+.welcometext {
+    margin-top: auto;
+}
+
+#buffer {
+    height: auto;
+}
+
+#login-form {
+    margin-top: 2em;
+}
 
 .large {
     font-size: 0.8em;

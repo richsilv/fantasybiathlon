@@ -85,6 +85,16 @@ Meteor.methods({
 			points.push(pointsobj[r]);
 		});
 		return [names, points];
+	},
+	getresults: function(team, date) {
+		return getresults(team, date);
+	},
+	getplayerresults: function(ibuid, date) {
+		return Results.find({IBUId: ibuid, RaceTime: {$lte: date}});
+	},
+	getplayerpoints: function(ibuid, date) {
+		results = Results.find({IBUId: ibuid, RaceTime: {$lte: date}});
+		return results.fetch().reduce(function(tot, res) {return tot + (res.Points ? res.Points : 0);}, 0);
 	}
 });
 
@@ -165,7 +175,9 @@ Meteor.publish("nations", function() {
 	return Nations.find();
 });
 Meteor.publish("results", function() {
-	return Results.find();
+	var team = FantasyTeams.find({UserId: this.userId});
+	return getresults(team);
+	//Results.find({$or:[{IBUId: }, {}]});
 });
 Meteor.publish("userData", function() {
 	return Meteor.users.find({_id: this.userId}, {fields: {'admin': 1}});
