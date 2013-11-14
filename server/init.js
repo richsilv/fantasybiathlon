@@ -1,6 +1,32 @@
+SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
+
 var MyCron = new Cron();
-MyCron.addJob(120000, function() {
+MyCron.addJob(5, function() {
+	writepopularathletes();
+});
+MyCron.addJob(2, function() {
+	console.log("Forward one day");
+	SystemVars.update({Name: "dateoffset"}, {$inc: {Value: 1440}});
+	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
+	var x = new Date();
+	var date = new Date(x.getTime() + (dateoffset * 60000));
+	var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
+	for (var i = 0; i < enddates.length; i++) {
+		if (enddates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()) {
+			FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
+			console.log("Transfers added");
+		}
+	}
+	FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
+	SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 	updatepointstable();
+});
+MyCron.addJob(30, function() {
+	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
+	var x = new Date();
+	var date = new Date(x.getTime() + (dateoffset * 60000));
+	var aveperf = averageperformance(date);
+	Statistics.upsert({Type: 'averagepoints', Data: aveperf})
 });
 
 var seasonStart = new Date(2012, 10, 15);
@@ -13,6 +39,17 @@ Meteor.startup(function () {
 if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
 
 Meteor.methods({
+	// DISABLE THIS IMMEDIATELY!!!!!!!!
+	givetransfers: function() {
+		var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
+		var x = new Date();
+		var date = new Date(x.getTime() + (dateoffset * 60000));
+		var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
+		FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
+		console.log("Transfers added");
+		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
+	},
+
 	teamPoints: function (team, date) {
 		var res = getresults(team, date);
 		var output =  res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
@@ -344,3 +381,38 @@ function getresults(team, enddate) {
 	return results.sort(compfunc);
 }
 
+function averageperformance(enddate) {
+    if (!enddate) enddate = new Date();
+    var races = Races.find({StartTime: {$lte: enddate}});
+    var teamnum = FantasyTeams.find().count();
+    var dates = [];
+    var avg = [];
+    var aths;
+    var total;
+    races.forEach(function(race) {
+	console.log(race.RaceId);
+	total = 0;
+	FantasyTeams.find().forEach(function(team) {
+	    if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
+		return (cur[1] > pre[1] && cur[1] <= race.StartTime) ? cur : pre;
+	    });
+	    else aths = [[], []];
+	    total += Results.find({RaceId: race.RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
+		return tot + r.Points;
+	    }, 0);
+	});
+	dates.push(race.StartTime);
+	avg.push(avg[avg.length - 1] + (total / teamnum));
+    });
+    return [dates, avg];
+}
+
+
+function beforeseasonstart() {
+		var seasonstart = SystemVars.findOne({Name: "seasonstart"});
+		var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
+		var x = new Date();
+		var date = new Date(x.getTime() + (dateoffset * 60000));
+		if (date.getTime() < seasonstart.getTime) return true;
+		else return false;
+}

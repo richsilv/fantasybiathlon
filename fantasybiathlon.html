@@ -95,7 +95,6 @@
     </div>
     </section>
     </div>
-
 {{> modalrender}}
 </template>
 
@@ -268,19 +267,12 @@
 </template>
 
 <template name="transfermodal">
-  {{#if okay}}
   <h3>Confirm Changes?</h3>
-  <p class="lead">You will have {{remtrans}} remaining.
-    {{{transferlist}}}
-    <a class="close-reveal-modal">&#215;</a>
+  <p class="lead">You will have {{remtrans}} remaining.</p>
+  {{{transferlist}}}
+     <a class="close-reveal-modal">&#215;</a>
     <a class="small success button" id="confirmtransferbutton">Confirm</a>
-    {{else}}
-    <h3>Too Many Changes!</h3>
-    <p class="lead">Sorry, but you only have {{hastrans}} to use!<p>
-      <p>You can reset your changes with the blue button.<p>
-        <a class="close-reveal-modal">&#215;</a>
-        {{/if}}
-      </template>
+</template>
 
       <template name="dateForm">
         <li><a href="javascript:;" id="titledate">-</a></li>
