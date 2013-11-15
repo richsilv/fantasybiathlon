@@ -111,7 +111,7 @@
 
 .large {
     font-size: 1.2em;
-    max-width: 10em;
+    max-width: 100%;
     white-space: normal;
     word-wrap: break-word;
     -webkit-hyphens: auto;
@@ -263,7 +263,7 @@
 
 .large {
     font-size: 0.8em;
-    max-width: 8em;
+    max-width: 100%;
 }
 
 #teamnameentry {
