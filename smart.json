@@ -6,6 +6,7 @@
     "cron-tick": {},
     "zurb-foundation": {},
     "accounts-ui-bootstrap-3": {},
-    "device-detection": {}
+    "device-detection": {},
+    "modernizr-meteor": {}
   }
 }

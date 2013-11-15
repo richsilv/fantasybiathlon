@@ -8,9 +8,11 @@
   {{> topbar}}
 
   {{#if currentUser}}
-  {{> loggedinscreen}}
+    {{#if athready}}
+      {{> loggedinscreen}}
+    {{/if}}
   {{else}}
-  {{> welcomescreen}}
+    {{> welcomescreen}}
   {{/if}}
 
 </body>
@@ -57,6 +59,7 @@
          <li class="has-dropdown"><a href="javascript:;" id="helpmenu">Help</a>
           <ul class="dropdown">
             <li id="helpmenu"><label>Topics</label></li>
+            <li><a href="javascript:;" id="news">News</a></li>
             <li><a href="javascript:;" id="about">About</a></li>
             <li><a href="javascript:;" id="rules">Rules</a></li>
             <li><a href="javascript:;" id="scoring">Scoring</a></li>
@@ -111,6 +114,7 @@
          <div>{{> team}}</div>
        </div>
      </div>
+     {{#if athready}}
      <div class="twelve columns dropbar" id="teamdrop" style="display: none">
        <div class="large-12 columns">
          <div class="large-3 columns">
@@ -122,6 +126,7 @@
          </div>
        </div>
      </div>
+     {{/if}}
    </div>
  </section>
  <section class="row">
@@ -159,7 +164,7 @@
 </template>
 
 <template name="fullleague">
-  <div class="pagination-centered row">
+  <div class="pagination-centered row" id="fullleagueholder">
     {{{contents}}}
   </div>
 </template>
@@ -200,14 +205,14 @@
   <div class="large-3 small-6 columns">
     <ul class="pricing-table teammember">
       <li class="title athletepic" style="background-image:url('mavatar.png');">
-      <div class="cross" style="display: none"></div>
-     <div class="pricelabel hidden"><div><h2></h2></div></div>
-   </li>
-   <li class="title athletename" style="height: 4em;"><div class="radius label large"><br></div></li>
-   <li class="bullet-item pritabnat"><br></li>
-   <li class="bullet-item pritabpts"><br></li>
- </ul>
-</div>
+        <div class="cross unavailable DUMMY" style="display: none"></div>
+        <div class="pricelabel hidden"><div><h2></h2></div></div>
+      </li>
+      <li class="title athletename" style="height: 4em;"><div class="radius label large hidden"><br></div></li>
+      <li class="bullet-item pritabnat"><br></li>
+      <li class="bullet-item pritabpts"><br></li>
+    </ul>  
+  </div>
 </template>
 
 <template name="pricebox">
@@ -243,7 +248,7 @@
        </div>
      </div>
    </fieldset>
-   <row>
+   <div class="row">
     <div class="large-6 small-6 columns">
      <a href="javascript:;" id="resettransfers" class="small button">Reset</a>
    </div>
@@ -251,7 +256,7 @@
         {{#if badchanges}} text="You need to have four athletes selected, but you cannot make more changes than you have transfers available."{{/if}}>
      <a href="javascript:;" id="savetransfers" class="small button success{{#if unverified}} disabled{{/if}}{{#if badchanges}} disabled{{/if}}">Save</a>
    </div>
- </row>
+ </div>
 </form>
 </template>
 
@@ -332,7 +337,7 @@
           <h4>Team Name</h4>
           <p>Change your team name by clicking here.</p>
         </li>
-        <li data-id="athleterow" data-text="Next" data-options="tipLocation:top;nubPosition:bottom">
+        <li data-id="2ath" data-text="Next" data-options="tipLocation:bottom;nubPosition:bottom">
           <h4>Athletes</h4>
           <p>Add or change athletes by clicking on one of the avatars.  Available athletes are shown below the avatars.</p>
         </li>
@@ -530,6 +535,16 @@
 <template name="about">
   <div class="welcometext">
     <p>Welcome to <strong>Fantasy Biathlon</strong>, the FREE-TO-PLAY on-line biathlon game that lets you build a team of your favourite biathletes and pit it against other biathlon enthusiasts around the world.</p>
-    <p>Rules and scoring can be found in the Help menu</a>. Good luck!</p>
+    <p>Rules and scoring can be found in the Help menu. Good luck!</p>
+  </div>
+</template>
+
+<template name="news">
+  <div class="welcometext">
+    <p>The <strong>Fantasy Biathlon</strong> season will begin with the 
+      <em><strong>Women's 15km Individual Competition</strong></em> from <em><strong>Oestersund</strong></em> on <em><strong>Wednesday, November 27th</strong></em>.</p>
+      <p>The very first race of the season, the Mixed Relay from Oestersund, will <strong>not</strong> be included in the scoring so that everybody has a little
+        bit longer to build their team and to assess the form of their favourite biathletes.</p>
+    <p>Rules and scoring can be found in the Help menu. Good luck!</p>
   </div>
 </template>

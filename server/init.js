@@ -230,16 +230,16 @@ Minileagues.find().observeChanges({
 })
 
 writepopularathletes();
-//    console.log(averageperformance());
-//    updatepointstable();
-//    removefloatingteams();
-//    for (var i = 0; i < 1000; i++) {
-//	var t = randomteam(seasonStart, makeDate);
-//	t.UserID = i;
-//	FantasyTeams.insert(t, function() {
-//	    console.log("Inserted team " + (i) + ": " + t.Name);
-//	});
-//    }
+/*    console.log(averageperformance());
+    updatepointstable();
+    removefloatingteams();
+    for (var i = 0; i < 1000; i++) {
+	var t = randomteam(seasonStart, makeDate);
+	t.UserID = i;
+	FantasyTeams.insert(t, function() {
+	    console.log("Inserted team " + (i) + ": " + t.Name);
+	});
+    } */
 
 Meteor.publish("athletes", function() {
 	return Athletes.find();
@@ -259,7 +259,6 @@ Meteor.publish("nations", function() {
 Meteor.publish("results", function() {
 	var team = FantasyTeams.find({UserId: this.userId});
 	return getresults(team);
-	//Results.find({$or:[{IBUId: }, {}]});
 });
 Meteor.publish("userData", function() {
 	return Meteor.users.find({_id: this.userId}, {fields: {'admin': 1}});
