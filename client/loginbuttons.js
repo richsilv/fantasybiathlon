@@ -7,13 +7,13 @@ Deps.autorun(function() {
 		Session.set('action', 'reset');
 	}
 	if (Accounts._verifyEmailToken) {
-    	Accounts.verifyEmail(Accounts._verifyEmailToken, function(err) {
-    		if (err) {
-    			Session.set('error', err.reason);
-    			Session.set('action', 'login');
-    		};
-    	})
-  	}
+		Accounts.verifyEmail(Accounts._verifyEmailToken, function(err) {
+			if (err) {
+				Session.set('error', err.reason);
+				Session.set('action', 'login');
+			};
+		})
+	}
 });
 
 Template.loginButtons.helpers({
@@ -95,5 +95,14 @@ Template.loginButtons.events({
 	},
 	'click #forgot': function(event) {
 		Session.set('action', 'forgot');
+	},
+	'click #facebook-login': function(event) {
+		$('#facebook-login').addClass('clicked');
+		Meteor.loginWithFacebook({ requestPermissions: ['email']},
+			function (error) {
+				if (error) {
+					Session.set('error', 'Cannot login with Facebook!');					
+				}
+			});
 	}
 })

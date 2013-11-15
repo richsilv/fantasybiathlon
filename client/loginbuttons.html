@@ -20,11 +20,12 @@
 			</select>
 		</div>
 		{{/if}}
-		{{#if login}}
 		<div>
+		{{#if login}}
+			<div id="facebook-login"></div>
 			<div class="tiny secondary button" id="forgot">Forgot Password</div>
+		{{/if}}		
 		</div>
-		{{/if}}
 		<div class="table">
 			<input type="submit" class="button{{#if loggingin}} disabled{{/if}}" id="login-button" value=
 			{{#if loggingin}}"Signing In"

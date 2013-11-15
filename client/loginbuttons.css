@@ -1,6 +1,6 @@
 #login-form {
     background-color: rgba(200,200,200,0.8);
-    padding: 1em;
+    padding: 1em 1em 0.5em;
     border-radius: 0.5em;
 }
 
@@ -12,6 +12,11 @@
 
 #forgot {
 	float: right;
+  display: inline-block;
+}
+
+#login-button {
+  margin-bottom: 0.5em;
 }
 
 .loading {
@@ -40,6 +45,20 @@
 
 .floater {
 	margin-left: 78%;
+}
+
+#facebook-login {
+  background-image: url('../active_200.png');
+  background-size: contain;
+  height: 46px;
+  width: 100px;
+  display: inline-block;
+  margin-bottom: 0.5em;
+  cursor: pointer;
+}
+
+#facebook-login.clicked {
+  background-image: url('../pressed_200.png');
 }
 
 @-webkit-keyframes spin {

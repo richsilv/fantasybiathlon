@@ -4,17 +4,36 @@ var MyCron = new Cron();
 MyCron.addJob(5, function() {
 	writepopularathletes();
 });
-MyCron.addJob(2, function() {
+MyCron.addJob(1, function() {
 	console.log("Forward one day");
 	SystemVars.update({Name: "dateoffset"}, {$inc: {Value: 1440}});
 	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
 	var x = new Date();
 	var date = new Date(x.getTime() + (dateoffset * 60000));
 	var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
+	var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
 	for (var i = 0; i < enddates.length; i++) {
 		if (enddates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()) {
 			FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
 			console.log("Transfers added");
+		}
+	}
+	for (var i = 0; i < startdates.length; i++) {
+		if (startdates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()) {
+			var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
+			var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
+			var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
+			var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
+			emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
+			for (k = 0; k < races.length; k++) {
+				emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
+			}
+			emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
+			emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
+			var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
+			for (var j = 0; j < users.length; j++) {
+				if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+			}
 		}
 	}
 	FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
@@ -33,10 +52,28 @@ var seasonStart = new Date(2012, 10, 15);
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
-	process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
+	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
 });
 
-if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+Accounts.loginServiceConfiguration.remove({
+	service: "facebook"
+});
+
+if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") {
+	Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+	Accounts.loginServiceConfiguration.insert({
+		service: "facebook",
+		appId: "178103755726555",
+		secret: "1149b8e0b0ba9e0ef15a629e60c698b4"
+	});
+}
+else {
+	Accounts.loginServiceConfiguration.insert({
+		service: "facebook",
+		appId: "1407972102773119",
+		secret: "2d3eb4531c0984b68297609c5652e564"
+	});	
+}
 
 Meteor.methods({
 	// DISABLE THIS IMMEDIATELY!!!!!!!!
@@ -137,19 +174,27 @@ Meteor.methods({
 
 Accounts.validateNewUser(function (user) {
 	var thatemail = Meteor.users.findOne({"emails.address":user.email});
-  	if (thatemail) throw new Meteor.Error(403, "Email already registered");
-    else return true;
+	if (thatemail) throw new Meteor.Error(403, "Email already registered");
+	else return true;
 });
 
 Accounts.onCreateUser(function(options, user) {
+	if (options.profile) user.profile = options.profile;
+	if (user.services.facebook) {
+		var natlookup = SystemVars.findOne({Name: 'localities'});
+		user.emails = [{address: user.services.facebook.email, verified: true}];
+		if (natlookup) user.profile.Nat = natlookup.Value[user.services.facebook.locale] ? natlookup.Value[user.services.facebook.locale] : 'ZZZ';
+		else user.profile.Nat = 'ZZZ';
+		user.profile.facebook = true;
+	}
 	var newteam = {UserID: user._id,
 		Name: "My Team",
 		transfers: 0,
 		Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
-		teamHistory: []
+		teamHistory: [],
+		Nat: user.profile.Nat
 	};
 	FantasyTeams.insert(newteam);
-	if (options.profile) user.profile = options.profile;
 	return user;
 });
 
@@ -272,36 +317,36 @@ Meteor.users.allow({
 
 
 function popular() {
-    var ids = [];
-    var teams = FantasyTeams.find();
-    if (!teams) return [[], []];
-    var numteams = FantasyTeams.find().count();
-    teams.forEach(function(t) {
-	ids = ids.concat(t.Athletes.map(function(a) {return a.IBUId;}));
-    });
-    idsobj = {};
-    ids.forEach(function(i) {
-	if (i && i !== "DUMMY") {
-	    if (Object.keys(idsobj).indexOf(i) === -1) idsobj[i] = 1;
-	    else idsobj[i] += 1;
-	}
-    });
-    var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
-    var teamcount = [];
-    var names = [];
-    popids.forEach(function(i) {
-	names.push(Athletes.findOne({IBUId: i}).ShortName);
-	teamcount.push(idsobj[i] * 100 / numteams);
-    });
-    return [names, teamcount];
+	var ids = [];
+	var teams = FantasyTeams.find();
+	if (!teams) return [[], []];
+	var numteams = FantasyTeams.find().count();
+	teams.forEach(function(t) {
+		ids = ids.concat(t.Athletes.map(function(a) {return a.IBUId;}));
+	});
+	idsobj = {};
+	ids.forEach(function(i) {
+		if (i && i !== "DUMMY") {
+			if (Object.keys(idsobj).indexOf(i) === -1) idsobj[i] = 1;
+			else idsobj[i] += 1;
+		}
+	});
+	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
+	var teamcount = [];
+	var names = [];
+	popids.forEach(function(i) {
+		names.push(Athletes.findOne({IBUId: i}).ShortName);
+		teamcount.push(idsobj[i] * 100 / numteams);
+	});
+	return [names, teamcount];
 }
 
 function writepopularathletes() {
-    var popathletes = popular();
-    Statistics.upsert({Type: "popular"}, {Type: "popular", Data: popathletes}, {}, function(err) {
-	if (!err) console.log("Popular athletes written");
-	else console.log("Error writing popular athletes: " + err);
-    });
+	var popathletes = popular();
+	Statistics.upsert({Type: "popular"}, {Type: "popular", Data: popathletes}, {}, function(err) {
+		if (!err) console.log("Popular athletes written");
+		else console.log("Error writing popular athletes: " + err);
+	});
 }
 
 function getresults(team, enddate) {
@@ -328,34 +373,24 @@ function getresults(team, enddate) {
 }
 
 function updatepointstable() {
-    var teams = FantasyTeams.find();
-    var tableobj = {Table: []};
-    var offsetvar = SystemVars.findOne({Name: "dateoffset"});
-    var enddate = new Date();
-    enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
-    teams.forEach(function(t) {
-	var res = getresults(t, enddate);
-	var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
-	var user = Meteor.users.findOne({_id: t.UserID});
-	if (user) {
-	    tableobj.Table.push({Name: t.Name,
-				 Country: user.Country,
-				 ID: t._id,
-				 Points: p
-				});
-	}
-	else {
-	    tableobj.Table.push({Name: t.Name,
-				 Country: "UNKNOWN",
-				 ID: t._id,
-				 Points: p
-				});
-	}
-    });
-    Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
-	if (!err) console.log("Points table updated");
-	else console.log("Error writing points table: " + err);
-    });
+	var teams = FantasyTeams.find();
+	var tableobj = {Table: []};
+	var offsetvar = SystemVars.findOne({Name: "dateoffset"});
+	var enddate = new Date();
+	enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
+	teams.forEach(function(t) {
+		var res = getresults(t, enddate);
+		var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
+		tableobj.Table.push({Name: t.Name,
+			Nat: t.Nat,
+			ID: t._id,
+			Points: p
+		});
+	});
+	Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
+		if (!err) console.log("Points table updated");
+		else console.log("Error writing points table: " + err);
+	});
 }
 
 function getresults(team, enddate) {
@@ -382,37 +417,37 @@ function getresults(team, enddate) {
 }
 
 function averageperformance(enddate) {
-    if (!enddate) enddate = new Date();
-    var races = Races.find({StartTime: {$lte: enddate}});
-    var teamnum = FantasyTeams.find().count();
-    var dates = [];
-    var avg = [];
-    var aths;
-    var total;
-    races.forEach(function(race) {
-	console.log(race.RaceId);
-	total = 0;
-	FantasyTeams.find().forEach(function(team) {
-	    if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
-		return (cur[1] > pre[1] && cur[1] <= race.StartTime) ? cur : pre;
-	    });
-	    else aths = [[], []];
-	    total += Results.find({RaceId: race.RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
-		return tot + r.Points;
-	    }, 0);
+	if (!enddate) enddate = new Date();
+	var races = Races.find({StartTime: {$lte: enddate}});
+	var teamnum = FantasyTeams.find().count();
+	var dates = [];
+	var avg = [];
+	var aths;
+	var total;
+	races.forEach(function(race) {
+		console.log(race.RaceId);
+		total = 0;
+		FantasyTeams.find().forEach(function(team) {
+			if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
+				return (cur[1] > pre[1] && cur[1] <= race.StartTime) ? cur : pre;
+			});
+				else aths = [[], []];
+				total += Results.find({RaceId: race.RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
+					return tot + r.Points;
+				}, 0);
+			});
+		dates.push(race.StartTime);
+		avg.push(avg[avg.length - 1] + (total / teamnum));
 	});
-	dates.push(race.StartTime);
-	avg.push(avg[avg.length - 1] + (total / teamnum));
-    });
-    return [dates, avg];
+	return [dates, avg];
 }
 
 
 function beforeseasonstart() {
-		var seasonstart = SystemVars.findOne({Name: "seasonstart"});
-		var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
-		var x = new Date();
-		var date = new Date(x.getTime() + (dateoffset * 60000));
-		if (date.getTime() < seasonstart.getTime) return true;
-		else return false;
+	var seasonstart = SystemVars.findOne({Name: "seasonstart"});
+	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
+	var x = new Date();
+	var date = new Date(x.getTime() + (dateoffset * 60000));
+	if (date.getTime() < seasonstart.getTime) return true;
+	else return false;
 }
