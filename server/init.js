@@ -269,7 +269,8 @@ Meteor.publish("minileagues", function(userid) {
 	return Minileagues.find({userid: userid});
 });
 Meteor.publish("allminileagues", function(leagueid) {
-	return Minileagues.find({_id: leagueid});
+	if (leagueid) return Minileagues.find({_id: leagueid});
+	else this.stop();
 })
 SystemVars.allow({
 	insert: function(userId) {
