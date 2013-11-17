@@ -1,15 +1,11 @@
 SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 
 var MyCron = new Cron();
-MyCron.addJob(5, function() {
+MyCron.addJob(15, function() {
 	writepopularathletes();
 });
-MyCron.addJob(1, function() {
-	console.log("Forward one day");
-	SystemVars.update({Name: "dateoffset"}, {$inc: {Value: 1440}});
-	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
-	var x = new Date();
-	var date = new Date(x.getTime() + (dateoffset * 60000));
+MyCron.addJob(1440, function() {
+	var date = new Date();
 	var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
 	var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
 	for (var i = 0; i < enddates.length; i++) {
@@ -41,14 +37,10 @@ MyCron.addJob(1, function() {
 	updatepointstable();
 });
 MyCron.addJob(30, function() {
-	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
-	var x = new Date();
-	var date = new Date(x.getTime() + (dateoffset * 60000));
+	var date = new Date();
 	var aveperf = averageperformance(date);
 	Statistics.upsert({Type: 'averagepoints', Data: aveperf})
 });
-
-var seasonStart = new Date(2012, 10, 15);
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
@@ -76,17 +68,15 @@ else {
 }
 
 Meteor.methods({
-	// DISABLE THIS IMMEDIATELY!!!!!!!!
+/*	// DISABLE THIS IMMEDIATELY!!!!!!!!
 	givetransfers: function() {
-		var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
-		var x = new Date();
-		var date = new Date(x.getTime() + (dateoffset * 60000));
+		var date = new Date();
 		var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
 		FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
 		console.log("Transfers added");
 		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 	},
-
+*/
 	teamPoints: function (team, date) {
 		var res = getresults(team, date);
 		var output =  res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
@@ -96,6 +86,7 @@ Meteor.methods({
 		return Statistics.findOne({Type: "popular"}).Data;
 	},
 	chartdata: function(team, date) {
+		var seasonStart = SystemVars.findOne({Name: 'seasonstart'});
 		var res = getresults(team, date);
 		var zs = [''];
 		var ys = [seasonStart];
@@ -187,9 +178,11 @@ Accounts.onCreateUser(function(options, user) {
 		else user.profile.Nat = 'ZZZ';
 		user.profile.facebook = true;
 	}
+	var beforeseasonstart = SystemVars.findOne({Name: 'beforeseasonstart'});
+	var transfers = (beforeseasonstart && beforeseasonstart.Value) ? 2 : 6;
 	var newteam = {UserID: user._id,
 		Name: "My Team",
-		transfers: 0,
+		transfers: transfers,
 		Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
 		teamHistory: [],
 		Nat: user.profile.Nat
@@ -374,9 +367,7 @@ function getresults(team, enddate) {
 function updatepointstable() {
 	var teams = FantasyTeams.find();
 	var tableobj = {Table: []};
-	var offsetvar = SystemVars.findOne({Name: "dateoffset"});
 	var enddate = new Date();
-	enddate = offsetvar ? new Date(enddate.getTime() + (offsetvar.Value * 60000)) : enddate;
 	teams.forEach(function(t) {
 		var res = getresults(t, enddate);
 		var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
@@ -444,9 +435,7 @@ function averageperformance(enddate) {
 
 function beforeseasonstart() {
 	var seasonstart = SystemVars.findOne({Name: "seasonstart"});
-	var dateoffset = SystemVars.findOne({Name: 'dateoffset'}).Value;
-	var x = new Date();
-	var date = new Date(x.getTime() + (dateoffset * 60000));
+	var date = new Date();
 	if (date.getTime() < seasonstart.getTime) return true;
 	else return false;
 }
