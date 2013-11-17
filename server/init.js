@@ -437,6 +437,6 @@ function averageperformance(enddate) {
 function beforeseasonstart() {
 	var seasonstart = SystemVars.findOne({Name: "seasonstart"});
 	var date = new Date();
-	if (date.getTime() < seasonstart.getTime) return true;
+	if (date.getTime() < seasonstart.Value.getTime()) return true;
 	else return false;
 }
