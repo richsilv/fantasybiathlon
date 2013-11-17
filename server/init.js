@@ -1,5 +1,4 @@
 SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
-updatepointstable();
 
 var MyCron = new Cron();
 MyCron.addJob(1, function() {
@@ -267,8 +266,11 @@ Meteor.publish("systemvars", function() {
 	return SystemVars.find();
 });
 Meteor.publish("minileagues", function(userid) {
-	return Minileagues.find();
+	return Minileagues.find({userid: userid});
 });
+Meteor.publish("allminileagues", function(leagueid) {
+	return Minileagues.find({_id: leagueid});
+})
 SystemVars.allow({
 	insert: function(userId) {
 		return Meteor.users.findOne({_id: userId}).admin;
