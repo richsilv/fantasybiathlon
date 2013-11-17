@@ -1,6 +1,10 @@
 SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
+updatepointstable();
 
 var MyCron = new Cron();
+MyCron.addJob(1, function() {
+	updatepointstable();
+});
 MyCron.addJob(15, function() {
 	writepopularathletes();
 });
@@ -34,7 +38,6 @@ MyCron.addJob(1440, function() {
 	}
 	FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 	SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
-	updatepointstable();
 });
 MyCron.addJob(720, function() {
 	var date = new Date();
@@ -211,7 +214,7 @@ Meteor.users.find().observeChanges({
 	}
 });
 Minileagues.find().observeChanges({
-	changed: function(id, fields) {
+	added: function(id, fields) {
 		if (fields.sendCode) {
 			var user = Meteor.users.findOne({_id: fields.Admin});
 			if (user && user.emails) {
@@ -264,7 +267,7 @@ Meteor.publish("systemvars", function() {
 	return SystemVars.find();
 });
 Meteor.publish("minileagues", function(userid) {
-	return Minileagues.find({userid: userid});
+	return Minileagues.find();
 });
 SystemVars.allow({
 	insert: function(userId) {
