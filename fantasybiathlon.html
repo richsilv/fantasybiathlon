@@ -56,8 +56,7 @@
            <!-- Right Nav Section -->
            <ul class="right">
            <li class="divider"></li>        
-           <li style="margin-top: 10px; margin-left: 10px;"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://fantasybiathlon.meteor.com" data-via="FantasyBiathlon">Tweet</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script></li>      
+           <li style="margin-top: 10px; margin-left: 10px;"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://fantasybiathlon.meteor.com" data-via="FantasyBiathlon">Tweet</a></li>      
              <li class="divider"></li>
              <li class="has-dropdown"><a href="javascript:;" id="helpmenu">Help</a>
               <ul class="dropdown">
@@ -256,7 +255,7 @@
      <a href="javascript:;" id="resettransfers" class="small button">Reset</a>
    </div>
    <div class="large-6 small-6 columns"{{#if unverified}} text="You need to respond to your verification e-mail before you can save your team."{{/if}}
-   {{#if badchanges}} text="You need to have four athletes selected, but you cannot make more changes than you have transfers available."{{/if}}>
+   {{#if badchanges}} title="You need to have four athletes selected, but you cannot make more changes than you have transfers available."{{/if}}>
    <a href="javascript:;" id="savetransfers" class="small button success{{#if unverified}} disabled{{/if}}{{#if badchanges}} disabled{{/if}}">Save</a>
  </div>
 </div>
@@ -548,7 +547,7 @@
     <p>The <strong>Fantasy Biathlon</strong> season will begin with the 
       <em><strong>Women's 15km Individual Competition</strong></em> from <em><strong>Oestersund</strong></em> on <em><strong>Wednesday, November 27th</strong></em>.</p>
       <p>The very first race of the season, the Mixed Relay from Oestersund, will <strong>not</strong> be included in the scoring so that everybody has a little
-        bit longer to build their team and to assess the form of their favourite biathletes.</p>
+        bit longer to build their team and to assess the form of their favourite biathletes.  You have unlimited transfers until midday on the 27th!</p>
         <p>Rules and scoring can be found in the Help menu. Good luck!</p>
       </div>
     </template>

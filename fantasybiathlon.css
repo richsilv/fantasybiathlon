@@ -1,10 +1,10 @@
 /* CSS declarations go here */
 
 #welcome {
-    background-image:url('background3.png');
-    background-size: contain;
+    background-image:url('background4.png');
+    background-size: 100%;
     background-repeat: no-repeat;
-    height: 666px;
+    min-height: 810px;
 }
 
 #welcometitle{
@@ -21,7 +21,7 @@
     background-color: rgba(200,200,200,0.8);
     padding: 1em;
     border-radius: 0.5em;
-    margin-top: 50px;
+    margin-top: 125px;
 }
 
 #buffer {
@@ -245,15 +245,16 @@
 @media only screen and (max-width: 767px) {
 
 #welcome {
-    background-image:url('backgroundmob.png');
+    background-image:url('backgroundmob2.png');
     background-size: cover;
+    min-height: inherit;
 }
 
 #welcometitlecontainer {
     text-align: center;
 }
 
-.welcometext {
+#welcome .welcometext {
     margin-top: auto;
 }
 

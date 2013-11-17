@@ -36,10 +36,11 @@ MyCron.addJob(1440, function() {
 	SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 	updatepointstable();
 });
-MyCron.addJob(30, function() {
+MyCron.addJob(720, function() {
 	var date = new Date();
 	var aveperf = averageperformance(date);
-	Statistics.upsert({Type: 'averagepoints', Data: aveperf})
+	console.log(aveperf);
+	Statistics.upsert({Type: 'averagepoints'}, {$set: {Data: aveperf}});
 });
 
 Meteor.startup(function () {
@@ -408,27 +409,27 @@ function getresults(team, enddate) {
 
 function averageperformance(enddate) {
 	if (!enddate) enddate = new Date();
-	var races = Races.find({StartTime: {$lte: enddate}});
+	var races = Races.find({StartTime: {$lte: enddate}}).fetch();
 	var teamnum = FantasyTeams.find().count();
 	var dates = [];
 	var avg = [];
 	var aths;
 	var total;
-	races.forEach(function(race) {
-		console.log(race.RaceId);
-		total = 0;
-		FantasyTeams.find().forEach(function(team) {
-			if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
-				return (cur[1] > pre[1] && cur[1] <= race.StartTime) ? cur : pre;
-			});
+	for (var i = 0; i < races.length; i++) {
+			console.log(races[i].RaceId);
+			total = 0;
+			FantasyTeams.find().forEach(function(team) {
+				if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
+					return (cur[1] > pre[1] && cur[1] <= races[i].StartTime) ? cur : pre;
+				});
 				else aths = [[], []];
-				total += Results.find({RaceId: race.RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
+				total += Results.find({RaceId: races[i].RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
 					return tot + r.Points;
 				}, 0);
 			});
-		dates.push(race.StartTime);
-		avg.push(avg[avg.length - 1] + (total / teamnum));
-	});
+			dates.push(races[i].StartTime);
+			avg.push(avg[avg.length - 1] + (total / teamnum));
+	}
 	return [dates, avg];
 }
 
