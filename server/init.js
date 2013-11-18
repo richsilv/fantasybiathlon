@@ -201,7 +201,7 @@ FantasyTeams.find().observe({
 			if (newdoc.Athletes.indexOf(olddoc.Athletes[i]) === -1) changes += 1;
 		}
 		seasonstart = SystemVars.findOne({Name: "seasonstart"}).Value;
-		if ((new Date()).getTime() < seasonstart.getTime()) FantasyTeams.update(newdoc, {$inc: {transfers: -changes}});
+		if (!beforeseasonstart()) FantasyTeams.update(newdoc, {$inc: {transfers: -changes}});
 	}
 });
 Meteor.users.find().observeChanges({
