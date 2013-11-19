@@ -1,5 +1,11 @@
 SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 
+ServerLogs = new Meteor.Collection("serverlogs");
+SecureData = new Meteor.Collection("securedata");
+var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
+var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
+var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
+
 var MyCron = new Cron();
 MyCron.addJob(1, function() {
 	updatepointstable();
@@ -56,18 +62,10 @@ Accounts.loginServiceConfiguration.remove({
 
 if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") {
 	Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
-	Accounts.loginServiceConfiguration.insert({
-		service: "facebook",
-		appId: "178103755726555",
-		secret: "1149b8e0b0ba9e0ef15a629e60c698b4"
-	});
+	Accounts.loginServiceConfiguration.insert(facebookprod);
 }
 else {
-	Accounts.loginServiceConfiguration.insert({
-		service: "facebook",
-		appId: "1407972102773119",
-		secret: "2d3eb4531c0984b68297609c5652e564"
-	});	
+	Accounts.loginServiceConfiguration.insert(facebooklocal);	
 }
 
 Meteor.methods({
@@ -163,6 +161,15 @@ Meteor.methods({
 	getplayerpoints: function(ibuid, date) {
 		results = Results.find({IBUId: ibuid, RaceTime: {$lte: date}});
 		return results.fetch().reduce(function(tot, res) {return tot + (res.Points ? res.Points : 0);}, 0);
+	},
+	runfunction: function(password, fn, args) {
+		if (password !== remotestring) return false;
+		if (!args) return eval(fn + '()');
+		else {
+			var argstring = args[0];
+			for (i = 1; i < args.length; i++) argstring += ', ' + args[i];
+			return eval(fn + '(' + argstring + ')');
+		}
 	}
 });
 
@@ -314,15 +321,40 @@ Meteor.users.allow({
 	}
 })
 
-
 function popular() {
 	var ids = [];
 	var teams = FantasyTeams.find();
 	if (!teams) return [[], []];
 	var numteams = FantasyTeams.find().count();
 	teams.forEach(function(t) {
-		ids = ids.concat(t.Athletes.map(function(a) {return a.IBUId;}));
+		ids = ids.concat(t.Athletes);
 	});
+	idsobj = {};
+	ids.forEach(function(i) {
+		if (i && i !== "DUMMY") {
+			if (Object.keys(idsobj).indexOf(i) === -1) idsobj[i] = 1;
+			else idsobj[i] += 1;
+		}
+	});
+	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
+	var teamcount = [];
+	var names = [];
+	popids.forEach(function(i) {
+		names.push(Athletes.findOne({IBUId: i}).ShortName);
+		teamcount.push(idsobj[i] * 100 / numteams);
+	});
+	return [names, teamcount];
+}
+
+function populartest() {
+	var ids = [];
+	var teams = FantasyTeams.find();
+	if (!teams) return [[], []];
+	var numteams = FantasyTeams.find().count();
+	teams.forEach(function(t) {
+		ids = ids.concat(t.Athletes);
+	});
+	return ids;
 	idsobj = {};
 	ids.forEach(function(i) {
 		if (i && i !== "DUMMY") {
@@ -342,9 +374,13 @@ function popular() {
 
 function writepopularathletes() {
 	var popathletes = popular();
-	Statistics.upsert({Type: "popular"}, {Type: "popular", Data: popathletes}, {}, function(err) {
-		if (!err) console.log("Popular athletes written");
-		else console.log("Error writing popular athletes: " + err);
+	Statistics.upsert({Type: "popular"}, {$set: {Data: popathletes}}, {}, function(err) {
+		if (!err) {
+			ServerLogs.insert({Message: "Popular athletes written", Time: new Date()});
+		}	
+		else {
+			ServerLogs.insert({Message: "Error writing popular athletes: " + err, Time: new Date()});
+		}
 	});
 }
 
