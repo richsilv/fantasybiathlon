@@ -1,3 +1,5 @@
+try {
+
 SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 
 ServerLogs = new Meteor.Collection("serverlogs");
@@ -322,10 +324,11 @@ Meteor.users.allow({
 })
 
 function popular() {
+	var athvar;
 	var ids = [];
 	var teams = FantasyTeams.find();
-	if (!teams) return [[], []];
 	var numteams = FantasyTeams.find().count();
+	if (!numteams) return [[], []];
 	teams.forEach(function(t) {
 		ids = ids.concat(t.Athletes);
 	});
@@ -340,34 +343,11 @@ function popular() {
 	var teamcount = [];
 	var names = [];
 	popids.forEach(function(i) {
-		names.push(Athletes.findOne({IBUId: i}).ShortName);
-		teamcount.push(idsobj[i] * 100 / numteams);
-	});
-	return [names, teamcount];
-}
-
-function populartest() {
-	var ids = [];
-	var teams = FantasyTeams.find();
-	if (!teams) return [[], []];
-	var numteams = FantasyTeams.find().count();
-	teams.forEach(function(t) {
-		ids = ids.concat(t.Athletes);
-	});
-	return ids;
-	idsobj = {};
-	ids.forEach(function(i) {
-		if (i && i !== "DUMMY") {
-			if (Object.keys(idsobj).indexOf(i) === -1) idsobj[i] = 1;
-			else idsobj[i] += 1;
+		athvar = Athletes.findOne({IBUId: i});
+		if (athvar) {
+			names.push(Athletes.findOne({IBUId: i}).ShortName);
+			teamcount.push(idsobj[i] * 100 / numteams);
 		}
-	});
-	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
-	var teamcount = [];
-	var names = [];
-	popids.forEach(function(i) {
-		names.push(Athletes.findOne({IBUId: i}).ShortName);
-		teamcount.push(idsobj[i] * 100 / numteams);
 	});
 	return [names, teamcount];
 }
@@ -376,10 +356,10 @@ function writepopularathletes() {
 	var popathletes = popular();
 	Statistics.upsert({Type: "popular"}, {$set: {Data: popathletes}}, {}, function(err) {
 		if (!err) {
-			ServerLogs.insert({Message: "Popular athletes written", Time: new Date()});
+			ServerLogs.insert({Type: "Message", Message: "Popular athletes written", Time: new Date()});
 		}	
 		else {
-			ServerLogs.insert({Message: "Error writing popular athletes: " + err, Time: new Date()});
+			ServerLogs.insert({Type: "Message", Message: "Error writing popular athletes: " + err, Time: new Date()});
 		}
 	});
 }
@@ -481,4 +461,10 @@ function beforeseasonstart() {
 	var date = new Date();
 	if (date.getTime() < seasonstart.Value.getTime()) return true;
 	else return false;
+}
+
+}
+
+catch(error) {
+	ServerLogs.insert({Type: "Error", Message: error.stack, Time: new Date()});
 }
