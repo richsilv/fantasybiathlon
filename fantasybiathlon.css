@@ -149,6 +149,10 @@
     background-color: rgba(200, 200, 200, 0.5);
 }
 
+.title.athletename {
+    height: 4em;
+}
+
 .cross {
     display: none;
     float: right;
@@ -271,8 +275,20 @@
     max-width: 100%;
 }
 
+#teambox {
+    min-height: 75px;
+}
+
+#teamname {
+     margin-top: 0.3em;
+ }
+
 #teamnameentry {
     height: 2em;
+}
+
+.block-75 {
+    min-height: 6em;
 }
 
 #modal {
@@ -284,6 +300,18 @@
 
 #fulltable {
     width: 100%;
+}
+
+.athletepic {
+    max-height: 6.5em;
+}
+
+.title.athletename {
+    height: 3em;
+}
+
+.pricelabel div {
+    margin-top: 3em;
 }
 
 .smallflag {
