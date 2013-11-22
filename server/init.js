@@ -1,57 +1,82 @@
 try {
 
-SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
-
-ServerLogs = new Meteor.Collection("serverlogs");
-SecureData = new Meteor.Collection("securedata");
-var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
-var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
-var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
-
-var MyCron = new Cron();
-MyCron.addJob(1, function() {
-	updatepointstable();
-});
-MyCron.addJob(15, function() {
-	writepopularathletes();
-});
-MyCron.addJob(1440, function() {
-	var date = new Date();
-	var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
-	var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
-	for (var i = 0; i < enddates.length; i++) {
-		if (enddates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()) {
-			FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
-			console.log("Transfers added");
-		}
-	}
-	for (var i = 0; i < startdates.length; i++) {
-		if (startdates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()) {
-			var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
-			var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
-			var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
-			var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
-			emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
-			for (k = 0; k < races.length; k++) {
-				emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
-			}
-			emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
-			emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
-			var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
-			for (var j = 0; j < users.length; j++) {
-				if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
-			}
-		}
-	}
-	FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 	SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
-});
+
+	ServerLogs = new Meteor.Collection("serverlogs");
+	SecureData = new Meteor.Collection("securedata");
+	var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
+	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
+	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
+
+	var MyCron = new Cron();
+	MyCron.addJob(1, function() {
+		updatepointstable();
+	});
+	MyCron.addJob(15, function() {
+		writepopularathletes();
+	});
+	MyCron.addJob(1440, function() {
+		var date = new Date();
+		var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
+		var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
+		for (var i = 0; i < enddates.length; i++) {
+			if (enddates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()) {
+				FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
+				console.log("Transfers added");
+			}
+		}
+		for (var i = 0; i < startdates.length; i++) {
+			if (startdates[i].getTime() == new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime()) {
+				var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
+				var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
+				var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
+				var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
+				emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
+				for (k = 0; k < races.length; k++) {
+					emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
+				}
+				emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
+				emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
+				var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
+				for (var j = 0; j < users.length; j++) {
+					if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+				}
+			}
+		}
+		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
+		SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
+	});
 MyCron.addJob(720, function() {
 	var date = new Date();
 	var aveperf = averageperformance(date);
 	console.log(aveperf);
 	Statistics.upsert({Type: 'averagepoints'}, {$set: {Data: aveperf}});
 });
+
+/*//Test races
+Races.remove({RaceId: 'BT1112SWRLCP06SWSP', EventId: 'BT1112SWRLCP06'});
+Races.remove({RaceId: 'BT1314SWRLCP01SWIN', EventId: 'BT1314SWRLCP01'});
+a = new Date(new Date().getTime() - 1770000);
+console.log('Adding races at ' + a, a.getTime());
+Races.insert({RaceId: 'BT1112SWRLCP06SWSP', EventId: 'BT1112SWRLCP06', StartTime: a});
+Races.insert({RaceId: 'BT1314SWRLCP01SWIN', EventId: 'BT1314SWRLCP01', StartTime: a});
+*/
+//Add race chrons
+var races = Races.find().fetch();
+for (var i = 0; i < races.length; i++) {
+	var raceend = (races[i].StartTime.getTime() / 1000) + 1800;
+	if ((raceend * 1000) > new Date().getTime()) addracechron(races[i].RaceId, raceend);
+}
+
+function addracechron(raceid, raceend) {
+	MyCron.addScheduleJob(raceend, function() {
+		var thiscrawler = Meteor.setInterval(function() {
+			var success = pullandstoreresults(raceid);
+			console.log(new Date(), success);
+			if (success) Meteor.clearInterval(thiscrawler);
+		}, 150000)	
+	});
+}
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
@@ -79,7 +104,7 @@ Meteor.methods({
 		console.log("Transfers added");
 		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 	},
-*/
+	*/
 	teamPoints: function (team, date) {
 		var res = getresults(team, date);
 		var output =  res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
@@ -168,9 +193,9 @@ Meteor.methods({
 		if (password !== remotestring) return false;
 		if (!args) return eval(fn + '()');
 		else {
-			var argstring = args[0];
-			for (i = 1; i < args.length; i++) argstring += ', ' + args[i];
-			return eval(fn + '(' + argstring + ')');
+			var argstring = '"' + args[0] + '"';
+			for (i = 1; i < args.length; i++) argstring += ', "' + args[i] + '"';
+				return eval(fn + '(' + argstring + ')');
 		}
 	}
 });
@@ -244,7 +269,7 @@ writepopularathletes();
 	FantasyTeams.insert(t, function() {
 	    console.log("Inserted team " + (i) + ": " + t.Name);
 	});
-    } */
+} */
 
 Meteor.publish("athletes", function() {
 	return Athletes.find();
@@ -438,19 +463,19 @@ function averageperformance(enddate) {
 	var aths;
 	var total;
 	for (var i = 0; i < races.length; i++) {
-			console.log(races[i].RaceId);
-			total = 0;
-			FantasyTeams.find().forEach(function(team) {
-				if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
-					return (cur[1] > pre[1] && cur[1] <= races[i].StartTime) ? cur : pre;
-				});
+		console.log(races[i].RaceId);
+		total = 0;
+		FantasyTeams.find().forEach(function(team) {
+			if (team.teamHistory.length) aths = team.teamHistory.reduce(function(pre, cur) {
+				return (cur[1] > pre[1] && cur[1] <= races[i].StartTime) ? cur : pre;
+			});
 				else aths = [[], []];
 				total += Results.find({RaceId: races[i].RaceId, IBUId: {$in: aths[0]}}).fetch().reduce(function(tot, r) {
 					return tot + r.Points;
 				}, 0);
 			});
-			dates.push(races[i].StartTime);
-			avg.push(avg[avg.length - 1] + (total / teamnum));
+		dates.push(races[i].StartTime);
+		avg.push(avg[avg.length - 1] + (total / teamnum));
 	}
 	return [dates, avg];
 }
@@ -467,4 +492,98 @@ function beforeseasonstart() {
 
 catch(error) {
 	ServerLogs.insert({Type: "Error", Message: error.stack, Time: new Date()});
+}
+
+pullandstoreresults = function(raceid) {
+	var analysis, params, success = true;
+	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
+	if (eventid) {
+		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
+		var racedata = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		if (!racedata.length) {
+			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
+			success = false;
+		}
+		racedata.forEach(function(race) {
+			if (race.RaceId === raceid) {
+				if (!Boolean(race.HasAnalysis)) {
+					ServerLogs.insert({Type: "Message", Message: "Still waiting for analysis: " + raceid, Time: new Date()});
+					success = false;
+				}
+			}
+		});
+	}
+	else {
+		ServerLogs.insert({Type: "Error", Message: "No Races entry for race: " + raceid, Time: new Date()});
+		success = false;
+	}
+	params = { RaceId: raceid, _: 1359993916314, callback: ''};
+	var results = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	for (var i=0; i < results.Results.length; i++) {
+		results.Results[i].RaceId = results.RaceId;
+		results.Results[i].EventId = eventid;
+		results.Results[i].ShootingTotal = parseInt(results.Results[i].ShootingTotal, 10);
+		results.Results[i].Shootings = getnumbers(results.Results[i].Shootings);
+		results.Results[i].TotalTime = timetosecs(results.Results[i].TotalTime);
+		results.Results[i].Behind = timetosecs(results.Results[i].Behind);
+		results.Results[i].Rank = parseInt(results.Results[i].Rank, 10);
+		if (isNaN(results.Results[i].Rank)) { results.Results[i].Rank = 999; }
+		if (isNaN(results.Results[i].TotalTime)) { results.Results[i].TotalTime = 86399; }
+		if (isNaN(results.Results[i].ShootingTotal)) { results.Results[i].ShootingTotal = -1; }
+	}
+	async.each(results.Results, function(res, cb) {
+		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
+		analysis = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
+		for (var i=0; i < analysis.length; i++) {
+			if (analysis[i].FieldId === 'STTM') {
+				res.ShootTime = timetosecs(analysis[i].Value);
+				res.ShootRank = parseInt(analysis[i].Rank, 10);
+				if (isNaN(res.ShootRank)) {res.ShootRank = 999;}
+			}
+			else if (analysis[i].FieldId === 'FINN') {
+				res.TotalRank = parseInt(analysis[i].Rank, 10);
+				if (isNaN(res.TotalRank)) {res.TotalRank = 999;}
+			}
+			else if (analysis[i].FieldId === 'A0TR') {
+				res.RangeTime = timetosecs(analysis[i].Value);
+				res.RangeRank = parseInt(analysis[i].Rank, 10);
+				if (isNaN(res.RangeRank)) {res.RangeRank = 999;}
+			}
+			else if (analysis[i].FieldId === 'A0TC') {
+				res.CourseTime = timetosecs(analysis[i].Value);
+				res.CourseRank = parseInt(analysis[i].Rank, 10);
+				if (isNaN(res.CourseRank)) {res.CourseRank = 999;}
+			}
+		}
+		Results.upsert({RaceId: raceid, IBUId: res.IBUId}, {$set: res});
+		cb(null);
+	}, function(err) {
+	});
+	if (success) {
+		ServerLogs.insert({Type: "Message", Message: "Race results crawled: " + raceid, Time: new Date()});
+		return true;
+	}
+	else return false;
+};
+
+function getnumbers(string) {
+	var re = /[0-9]/g;
+	var matches = [];
+	var match;
+	while(true) {
+		match = re.exec(string);
+		if (match !== null) { matches.push(parseInt(match[0], 10)); }
+		else { break; }
+	}
+	return matches;
+}
+
+function timetosecs(string) {
+	if (string === null) {return 86399;}
+	timearray = string.replace('+','').split(':');
+	time = 0;
+	for (var i = 0; i < timearray.length; i++) {
+		time += parseFloat(timearray[timearray.length - i - 1]) * Math.pow(60, i);
+	}
+	return time;
 }
