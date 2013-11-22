@@ -1,0 +1,43 @@
+{
+	"Name": "firstnames",
+	"Value": [
+		"Flying",
+		"Speedy",
+		"Lightning",
+		"Nimble",
+		"Sprightly",
+		"Turbo",
+		"High-Speed",
+		"Express",
+		"Whirlwind",
+		"Scorching",
+		"Frozen",
+		"Supersonic",
+		"Rapid",
+		"Swift",
+		"Icy",
+		"Frosty",
+		"Precise",
+		"Deadly",
+		"Lethal",
+		"Precise",
+		"Dead-eye"
+	]
+},
+
+{
+	"Name": "lastnames",
+	"Value": [
+		"Bullets",
+		"Shots",
+		"Strikes",
+		"Racers",
+		"Contenders",
+		"Champions",
+		"Victors",
+		"Heroes",
+		"Lionhearts",
+		"Warriors",
+		"Speedsters",
+	]
+}

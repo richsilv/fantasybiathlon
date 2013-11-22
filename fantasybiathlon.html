@@ -59,8 +59,8 @@
            </ul>
            <!-- Right Nav Section -->
            <ul class="right">
-           <li class="divider"></li>        
-           <li style="margin-top: 10px; margin-left: 10px;"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://fantasybiathlon.meteor.com" data-via="FantasyBiathlon">Tweet</a></li>      
+             <li class="divider"></li>        
+             <li style="margin-top: 10px; margin-left: 10px;"><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://fantasybiathlon.meteor.com" data-via="FantasyBiathlon">Tweet</a></li>      
              <li class="divider"></li>
              <li class="has-dropdown"><a href="javascript:;" id="helpmenu">Help</a>
               <ul class="dropdown">
@@ -69,6 +69,9 @@
                 <li><a href="javascript:;" id="about">About</a></li>
                 <li><a href="javascript:;" id="rules">Rules</a></li>
                 <li><a href="javascript:;" id="scoring">Scoring</a></li>
+                <li id="helpmenu"><label>Admin</label></li>
+                <li><a href="javascript:;" id="changenation">Change Nation</a></li>
+                {{#unless facebooklogin}}<li><a href="javascript:;" id="resetpassword">Reset Password</a></li>{{/unless}}             
               </ul>
             </li>
             {{#if currentUser}}
@@ -189,13 +192,16 @@
   <h3 class="subheader">TEAM NAME:</h3>
   <div style="text-align: center; margin-top: -0.5em;">
     <div class="large-8 large-offset-2 centered columns" id="teambox">
-    {{#if teamnameedit}}
+      {{#if teamnameedit}}
       <h1><input type="text" value="{{teamname}}" id="teamnameentry"></h1>
-    {{else}}
-      <h1 id="teamname">{{teamname}}</h1>
-    {{/if}}
-   </div>
- </div>
+      {{else}}
+      <div id="lightbulb" title="Generate random team name"></div>
+      <h1 id="teamname">
+        {{teamname}}
+      </h1>
+      {{/if}}
+    </div>
+  </div>
 </template>
 
 <template name="team">
@@ -548,10 +554,38 @@
 
 <template name="news">
   <div class="welcometext">
-    <p>The <strong>Fantasy Biathlon</strong> season will begin with the 
-      <em><strong>Women's 15km Individual Competition</strong></em> from <em><strong>Oestersund</strong></em> on <em><strong>Wednesday, November 27th</strong></em>.</p>
-      <p>The very first race of the season, the Mixed Relay from Oestersund, will <strong>not</strong> be included in the scoring so that everybody has a little
-        bit longer to build their team and to assess the form of their favourite biathletes.  You have unlimited transfers until midday on the 27th!</p>
-        <p>Rules and scoring can be found in the Help menu. Good luck!</p>
+    <p>The <strong>Fantasy Biathlon</strong> season will begin with the <em><strong>Women's 15km Individual Competition</strong></em> 
+      from <em><strong>Oestersund</strong></em> on <em><strong>Wednesday, November 27th</strong></em>.
+    </p>
+    <p>The very first race of the season, the Mixed Relay from Oestersund, will <strong>not</strong> be included in the scoring so that everybody has a little
+      bit longer to build their team and to assess the form of their favourite biathletes.  You have unlimited transfers until midday on the 27th!
+    </p>
+    <p>Rules and scoring can be found in the Help menu. Good luck!
+    </p>
+  </div>
+</template>
+
+<template name="changenation">
+  <div class="row"><div class="large-12 columns"><h2>CHANGE NATION</h2></div>
+  <form id="changenatform">
+    <div class="large-12 large-centered columns">
+      <select id="changenatdropdown" class="medium">
+        {{#each nations}}<option value="{{this.Nat}}">{{this.LongName}}</option>{{/each}}
+      </select>
+      <input type="submit" href="javascript:;" class="button" id="change-nation-button" value="Select" />
+    </div>
+  </form>
+  <a class="close-reveal-modal">&#215;</a>
+</template>
+
+<template name="resetpassword">
+  <div class="row"><div class="large-12 columns"><h2>RESET PASSWORD</h2></div>
+  <p>If you would like to change your password, click the button below.  You will be sent an email with a link in it, which you can follow to choose a new 
+    password for your account.
+    <form id="resetpasswordform">
+      <div class="large-6 large-centered columns">
+        <input type="submit" href="javascript:;" class="button" id="reset-password-button" value="Reset" />
       </div>
-    </template>
+    </form>
+    <a class="close-reveal-modal">&#215;</a>
+  </template>

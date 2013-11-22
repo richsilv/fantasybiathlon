@@ -156,7 +156,7 @@
 .cross {
     display: none;
     float: right;
-    background-image: url('cross.png');
+    background-image: url('fi-x.svg');
     width: 2em;
     height: 2em;
     background-size: cover;
@@ -164,6 +164,18 @@
     margin-right: -0.5em;
     cursor: pointer;
     background-repeat: no-repeat;
+}
+
+#lightbulb {
+    background-image: url('fi-lightbulb.svg');
+    width: 2em;
+    height: 2em;
+    background-size: cover;
+    position: absolute;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    left: -2em;
+    top: 0.5em;
 }
 
 .custom.dropdown.tiny {
