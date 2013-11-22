@@ -274,8 +274,8 @@ Meteor.publish("statistics", function() {
 Meteor.publish("systemvars", function() {
 	return SystemVars.find();
 });
-Meteor.publish("minileagues", function(userid) {
-	return Minileagues.find({userid: userid});
+Meteor.publish("minileagues", function(teamid) {
+	return Minileagues.find({Teams: teamid});
 });
 Meteor.publish("allminileagues", function(leagueid) {
 	if (leagueid) return Minileagues.find({_id: leagueid});
