@@ -295,6 +295,10 @@
      margin-top: 0.3em;
  }
 
+#lightbulb {
+    left: 0;
+}
+
 #teamnameentry {
     height: 2em;
 }
