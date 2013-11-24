@@ -14,6 +14,7 @@ try {
 	});
 	MyCron.addJob(15, function() {
 		writepopularathletes();
+		updateallpoints();
 	});
 	MyCron.addJob(1440, function() {
 		var date = new Date();
@@ -66,6 +67,7 @@ var races = Races.find().fetch();
 for (var i = 0; i < races.length; i++) {
 	var raceend = (races[i].StartTime.getTime() / 1000) + 1800;
 	if ((raceend * 1000) > new Date().getTime()) addracechron(races[i].RaceId, raceend);
+	else if (((raceend + 9000) * 1000) > new Date().getTime()) addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 60);
 }
 
 function addracechron(raceid, raceend) {
@@ -76,6 +78,10 @@ function addracechron(raceid, raceend) {
 			if (success) Meteor.clearInterval(thiscrawler);
 		}, 150000)	
 	});
+}
+
+function showChrons() {
+	return MyCron;
 }
 
 Meteor.startup(function () {
@@ -491,6 +497,7 @@ function beforeseasonstart() {
 }
 
 catch(error) {
+	console.log(error.stack);
 	ServerLogs.insert({Type: "Error", Message: error.stack, Time: new Date()});
 }
 
@@ -586,4 +593,42 @@ function timetosecs(string) {
 		time += parseFloat(timearray[timearray.length - i - 1]) * Math.pow(60, i);
 	}
 	return time;
+}
+
+function athleteracepoints(r) {
+	var points = 0;
+	if (typeof r == 'undefined') {console.log("no match"); return 0;}
+	if (r.ResultOrder > 998) {console.log("DNF"); return 0;}
+	else if (r.RaceId.substr(r.RaceId.length-2) === 'RL') {
+		points += relaypoints[r.ResultOrder] ? relaypoints[r.ResultOrder] : 0;
+		if (r.Shootings.reduce(function(tot, x) {return tot + x;}, 0) === 0) {points += 5;}
+	}
+	else {
+		points += finishpoints[r.ResultOrder] ? finishpoints[r.ResultOrder] : 0;
+		if (r.CourseRank != 'undefined') {
+			points += smallpoints[r.CourseRank] ? smallpoints[r.CourseRank] : 0;
+		}
+		points += (r.ShootingTotal === 0 ? 5 : 0);
+		points += (r.Shootings.reduce(function(total, x) {return x === 0 ? total+1 : total;}, 0));
+		if (r.RangeTime != 'undefined') {
+			var minmisses = Results.findOne({RaceId: r.RaceId, ResultOrder: {$lte: 998}}, {fields: {ShootingTotal: 1}, sort: {ShootingTotal: 1}}).ShootingTotal;
+			var shootorder = Results.find({RaceId: r.RaceId, ShootingTotal: minmisses, ResultOrder: {$lte: 998}}, {sort: {RangeTime: 1}}).fetch();
+			points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
+		}
+	}
+	return points;
+}
+
+function updateallpoints(force) {
+	var res;
+	if (force) {
+		res = Results.find();
+	}
+	else {
+		res = Results.find({Points: null});
+	}
+	res.map(function(r) {
+		console.log(r.IBUId + ' - ' + r.RaceId);
+		Results.update({_id: r._id}, {$set: {Points: athleteracepoints(r)}});
+	});
 }
