@@ -218,30 +218,15 @@ Accounts.validateNewUser(function (user) {
 });
 
 Accounts.onCreateUser(function(options, user) {
-	try {
-		if (options.profile) user.profile = options.profile;
-		if (user.services.facebook) {
-			var natlookup = SystemVars.findOne({Name: 'localities'});
-			user.emails = [{address: user.services.facebook.email, verified: true}];
-			if (natlookup) user.profile.Nat = natlookup.Value[user.services.facebook.locale] ? natlookup.Value[user.services.facebook.locale] : 'ZZZ';
-			else user.profile.Nat = 'ZZZ';
-			user.profile.facebook = true;
-		}
-		var beforeseasonstart = SystemVars.findOne({Name: 'beforeseasonstart'});
-		var transfers = (beforeseasonstart && beforeseasonstart.Value) ? 2 : 6;
-		var newteam = {UserID: user._id,
-			Name: "My Team",
-			transfers: transfers,
-			Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
-			teamHistory: [],
-			Nat: user.profile.Nat
-		};
-		FantasyTeams.insert(newteam);
-		return user;
+	if (options.profile) user.profile = options.profile;
+	if (user.services.facebook) {
+		var natlookup = SystemVars.findOne({Name: 'localities'});
+		user.emails = [{address: user.services.facebook.email, verified: true}];
+		if (natlookup) user.profile.Nat = natlookup.Value[user.services.facebook.locale] ? natlookup.Value[user.services.facebook.locale] : 'ZZZ';
+		else user.profile.Nat = 'ZZZ';
+		user.profile.facebook = true;
 	}
-	catch (err) {
-		ServerLogs.insert({Type: "Create Error", Message: err.message, User: [user],Time: new Date()});		
-	}
+	return user;
 });
 
 FantasyTeams.find().observe({
@@ -271,6 +256,23 @@ Minileagues.find().observeChanges({
 					html: "<p>Here's the code you need to send to your friends to allow them to sign up to your MiniLeague, <strong>" + fields.Name + "</strong>:</p><h3>" + id + "</h3>"})
 			}
 			Minileagues.update({_id: id}, {$unset: {sendCode: false}});
+		}
+	}
+})
+Meteor.users.find().observeChanges({
+	added: function(id, fields) {
+		if (!FantasyTeams.findOne({UserID: id})) {
+			var beforeseasonstart = SystemVars.findOne({Name: 'beforeseasonstart'});
+			var transfers = (beforeseasonstart && beforeseasonstart.Value) ? 2 : 6;
+			var newteam = {UserID: id,
+				Name: "My Team",
+				transfers: transfers,
+				Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
+				teamHistory: [],
+				Nat: fields.profile.Nat
+			};
+			var newteam = FantasyTeams.insert(newteam);
+			ServerLogs.insert({Type: "New", TeamID: newteam , UserID: id, Time: new Date()})
 		}
 	}
 })
