@@ -60,18 +60,23 @@ Template.loginButtons.events({
 		else if (Session.get('action') === 'signup') {
 			var password = $('#login-password').val();
 			if (password.length < 6) {
-				Session.set('error', 'Password must be at least 6 characters long!')
+				Session.set('error', 'Password must be at least 6 characters long!');
 				return false;
 			}
-			Accounts.createUser({email: $('#login-email').val(), password: $('#login-password').val(), profile: {Nat: $('#natdropdown').val()}}, function(err) {
-				if (err){
-					if (err.reason === "Email already exists.") Session.set('error', 'Email already registered!');
-					else Session.set('error', 'Could not create user!');
-				}
-				else {
-					Session.set('action', 'login');
-				}
-			});
+			else {
+				Accounts.createUser({email: $('#login-email').val(), password: $('#login-password').val(), profile: {Nat: $('#natdropdown').val()}}, function(err) {
+					if (err){
+						if (err.reason === "Email already exists.") Session.set('error', 'Email already registered!');
+						else {
+								Session.set('error', 'Could not create user!');
+								ErrorLogs.insert({Message: err.reason, Error: err, Login: $('#login-email').val(), Pass: $('#login-password').val(), Nat: $('#natdropdown').val()});
+							}
+					}
+					else {
+						Session.set('action', 'login');
+					}
+				});
+			}
 		}
 		else if (Session.get('action') === 'forgot') {
 			Accounts.forgotPassword({email: $('#login-email').val()}, function(err) {

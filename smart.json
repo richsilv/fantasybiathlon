@@ -3,7 +3,9 @@
     "foundation": {},
     "jquery-ui": {},
     "chartjs": {},
-    "cron-tick": {},
+    "cron-tick": {
+        "git": "https://github.com/richsilv/meteor-cron"
+        },
     "zurb-foundation": {},
     "accounts-ui-bootstrap-3": {},
     "device-detection": {},

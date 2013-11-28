@@ -1,3 +1,10 @@
+var maxPoints = 15;
+var finishpoints = [0, 30, 25, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+var relaypoints = [0, 15, 10, 8, 6, 4, 3, 2, 1];
+var smallpoints = [0, 10, 7, 5, 3, 1];
+var weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 try {
 
 	SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
@@ -207,31 +214,34 @@ Meteor.methods({
 });
 
 Accounts.validateNewUser(function (user) {
-	var thatemail = Meteor.users.findOne({"emails.address":user.email});
-	if (thatemail) throw new Meteor.Error(403, "Email already registered");
-	else return true;
+	return true;
 });
 
 Accounts.onCreateUser(function(options, user) {
-	if (options.profile) user.profile = options.profile;
-	if (user.services.facebook) {
-		var natlookup = SystemVars.findOne({Name: 'localities'});
-		user.emails = [{address: user.services.facebook.email, verified: true}];
-		if (natlookup) user.profile.Nat = natlookup.Value[user.services.facebook.locale] ? natlookup.Value[user.services.facebook.locale] : 'ZZZ';
-		else user.profile.Nat = 'ZZZ';
-		user.profile.facebook = true;
+	try {
+		if (options.profile) user.profile = options.profile;
+		if (user.services.facebook) {
+			var natlookup = SystemVars.findOne({Name: 'localities'});
+			user.emails = [{address: user.services.facebook.email, verified: true}];
+			if (natlookup) user.profile.Nat = natlookup.Value[user.services.facebook.locale] ? natlookup.Value[user.services.facebook.locale] : 'ZZZ';
+			else user.profile.Nat = 'ZZZ';
+			user.profile.facebook = true;
+		}
+		var beforeseasonstart = SystemVars.findOne({Name: 'beforeseasonstart'});
+		var transfers = (beforeseasonstart && beforeseasonstart.Value) ? 2 : 6;
+		var newteam = {UserID: user._id,
+			Name: "My Team",
+			transfers: transfers,
+			Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
+			teamHistory: [],
+			Nat: user.profile.Nat
+		};
+		FantasyTeams.insert(newteam);
+		return user;
 	}
-	var beforeseasonstart = SystemVars.findOne({Name: 'beforeseasonstart'});
-	var transfers = (beforeseasonstart && beforeseasonstart.Value) ? 2 : 6;
-	var newteam = {UserID: user._id,
-		Name: "My Team",
-		transfers: transfers,
-		Athletes: ['DUMMY', 'DUMMY', 'DUMMY', 'DUMMY'],
-		teamHistory: [],
-		Nat: user.profile.Nat
-	};
-	FantasyTeams.insert(newteam);
-	return user;
+	catch (err) {
+		ServerLogs.insert({Type: "Create Error", Message: err.message, User: [user],Time: new Date()});		
+	}
 });
 
 FantasyTeams.find().observe({
@@ -352,7 +362,12 @@ Meteor.users.allow({
 	update: function(userId, doc, fields) {
 		if (fields.length === 1 && fields[0] === 'sendVerification') return true;
 	}
-})
+});
+ErrorLogs.allow({
+	insert: function() {
+		return true;
+	}
+});
 
 function popular() {
 	var athvar;

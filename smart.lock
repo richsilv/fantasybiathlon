@@ -5,7 +5,10 @@
       "foundation": {},
       "jquery-ui": {},
       "chartjs": {},
-      "cron-tick": {},
+      "cron-tick": {
+        "git": "https://github.com/richsilv/meteor-cron",
+        "branch": "master"
+      },
       "zurb-foundation": {},
       "accounts-ui-bootstrap-3": {},
       "device-detection": {},
@@ -29,9 +32,9 @@
         "commit": "9d2adcd1de3728c8227e8eb7da0dcb2e0df21d0b"
       },
       "cron-tick": {
-        "git": "https://github.com/tmeasday/meteor-cron.git",
-        "tag": "v0.0.4",
-        "commit": "44cff9116af510fe53704fdeeff57c444ceb75ba"
+        "git": "https://github.com/richsilv/meteor-cron",
+        "branch": "master",
+        "commit": "2e5dffe797163496b3490ca742edf9fcd122ed4c"
       },
       "zurb-foundation": {
         "git": "https://github.com/MixinLabs/meteor-foundation.git",
