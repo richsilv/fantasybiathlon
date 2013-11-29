@@ -82,7 +82,11 @@ function addracechron(raceid, raceend) {
 		var thiscrawler = Meteor.setInterval(function() {
 			var success = pullandstoreresults(raceid);
 			console.log(new Date(), success);
-			if (success) Meteor.clearInterval(thiscrawler);
+			if (success) {
+				Meteor.clearInterval(thiscrawler);
+				decorateResults();
+				updateallpoints();
+			}
 		}, 150000)	
 	});
 }
@@ -641,7 +645,7 @@ function decorateResults(force) {
     reslist.forEach(function(r) {
     	race = Races.findOne({RaceId: r.RaceId});
     	if (race) Results.update(r, {$set: {RaceTime: race.StartTime}});
-    });
+    });	
 };
 
 
