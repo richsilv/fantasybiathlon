@@ -640,7 +640,7 @@ function decorateResults(force) {
     else reslist = Results.find({RaceTime: {$exists: false}})
     reslist.forEach(function(r) {
     	race = Races.findOne({RaceId: r.RaceId});
-    	if (race) Results.update(r, {$set: {RaceTime: race.StarTime}});
+    	if (race) Results.update(r, {$set: {RaceTime: race.StartTime}});
     });
 };
 
