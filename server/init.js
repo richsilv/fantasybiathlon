@@ -205,10 +205,14 @@ Meteor.methods({
 	runfunction: function(password, fn, args) {
 		if (password !== remotestring) return false;
 		if (!args) return eval(fn + '()');
-		else {
+		else if (args instanceof Array) {
 			var argstring = '"' + args[0] + '"';
 			for (i = 1; i < args.length; i++) argstring += ', "' + args[i] + '"';
-				return eval(fn + '(' + argstring + ')');
+			return eval(fn + '(' + argstring + ')');
+		}
+		else {
+			var argstring = '"' + args + '"';
+			return eval(fn + '(' + argstring + ')');
 		}
 	}
 });
@@ -519,6 +523,7 @@ catch(error) {
 }
 
 pullandstoreresults = function(raceid) {
+	Results.remove({RaceId: raceid});
 	var analysis, params, success = true;
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
@@ -581,11 +586,10 @@ pullandstoreresults = function(raceid) {
 		}
 		Results.upsert({RaceId: raceid, IBUId: res.IBUId}, {$set: res});
 		cb(null);
-	}, function(err) {
-	});
+	}, function(err) {});
 	if (success) {
 		ServerLogs.insert({Type: "Message", Message: "Race results crawled: " + raceid, Time: new Date()});
-		return true;
+		return raceid;
 	}
 	else return false;
 };
@@ -611,6 +615,35 @@ function timetosecs(string) {
 	}
 	return time;
 }
+
+function decorateResults(force) {
+    var shootingscore = function(err, results) {
+		results.forEach(function(r, i) {
+		    console.log('record number ' + i);
+		    if (r.RangeTime && typeof r.ShootingTotal != 'undefined') {
+				Result.update(r, {ShootScore: r.RangeTime + (r.ShootingTotal * 1000)}, {}, function(err, num) {
+				    if (!err) console.log('Record updated: ' + r.RaceId + ', ' + r.IBUId);
+				    else console.log(err);
+				});
+		    }
+		});
+    };
+    var reslist
+    if (force) reslist = Results.find();
+    else reslist = Results.find({ShootScore: {$exists: false}});
+    reslist.forEach(function(r) {
+	    if (r.RangeTime && typeof r.ShootingTotal != 'undefined') {
+			Results.update(r, {$set: {ShootScore: r.RangeTime + (r.ShootingTotal * 1000)}});
+		}
+    });
+    if (force) reslist = Results.find();
+    else reslist = Results.find({RaceTime: {$exists: false}})
+    reslist.forEach(function(r) {
+    	race = Races.findOne({RaceId: r.RaceId});
+    	if (race) Results.update(r, {$set: {RaceTime: race.StarTime}});
+    });
+};
+
 
 function athleteracepoints(r) {
 	var points = 0;
