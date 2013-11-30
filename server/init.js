@@ -74,11 +74,11 @@ var races = Races.find().fetch();
 for (var i = 0; i < races.length; i++) {
 	var raceend = (races[i].StartTime.getTime() / 1000) + 1800;
 	if ((raceend * 1000) > new Date().getTime()) addracechron(races[i].RaceId, raceend);
-	else if (((raceend + 9000) * 1000) > new Date().getTime()) addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 60);
+	else if (((raceend + 86400) * 1000) > new Date().getTime()) addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 60);
 }
 
 function addracechron(raceid, raceend) {
-	MyCron.addScheduleJob(raceend, function() {
+	MyCron.addScheduleJob(parseFloat(raceend), function() {
 		var thiscrawler = Meteor.setInterval(function() {
 			var success = pullandstoreresults(raceid);
 			console.log(new Date(), success);
