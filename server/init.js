@@ -532,7 +532,7 @@ pullandstoreresults = function(raceid) {
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
@@ -551,7 +551,7 @@ pullandstoreresults = function(raceid) {
 		success = false;
 	}
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
@@ -633,6 +633,13 @@ function decorateResults(force) {
 		});
     };
     var reslist
+    reslist = Results.find({IBUId: {$exists: false}});
+    reslist.forEach(function(r) {
+    	ath = Athletes.findOne({Name: r.Name});
+    	if (ath) {
+    		Results.update(r, {$set: {IBUId: ath.IBUId}});
+    	}
+    });
     if (force) reslist = Results.find();
     else reslist = Results.find({ShootScore: {$exists: false}});
     reslist.forEach(function(r) {
