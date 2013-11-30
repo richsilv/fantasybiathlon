@@ -550,6 +550,7 @@ pullandstoreresults = function(raceid) {
 		ServerLogs.insert({Type: "Error", Message: "No Races entry for race: " + raceid, Time: new Date()});
 		success = false;
 	}
+	if (!success) return false
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
 	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
