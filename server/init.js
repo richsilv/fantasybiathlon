@@ -100,7 +100,7 @@ for (var i = 0; i < enddates.length; i++) {
 		FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
 		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 		console.log("Transfers added");
-	}
+	});
 }
 for (var i = 0; i < startdates.length; i++) {
 	MyCron.addScheduleJob((startdates[i].getTime()/1000) - 86400, function() {
@@ -118,7 +118,7 @@ for (var i = 0; i < startdates.length; i++) {
 		for (var j = 0; j < users.length; j++) {
 			if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
 		}
-	}
+	});
 }
 
 function showChrons() {
