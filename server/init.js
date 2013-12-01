@@ -24,7 +24,7 @@ try {
 		updateallpoints();
 	});
 	MyCron.addJob(1440, function() {
-		var date = new Date();
+/*		var date = new Date();
 		var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
 		var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
 		for (var i = 0; i < enddates.length; i++) {
@@ -51,7 +51,7 @@ try {
 				}
 			}
 		}
-		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
+*/		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
 		SystemVars.upsert({Name: 'beforeseasonstart'}, {$set: {Value: beforeseasonstart()}});
 	});
 MyCron.addJob(720, function() {
@@ -90,6 +90,35 @@ function addracechron(raceid, raceend) {
 			}
 		}, 150000)	
 	});
+}
+
+//Add transfer chrons
+var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
+var startdates = SystemVars.findOne({Name: 'meetingstartdates'}).Value;
+for (var i = 0; i < enddates.length; i++) {
+	MyCron.addScheduleJob(enddates[i].getTime()/1000, function() {
+		FantasyTeams.update({}, {$inc: {transfers: 2}}, {multi: true});
+		FantasyTeams.update({transfers: {$gt: 4}}, {$set: {transfers: 4}}, {multi: true});
+		console.log("Transfers added");
+	}
+}
+for (var i = 0; i < startdates.length; i++) {
+	MyCron.addScheduleJob((startdates[i].getTime()/1000) - 86400, function() {
+		var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
+		var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
+		var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
+		var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
+		emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
+		for (k = 0; k < races.length; k++) {
+			emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
+		}
+		emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
+		emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
+		var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
+		for (var j = 0; j < users.length; j++) {
+			if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+		}
+	}
 }
 
 function showChrons() {
