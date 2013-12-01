@@ -80,6 +80,7 @@ for (var i = 0; i < races.length; i++) {
 function addracechron(raceid, raceend) {
 	MyCron.addScheduleJob(parseFloat(raceend), function() {
 		var thiscrawler = Meteor.setInterval(function() {
+			console.log("trying " + raceid);
 			var success = pullandstoreresults(raceid);
 			console.log(new Date(), success);
 			if (success) {
@@ -551,6 +552,7 @@ pullandstoreresults = function(raceid) {
 		success = false;
 	}
 	if (!success) return false
+	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
 	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
@@ -566,6 +568,7 @@ pullandstoreresults = function(raceid) {
 		if (isNaN(results.Results[i].ShootingTotal)) { results.Results[i].ShootingTotal = -1; }
 	}
 	async.each(results.Results, function(res, cb) {
+		console.log(res.IBUId);
 		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
 		analysis = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
 		for (var i=0; i < analysis.length; i++) {
