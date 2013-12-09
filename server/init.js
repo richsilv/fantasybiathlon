@@ -163,10 +163,10 @@ Meteor.methods({
 		return Statistics.findOne({Type: "popular"}).Data;
 	},
 	chartdata: function(team, date) {
-		var seasonStart = SystemVars.findOne({Name: 'seasonstart'});
+		var seasonStart = SystemVars.findOne({Name: 'seasonstart'}).Value;
 		var res = getresults(team, date);
-		var zs = [''];
-		var ys = [seasonStart.Value];
+		var ys = [seasonStart];
+		var zs = [seasonStart.getDay() + '/' + seasonStart.getMonth() + '/' + (seasonStart.getYear() % 100)]
 		var xs = [0];
 		var runtotal = 0;
 		for (var i = 0; i < res.length; i++) {
