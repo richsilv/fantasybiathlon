@@ -87,6 +87,7 @@ function addracechron(raceid, raceend) {
 				Meteor.clearInterval(thiscrawler);
 				decorateResults();
 				updateallpoints();
+				addNewAthletes();
 			}
 		}, 150000)	
 	});
@@ -103,7 +104,8 @@ for (var i = 0; i < enddates.length; i++) {
 	});
 }
 for (var i = 0; i < startdates.length; i++) {
-	MyCron.addScheduleJob((startdates[i].getTime()/1000) - 86400, function() {
+	MyCron.addScheduleJob((startdates[i].getTime()/1000), function() {
+		var date = new Date();
 		var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
 		var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
 		var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
@@ -199,6 +201,7 @@ Meteor.methods({
 		points = [];
 		names = [];
 		ibuids.forEach(function(r) {
+			console.log(r);
 			names.push(Athletes.findOne({IBUId: r}).ShortName);
 			points.push(pointsobj[r]);
 		});
@@ -725,4 +728,24 @@ function updateallpoints(force) {
 		console.log(r.IBUId + ' - ' + r.RaceId);
 		Results.update({_id: r._id}, {$set: {Points: athleteracepoints(r)}});
 	});
+}
+
+function addNewAthletes() {
+	var newath, absent = [];
+	Results.find().forEach(function(r) {
+		if(absent.indexOf(r.IBUId) === -1 && r.IBUId.trim().length > 14 && !Athletes.findOne({IBUId: r.IBUId})) 
+			{
+				newath = {
+					IBUId: r.IBUId,
+					ShortName: r.ShortName,
+					Name: r.Name,
+					Nat: r.Nat,
+					Gender: r.RaceId.slice(15,16),
+					Price: 1.0
+					};
+				console.log(newath);
+				absent.push([r.IBUId, r.ShortName]);
+			}
+	});
+	return absent;
 }
