@@ -69,7 +69,6 @@ Template.loginButtons.events({
 						if (err.reason === "Email already exists.") Session.set('error', 'Email already registered!');
 						else {
 								Session.set('error', 'Could not create user!');
-								ErrorLogs.insert({Message: err.reason, Error: err, Login: $('#login-email').val(), Pass: $('#login-password').val(), Nat: $('#natdropdown').val()});
 							}
 					}
 					else {

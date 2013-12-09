@@ -23,6 +23,9 @@ try {
 		writepopularathletes();
 		updateallpoints();
 	});
+	MyCron.addJob(60, function() {
+		updateWeather();		
+	});
 	MyCron.addJob(1440, function() {
 /*		var date = new Date();
 		var enddates = SystemVars.findOne({Name: 'meetingenddates'}).Value;
@@ -373,6 +376,9 @@ Meteor.publish("minileagues", function(teamid) {
 Meteor.publish("allminileagues", function(leagueid) {
 	if (leagueid) return Minileagues.find({_id: leagueid});
 	else this.stop();
+});
+Meteor.publish("locations", function() {
+	return Locations.find();
 })
 SystemVars.allow({
 	insert: function(userId) {
@@ -766,4 +772,15 @@ function cleanLogs(cleanDate) {
 		cleanDate = new Date(d.getTime() - (24 * 60 * 60 * 1000));
 	}
 	return ServerLogs.remove({Time: {$lt: cleanDate}}); 
+}
+
+function updateWeather() {
+	var locs = Locations.find()
+	locs.forEach(function(l) {
+		res = HTTP.get('http://api.openweathermap.org/data/2.5/weather', {params: {lat: l.Location[0], lon: l.Location[1]}});
+		if (res.statusCode === 200) {
+			Locations.update({Name: l.Name}, {$set: {Weather: res.data}});
+		}
+		else ServerLogs.insert({Type: "Weather", Message: 'Could not get data for ' + l.Name, Time: new Date()});
+	})
 }
