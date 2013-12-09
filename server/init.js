@@ -227,6 +227,15 @@ Meteor.methods({
 			names.push(Athletes.findOne({IBUId: r}).ShortName);
 			points.push(pointsobj[r]);
 		});
+		if (names.length > 6) {
+			otherpoints = 0;
+			for (var i = names.length; i > 5; i--) {
+				names.pop();
+				otherpoints += points.pop();
+			}
+			names.push("Others");
+			points.push(otherpoints);
+		}
 		return [names, points];
 	},
 	getresults: function(team, date) {
