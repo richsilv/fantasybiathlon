@@ -166,7 +166,7 @@ Meteor.methods({
 		var seasonStart = SystemVars.findOne({Name: 'seasonstart'});
 		var res = getresults(team, date);
 		var zs = [''];
-		var ys = [seasonStart];
+		var ys = [seasonStart.Value];
 		var xs = [0];
 		var runtotal = 0;
 		for (var i = 0; i < res.length; i++) {
@@ -749,4 +749,12 @@ function addNewAthletes() {
 			}
 	});
 	return absent;
+}
+
+function cleanLogs(cleanDate) {
+	if (!cleanDate) {
+		var d = new Date();
+		cleanDate = new Date(d.getTime() - (24 * 60 * 60 * 1000));
+	}
+	return ServerLogs.remove({Time: {$lt: cleanDate}}); 
 }
