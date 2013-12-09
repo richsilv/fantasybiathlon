@@ -743,7 +743,8 @@ function addNewAthletes() {
 					Gender: r.RaceId.slice(15,16),
 					Price: 1.0
 					};
-				console.log(newath);
+				ServerLogs.insert({Type: "Athlete", Data: newath, Time: new Date()});
+				Athletes.insert(newath);
 				absent.push([r.IBUId, r.ShortName]);
 			}
 	});
