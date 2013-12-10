@@ -601,7 +601,7 @@ pullandstoreresults = function(raceid) {
 	if (!success) return false
 	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get('http://datacentre.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
