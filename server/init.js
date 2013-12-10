@@ -580,7 +580,7 @@ pullandstoreresults = function(raceid) {
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
