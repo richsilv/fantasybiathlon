@@ -5,6 +5,7 @@
   <link rel=”author” href=”https://plus.google.com/117608652502810550836“/>
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
   <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
+  <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false">   </script>
 </head>
 
 <body>
@@ -158,7 +159,7 @@
   <ul class="breadcrumbs" id="databarselect">
     <li id="league"{{#if league}} class="current"{{/if}}><a href="javascript:;">League Table</a></li>
     <li id="calendar"{{#if calendar}} class="current"{{/if}}><a href="javascript:;">Calendar</a></li>
-    <li id="venue"{{#if venue}} class="current"{{/if}}><a href="javascript:;">Next Venue Info</a></li>
+    <li id="venue"{{#if venue}} class="current"{{/if}}><a href="javascript:;">Info{{nextvenue}}</a></li>
   </ul>
 </template>
 
@@ -276,10 +277,22 @@
   {{{athleteset}}}
 </template>
 
-<template name="map">
+<template name="venueinfo">
   <div class="row">
-    <div class="large-6 large-centered columns">
-      <h3>COMING SOON</h3>
+    <div class="large-6 columns panel" id="weatherinfo">
+      <h3>WEATHER</h3>
+      <p>Conditions: <strong>{{cond}}</strong></p>
+      <p>Temperature: <strong>{{{temp}}</strong></p>
+      <p>Wind: <strong>{{wind}}</strong></p>
+      <div id="weathericon"></div>
+    </div>
+    <div class="large-6 columns">
+      {{#constant}}
+      <div id="gmap">
+        MAP DIV
+      </div>
+      {{/constant}}
+    </div>
     </div>
   </div>
 </template>
