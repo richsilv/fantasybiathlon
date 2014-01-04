@@ -11,6 +11,7 @@ try {
 
 	ServerLogs = new Meteor.Collection("serverlogs");
 	SecureData = new Meteor.Collection("securedata");
+	SentAddresses = new Meteor.Collection("sentaddresses");
 	var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
 	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
 	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
@@ -108,7 +109,7 @@ for (var i = 0; i < enddates.length; i++) {
 }
 for (var i = 0; i < startdates.length; i++) {
 	MyCron.addScheduleJob((startdates[i].getTime()/1000), function() {
-		var date = new Date();
+		var date = new Date(), baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 		var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
 		var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
 		var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
@@ -121,7 +122,13 @@ for (var i = 0; i < startdates.length; i++) {
 		emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
 		var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
 		for (var j = 0; j < users.length; j++) {
-			if (users[j].emails) Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+			if (users[j].emails) {
+				var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: baseDate});
+				if (!thisItem) {
+					Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+					SentAddresses.insert({address: users[j].emails[0].address, date: baseDate});
+				}
+			}
 		}
 	});
 }
