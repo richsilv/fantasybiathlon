@@ -77,8 +77,14 @@ Races.insert({RaceId: 'BT1314SWRLCP01SWIN', EventId: 'BT1314SWRLCP01', StartTime
 var races = Races.find().fetch();
 for (var i = 0; i < races.length; i++) {
 	var raceend = (races[i].StartTime.getTime() / 1000) + 1800;
-	if ((raceend * 1000) > new Date().getTime()) addracechron(races[i].RaceId, raceend);
-	else if (((raceend + 86400) * 1000) > new Date().getTime()) addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 60);
+	if ((raceend * 1000) > new Date().getTime()) {
+		addracechron(races[i].RaceId, raceend);
+		console.log("Adding race chron for " + races[i].RaceId);
+	}		
+	else if (((raceend + 150400) * 1000) > new Date().getTime()) {
+		addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 10);
+		console.log("Adding race chron for " + races[i].RaceId + " [delayed start]");
+	}
 }
 
 function addracechron(raceid, raceend) {
@@ -112,21 +118,23 @@ for (var i = 0; i < startdates.length; i++) {
 		var date = new Date(), baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 		var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
 		var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
-		var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
-		var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
-		emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
-		for (k = 0; k < races.length; k++) {
-			emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
-		}
-		emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
-		emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
-		var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
-		for (var j = 0; j < users.length; j++) {
-			if (users[j].emails) {
-				var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: baseDate});
-				if (!thisItem) {
-					Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
-					SentAddresses.insert({address: users[j].emails[0].address, date: baseDate});
+		if (meeting) {
+			var races = Races.find({StartTime: {$gt: date, $lt: futuredate}}).fetch();
+			var emailcontent = '<h3>Biathlon meeting at ' + meeting.Organizer + '</h3>';
+			emailcontent += '<p>The next biathlon meeting is coming up fast!  Here are the races coming up over the next few days:</p><table>'
+			for (k = 0; k < races.length; k++) {
+				emailcontent += '<tr><td>' + races[k].Description + '</td><td>' + races[k].StartTime + '</td></tr>';
+			}
+			emailcontent += '</table><p>Don\'t forget to make any transfers well before the start of the race to make sure they\'re registered in time!<p>';
+			emailcontent += '<p>You can always check your team, points, transfers and the league table at <a href="http://fantasybiathlon.meteor.com">FantasyBiathlon.Meteor.Com</a>.</p>';
+			var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
+			for (var j = 0; j < users.length; j++) {
+				if (users[j].emails) {
+					var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: baseDate});
+					if (!thisItem) {
+						Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+						SentAddresses.insert({address: users[j].emails[0].address, date: baseDate});
+					}
 				}
 			}
 		}
@@ -587,7 +595,7 @@ pullandstoreresults = function(raceid) {
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
