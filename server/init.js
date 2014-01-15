@@ -81,7 +81,7 @@ for (var i = 0; i < races.length; i++) {
 		addracechron(races[i].RaceId, raceend);
 		console.log("Adding race chron for " + races[i].RaceId);
 	}		
-	else if (((raceend + 150400) * 1000) > new Date().getTime()) {
+	else if (((raceend + 14400) * 1000) > new Date().getTime()) {
 		addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 10);
 		console.log("Adding race chron for " + races[i].RaceId + " [delayed start]");
 	}
@@ -616,7 +616,7 @@ pullandstoreresults = function(raceid) {
 	if (!success) return false
 	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
@@ -632,7 +632,7 @@ pullandstoreresults = function(raceid) {
 	async.each(results.Results, function(res, cb) {
 		console.log(res.IBUId);
 		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
-		analysis = HTTP.get('http://datacenter.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
+		analysis = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
 		for (var i=0; i < analysis.length; i++) {
 			if (analysis[i].FieldId === 'STTM') {
 				res.ShootTime = timetosecs(analysis[i].Value);
