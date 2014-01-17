@@ -25,7 +25,8 @@ try {
 		updateallpoints();
 	});
 	MyCron.addJob(60, function() {
-		updateWeather();		
+		updateWeather();
+		updateAthletePoints();		
 	});
 	MyCron.addJob(1440, function() {
 /*		var date = new Date();
@@ -743,6 +744,7 @@ function athleteracepoints(r) {
 			points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
 		}
 	}
+	if (r.EventId === "BT1314SWRLOGSO") points = points * 2;
 	return points;
 }
 
@@ -798,4 +800,12 @@ function updateWeather() {
 		}
 		else ServerLogs.insert({Type: "Weather", Message: 'Could not get data for ' + l.Name, Time: new Date()});
 	})
+}
+
+function updateAthletePoints() {
+	var now = new Date();
+	Athletes.find().forEach(function(ath) {
+		var pts = Meteor.call('getplayerpoints', ath.IBUId, now);
+		Athletes.update(ath, {$set: {Points: pts}});
+	});
 }

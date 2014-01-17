@@ -11,7 +11,10 @@
       },
       "zurb-foundation": {},
       "accounts-ui-bootstrap-3": {},
-      "device-detection": {},
+      "device-detection": {
+        "git": "https://github.com/mystor/meteor-device-detection.git",
+        "branch": "master"
+      },
       "modernizr-meteor": {},
       "async": {}
     },
@@ -34,12 +37,12 @@
       "cron-tick": {
         "git": "https://github.com/richsilv/meteor-cron",
         "branch": "master",
-        "commit": "2e5dffe797163496b3490ca742edf9fcd122ed4c"
+        "commit": "4d4240cd66e808d6ca5ecfb54731e3ccc74f1d66"
       },
       "zurb-foundation": {
         "git": "https://github.com/MixinLabs/meteor-foundation.git",
-        "tag": "v0.1.8",
-        "commit": "1df073584c45582ce9d6fe6a42aa46e5de39eb9c"
+        "tag": "v0.1.10",
+        "commit": "545234bc38f7a747a5d69b48f75c5cc77ca8382f"
       },
       "accounts-ui-bootstrap-3": {
         "git": "https://github.com/mangasocial/meteor-accounts-ui-bootstrap-3.git",
@@ -47,9 +50,9 @@
         "commit": "cdbd20eb065310c0cc302bbd5f22e5b2121c769a"
       },
       "device-detection": {
-        "git": "https://github.com/Mystor/meteor-device-detection.git",
-        "tag": "v0.1.4",
-        "commit": "9c8db3c2f7d7bd59b361697ab63f006c05aaf089"
+        "git": "https://github.com/mystor/meteor-device-detection.git",
+        "branch": "master",
+        "commit": "4c7c6972aa3568062bb03bc0cabbade8874ce836"
       },
       "modernizr-meteor": {
         "git": "https://github.com/ckir/modernizr-meteor.git",

@@ -8,7 +8,7 @@
         },
     "zurb-foundation": {},
     "accounts-ui-bootstrap-3": {},
-    "device-detection": {},
+    "device-detection": {"git":"https://github.com/mystor/meteor-device-detection.git"},
     "modernizr-meteor": {},
     "async": {}
   }
