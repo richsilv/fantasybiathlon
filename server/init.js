@@ -279,6 +279,16 @@ Meteor.methods({
 			var argstring = '"' + args + '"';
 			return eval(fn + '(' + argstring + ')');
 		}
+	},
+	crawlResults: function(password, raceId) {
+		if (password !== remotestring) return false;
+		var success = pullandstoreresults(raceId);
+		if (success) {
+			decorateResults();
+			updateallpoints();
+			addNewAthletes();
+		}
+		return success;
 	}
 });
 
