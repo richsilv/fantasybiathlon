@@ -389,10 +389,16 @@ Meteor.publish("races", function() {
 Meteor.publish("nations", function() {
 	return Nations.find();
 });
+// DELETE THIS //
 Meteor.publish("results", function() {
+	return Results.find();
+})
+/*Meteor.publish("results", function() {
 	var team = FantasyTeams.find({UserId: this.userId});
 	return getresults(team);
 });
+*/
+// END //
 Meteor.publish("userData", function() {
 	return Meteor.users.find({_id: this.userId}, {fields: {'admin': 1}});
 });
@@ -458,6 +464,14 @@ ErrorLogs.allow({
 		return true;
 	}
 });
+AthleteStats.allow({
+	insert: function() {
+		return true;
+	},
+	remove: function() {
+		return true;
+	}
+})
 
 function popular() {
 	var athvar;
