@@ -292,7 +292,7 @@ Meteor.methods({
 	},
 	missingAnalysisCheck: function() {
 		var missing = {}
-		Results.find({CourseTime: {$exists: false}}).forEach(function(r) {if (!(r.RaceId in missing)) missing[r.RaceId] = 1; else missing[r.RaceId]++;});
+		Results.find({CourseRank: {$exists: false}}).forEach(function(r) {if (!(r.RaceId in missing)) missing[r.RaceId] = 1; else missing[r.RaceId]++;});
 		var whiteList = _.filter(_.keys(missing), function(raceId) {return missing[raceId] >= 10;});
 		return _.pick(missing, whiteList);
 	}
