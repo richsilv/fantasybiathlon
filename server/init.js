@@ -19,6 +19,7 @@ try {
 	var MyCron = new Cron();
 	MyCron.addJob(1, function() {
 		updatepointstable();
+		updatepointstable(true);
 	});
 	MyCron.addJob(15, function() {
 		writepopularathletes();
@@ -523,12 +524,12 @@ function getresults(team, enddate) {
 	return results.sort(compfunc);
 }
 
-function updatepointstable() {
+function updatepointstable(olympic) {
 	var teams = FantasyTeams.find();
 	var tableobj = {Table: []};
 	var enddate = new Date();
 	teams.forEach(function(t) {
-		var res = getresults(t, enddate);
+		var res = getresults(t, enddate, olympic);
 		var p = res.reduce(function(tot, r) {return tot + (r.Points ? r.Points : 0);}, 0);
 		tableobj.Table.push({Name: t.Name,
 			Nat: t.Nat,
@@ -536,13 +537,19 @@ function updatepointstable() {
 			Points: p
 		});
 	});
-	Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
-		if (!err) console.log("Points table updated");
-		else console.log("Error writing points table: " + err);
-	});
+	if (olympic) 
+		Statistics.upsert({Type: "olympictable"}, {Type: "olympictable", Data: tableobj}, {}, function(err) {
+			if (!err) console.log("Olympic table updated");
+			else console.log("Error writing Olympic table: " + err);
+		});
+	else
+		Statistics.upsert({Type: "pointstable"}, {Type: "pointstable", Data: tableobj}, {}, function(err) {
+			if (!err) console.log("Points table updated");
+			else console.log("Error writing points table: " + err);
+		});
 }
 
-function getresults(team, enddate) {
+function getresults(team, enddate, olympic) {
 	var compfunc = function(a, b) {
 		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
 	};
@@ -560,7 +567,9 @@ function getresults(team, enddate) {
 			if (enddate) dtend = enddate;
 			else dtend = new Date();
 		}
-		results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
+		var query = {IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}};
+		if (olympic) query['EventId'] = "BT1314SWRLOGSO";
+		results = results.concat(Results.find(query).fetch());
 	}
 	return results.sort(compfunc);
 }
