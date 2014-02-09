@@ -479,18 +479,21 @@ function popular() {
 	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
 	var teamcount = [];
 	var names = [];
+	var prices = [];
 	popids.forEach(function(i) {
 		athvar = Athletes.findOne({IBUId: i});
 		if (athvar) {
-			names.push(Athletes.findOne({IBUId: i}).ShortName);
+			names.push(athvar.ShortName + '(' + athvar.Points + ')');
 			teamcount.push(idsobj[i] * 100 / numteams);
+			prices.push(athvar.Price);
 		}
 	});
-	return [names, teamcount];
+	return [names, teamcount, prices];
 }
 
 function writepopularathletes() {
 	var popathletes = popular();
+	console.log(popathletes);
 	Statistics.upsert({Type: "popular"}, {$set: {Data: popathletes}}, {}, function(err) {
 		if (!err) {
 			ServerLogs.insert({Type: "Message", Message: "Popular athletes written", Time: new Date()});

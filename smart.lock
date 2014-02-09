@@ -4,7 +4,10 @@
     "basePackages": {
       "foundation": {},
       "jquery-ui": {},
-      "chartjs": {},
+      "chartjs": {
+        "git": "https://github.com/richsilv/Chart.js",
+        "branch": "master"
+      },
       "cron-tick": {
         "git": "https://github.com/richsilv/meteor-cron",
         "branch": "master"
@@ -30,9 +33,9 @@
         "commit": "c437d45edcf1367df8d5ffa8bad2867758030bd2"
       },
       "chartjs": {
-        "git": "https://github.com/donskifarrell/meteor-chartjs.git",
-        "tag": "v0.0.4",
-        "commit": "9d2adcd1de3728c8227e8eb7da0dcb2e0df21d0b"
+        "git": "https://github.com/richsilv/Chart.js",
+        "branch": "master",
+        "commit": "68d9a41b4a059483b81b3a7c745f19c54a86a3ee"
       },
       "cron-tick": {
         "git": "https://github.com/richsilv/meteor-cron",

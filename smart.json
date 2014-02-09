@@ -2,7 +2,9 @@
   "packages": {
     "foundation": {},
     "jquery-ui": {},
-    "chartjs": {},
+    "chartjs": {
+        "git": "https://github.com/richsilv/Chart.js"
+        },
     "cron-tick": {
         "git": "https://github.com/richsilv/meteor-cron"
         },
