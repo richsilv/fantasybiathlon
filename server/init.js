@@ -83,7 +83,7 @@ for (var i = 0; i < races.length; i++) {
 		addracechron(races[i].RaceId, raceend);
 		console.log("Adding race chron for " + races[i].RaceId);
 	}		
-	else if (((raceend + 14400) * 1000) > new Date().getTime()) {
+	else if (((raceend + 3600) * 1000) > new Date().getTime()) {
 		addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 10);
 		console.log("Adding race chron for " + races[i].RaceId + " [delayed start]");
 	}
@@ -501,10 +501,10 @@ function writepopularathletes() {
 	});
 }
 
-function getresults(team, enddate) {
+/*function getresults(team, enddate, olympic) {
 	var compfunc = function(a, b) {
 		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
-	};
+	}, resultFilter;
 	enddate = enddate ? enddate : (Session.get('datestatic') ? Session.get('datestatic') : new Date());
 	if (!team || !team.teamHistory) {return [];}
 	results = [];
@@ -519,10 +519,12 @@ function getresults(team, enddate) {
 			if (enddate) dtend = enddate;
 			else dtend = Session.get('datestatic');
 		}
-		results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
+		resultFilter = {IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}};
+		if (olympic) resultFilter['EventId'] = 'BT1314SWRLOG__';
+		results = results.concat(Results.find(resultFilter).fetch());
 	}
 	return results.sort(compfunc);
-}
+}*/
 
 function updatepointstable(olympic) {
 	var teams = FantasyTeams.find();
@@ -568,7 +570,7 @@ function getresults(team, enddate, olympic) {
 			else dtend = new Date();
 		}
 		var query = {IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}};
-		if (olympic) query['EventId'] = "BT1314SWRLOGSO";
+		if (olympic) query['EventId'] = "BT1314SWRLOG__";
 		results = results.concat(Results.find(query).fetch());
 	}
 	return results.sort(compfunc);
