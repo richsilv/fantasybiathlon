@@ -13,6 +13,7 @@ try {
 	SecureData = new Meteor.Collection("securedata");
 	SentAddresses = new Meteor.Collection("sentaddresses");
 	var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
+	var apiurl = SecureData.findOne({Name: 'APIURL'}).Value;
 	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
 	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
 
@@ -504,7 +505,7 @@ function writepopularathletes() {
 	});
 }
 
-function getresults(team, enddate) {
+/*function getresults(team, enddate) {
 	var compfunc = function(a, b) {
 		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
 	};
@@ -525,7 +526,7 @@ function getresults(team, enddate) {
 		results = results.concat(Results.find({IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}}).fetch());
 	}
 	return results.sort(compfunc);
-}
+}*/
 
 function updatepointstable(olympic) {
 	var teams = FantasyTeams.find();
@@ -571,7 +572,7 @@ function getresults(team, enddate, olympic) {
 			else dtend = new Date();
 		}
 		var query = {IBUId: {$in: team.teamHistory[i][0]}, RaceTime: {$lt: dtend, $gte: dtstart}};
-		if (olympic) query['EventId'] = "BT1314SWRLOGSO";
+		if (olympic) query['EventId'] = "BT1314SWRLOG__";
 		results = results.concat(Results.find(query).fetch());
 	}
 	return results.sort(compfunc);
@@ -624,7 +625,7 @@ pullandstoreresults = function(raceid) {
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get(apiurl + 'Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
@@ -645,7 +646,7 @@ pullandstoreresults = function(raceid) {
 	if (!success) return false
 	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get(apiurl + 'Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
@@ -661,7 +662,7 @@ pullandstoreresults = function(raceid) {
 	async.each(results.Results, function(res, cb) {
 		console.log(res.IBUId);
 		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
-		analysis = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
+		analysis = HTTP.get(apiurl + 'Analysis', {params: params}).data.Values;
 		for (var i=0; i < analysis.length; i++) {
 			if (analysis[i].FieldId === 'STTM') {
 				res.ShootTime = timetosecs(analysis[i].Value);
