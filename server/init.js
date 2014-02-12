@@ -258,8 +258,8 @@ Meteor.methods({
 		}
 		return [names, points];
 	},
-	getresults: function(team, date) {
-		return getresults(team, date);
+	getresults: function(team, date, olympic) {
+		return getresults(team, date, olympic);
 	},
 	getplayerresults: function(ibuid, date) {
 		return Results.find({IBUId: ibuid, RaceTime: {$lte: date}});
