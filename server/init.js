@@ -13,7 +13,6 @@ try {
 	SecureData = new Meteor.Collection("securedata");
 	SentAddresses = new Meteor.Collection("sentaddresses");
 	var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
-	var apiurl = SecureData.findOne({Name: 'APIURL'}).Value;
 	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
 	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
 
@@ -621,7 +620,7 @@ catch(error) {
 
 pullandstoreresults = function(raceid) {
 	Results.remove({RaceId: raceid});
-	var analysis, params, success = true;
+	var analysis, params, success = true, apiurl = SecureData.findOne({Name: 'APIURL'}).Value;;
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
