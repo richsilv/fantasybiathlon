@@ -479,18 +479,21 @@ function popular() {
 	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
 	var teamcount = [];
 	var names = [];
+	var prices = [];
 	popids.forEach(function(i) {
 		athvar = Athletes.findOne({IBUId: i});
 		if (athvar) {
-			names.push(Athletes.findOne({IBUId: i}).ShortName);
+			names.push(athvar.ShortName + '(' + athvar.Points + ')');
 			teamcount.push(idsobj[i] * 100 / numteams);
+			prices.push(athvar.Price);
 		}
 	});
-	return [names, teamcount];
+	return [names, teamcount, prices];
 }
 
 function writepopularathletes() {
 	var popathletes = popular();
+	console.log(popathletes);
 	Statistics.upsert({Type: "popular"}, {$set: {Data: popathletes}}, {}, function(err) {
 		if (!err) {
 			ServerLogs.insert({Type: "Message", Message: "Popular athletes written", Time: new Date()});
@@ -619,11 +622,11 @@ catch(error) {
 
 pullandstoreresults = function(raceid) {
 	Results.remove({RaceId: raceid});
-	var analysis, params, success = true;
+	var analysis, params, success = true, apiurl = SecureData.findOne({Name: 'APIURL'}).Value;;
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get(apiurl + 'Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
@@ -644,7 +647,7 @@ pullandstoreresults = function(raceid) {
 	if (!success) return false
 	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get(apiurl + 'Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
@@ -660,7 +663,7 @@ pullandstoreresults = function(raceid) {
 	async.each(results.Results, function(res, cb) {
 		console.log(res.IBUId);
 		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
-		analysis = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
+		analysis = HTTP.get(apiurl + 'Analysis', {params: params}).data.Values;
 		for (var i=0; i < analysis.length; i++) {
 			if (analysis[i].FieldId === 'STTM') {
 				res.ShootTime = timetosecs(analysis[i].Value);
@@ -771,7 +774,7 @@ function athleteracepoints(r) {
 			points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
 		}
 	}
-	if (r.EventId === "BT1314SWRLOGSO") points = points * 2;
+	if (r.EventId === "BT1314SWRLOG__") points = points * 2;
 	return points;
 }
 

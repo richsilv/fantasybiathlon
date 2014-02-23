@@ -603,3 +603,39 @@
     </form>
     <a class="close-reveal-modal">&#215;</a>
   </template>
+
+<template name="medals">
+  <div class="medalBackground">
+    <div class="small-12 medium-10 small-centered columns">
+      <h3 class="header">Congratulations to the winners of our Sochi Olympic Fantasy League medals!</h3>
+      <div class="small-4 columns">
+        <ul class="pricing-table">
+          <li class="title flagarea" style="background-image: url('silvermedal.png'), url('{{olympicCountry 1}}.png')"></li>
+          <li class="title">SILVER</li>
+          <li class="price">{{olympicName 1}}</li>
+          <li class="bullet-item">{{olympicCountry 1}}</li>
+          <li class="description">{{olympicPoints 1}} points</li>
+        </ul>
+      </div>
+      <div class="small-4 columns">
+        <ul class="pricing-table">
+          <li class="title flagarea" style="background-image: url('goldmedal.png'), url('{{olympicCountry 0}}.png')"></li>
+          <li class="title">GOLD</li>
+          <li class="price">{{olympicName 0}}</li>
+          <li class="bullet-item">{{olympicCountry 0}}</li>
+          <li class="description">{{olympicPoints 0}} points</li>
+        </ul>
+      </div>
+      <div class="small-4 columns">
+        <ul class="pricing-table">
+          <li class="title flagarea" style="background-image: url('bronzemedal.png'), url('{{olympicCountry 2}}.png')"></li>
+          <li class="title">BRONZE</li>
+          <li class="price">{{olympicName 2}}</li>
+          <li class="bullet-item">{{olympicCountry 2}}</li>
+          <li class="description">{{olympicPoints 2}} points</li>
+        </ul>
+      </div>
+      <h5>Now back to the World Cup!</h5>
+    </div>
+  </div>
+</template>

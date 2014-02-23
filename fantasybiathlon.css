@@ -270,6 +270,21 @@
     border: 1px solid rgb(217, 217, 217);
 }
 
+.medalBackground .flagarea {
+    min-height: 150px;
+    background-size: contain, 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.medalBackground .pricing-table .price {
+    min-height: 4em;
+}
+
+.medalBackground h3, .medalBackground h5 {
+    text-align: center;
+}
+
 /*canvas{
     width: 100% !important;
     max-width: 600px;

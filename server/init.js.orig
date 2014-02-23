@@ -83,11 +83,7 @@ for (var i = 0; i < races.length; i++) {
 		addracechron(races[i].RaceId, raceend);
 		console.log("Adding race chron for " + races[i].RaceId);
 	}		
-<<<<<<< HEAD
 	else if (((raceend + 3600) * 1000) > new Date().getTime()) {
-=======
-	else if (((raceend + 100000) * 1000) > new Date().getTime()) {
->>>>>>> 8d0e522d090724d5a3c3b01bcd5ca92e200480a3
 		addracechron(races[i].RaceId, (new Date().getTime() / 1000) + 10);
 		console.log("Adding race chron for " + races[i].RaceId + " [delayed start]");
 	}
@@ -262,8 +258,8 @@ Meteor.methods({
 		}
 		return [names, points];
 	},
-	getresults: function(team, date) {
-		return getresults(team, date);
+	getresults: function(team, date, olympic) {
+		return getresults(team, date, olympic);
 	},
 	getplayerresults: function(ibuid, date) {
 		return Results.find({IBUId: ibuid, RaceTime: {$lte: date}});
@@ -483,21 +479,18 @@ function popular() {
 	var popids = Object.keys(idsobj).sort(function(a, b) { return idsobj[a] > idsobj[b] ? -1 : 1; }).slice(0, 20);
 	var teamcount = [];
 	var names = [];
-	var prices = [];
 	popids.forEach(function(i) {
 		athvar = Athletes.findOne({IBUId: i});
 		if (athvar) {
-			names.push(athvar.ShortName + '(' + athvar.Points + ')');
+			names.push(Athletes.findOne({IBUId: i}).ShortName);
 			teamcount.push(idsobj[i] * 100 / numteams);
-			prices.push(athvar.Price);
 		}
 	});
-	return [names, teamcount, prices];
+	return [names, teamcount];
 }
 
 function writepopularathletes() {
 	var popathletes = popular();
-	console.log(popathletes);
 	Statistics.upsert({Type: "popular"}, {$set: {Data: popathletes}}, {}, function(err) {
 		if (!err) {
 			ServerLogs.insert({Type: "Message", Message: "Popular athletes written", Time: new Date()});
@@ -508,7 +501,11 @@ function writepopularathletes() {
 	});
 }
 
+<<<<<<< HEAD
 /*function getresults(team, enddate, olympic) {
+=======
+/*function getresults(team, enddate) {
+>>>>>>> old-state
 	var compfunc = function(a, b) {
 		return a.RaceTime > b.RaceTime ? 1 : a.RaceTime < b.RaceTime ? -1 : 0;
 	}, resultFilter;
@@ -626,11 +623,11 @@ catch(error) {
 
 pullandstoreresults = function(raceid) {
 	Results.remove({RaceId: raceid});
-	var analysis, params, success = true;
+	var analysis, params, success = true, apiurl = SecureData.findOne({Name: 'APIURL'}).Value;;
 	var eventid = Races.findOne({RaceId: raceid}) ? Races.findOne({RaceId: raceid}).EventId : '';
 	if (eventid) {
 		params = {'EventId': eventid, '_': 1359993916314, 'callback': ''};
-		var racedata = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Competitions', {params: params}).data;
+		var racedata = HTTP.get(apiurl + 'Competitions', {params: params}).data;
 		if (!racedata.length) {
 			ServerLogs.insert({Type: "Error", Message: "No race data: " + raceid, Time: new Date()});
 			success = false;
@@ -651,7 +648,7 @@ pullandstoreresults = function(raceid) {
 	if (!success) return false
 	console.log("now crawling...")
 	params = { RaceId: raceid, _: 1359993916314, callback: ''};
-	var results = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Results', {params: params}).data;
+	var results = HTTP.get(apiurl + 'Results', {params: params}).data;
 	for (var i=0; i < results.Results.length; i++) {
 		results.Results[i].RaceId = results.RaceId;
 		results.Results[i].EventId = eventid;
@@ -667,7 +664,7 @@ pullandstoreresults = function(raceid) {
 	async.each(results.Results, function(res, cb) {
 		console.log(res.IBUId);
 		params = { RaceId: raceid, IBUId: res.IBUId, RT: 340203, _: 1359993916314, callback: ''};
-		analysis = HTTP.get('http://m1.biathlonresults.com/modules/sportapi/api/Analysis', {params: params}).data.Values;
+		analysis = HTTP.get(apiurl + 'Analysis', {params: params}).data.Values;
 		for (var i=0; i < analysis.length; i++) {
 			if (analysis[i].FieldId === 'STTM') {
 				res.ShootTime = timetosecs(analysis[i].Value);
@@ -778,7 +775,7 @@ function athleteracepoints(r) {
 			points += shootorder.reduce(function(t, e, i) {return (e.IBUId === r.IBUId) ? t + (smallpoints[i + 1] ? smallpoints[i + 1] : 0) : t;}, 0);
 		}
 	}
-	if (r.EventId === "BT1314SWRLOG__") points = points * 2;
+	if (r.EventId === "BT1314SWRLOGSO") points = points * 2;
 	return points;
 }
 
