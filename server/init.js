@@ -117,7 +117,7 @@ for (var i = 0; i < enddates.length; i++) {
 }
 for (var i = 0; i < startdates.length; i++) {
 	MyCron.addScheduleJob((startdates[i].getTime()/1000), function() {
-		var date = new Date(), baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+		var date = new Date(), baseDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()), startDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate()-6);
 		var futuredate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7);
 		var meeting = Meetings.findOne({StartDate: {$gt: date, $lt: futuredate}});
 		if (meeting) {
@@ -132,7 +132,7 @@ for (var i = 0; i < startdates.length; i++) {
 			var users = Meteor.users.find({'emails.verified': true}, {fields: {emails: true}}).fetch();
 			for (var j = 0; j < users.length; j++) {
 				if (users[j].emails) {
-					var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: baseDate});
+					var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: {$lte: baseDate, $gte: startDate}});
 					if (!thisItem) {
 						Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
 						SentAddresses.insert({address: users[j].emails[0].address, date: baseDate});
