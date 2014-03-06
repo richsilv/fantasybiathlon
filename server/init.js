@@ -134,7 +134,7 @@ for (var i = 0; i < startdates.length; i++) {
 				if (users[j].emails) {
 					var thisItem = SentAddresses.findOne({address: users[j].emails[0].address, date: {$lte: baseDate, $gte: startDate}});
 					if (!thisItem) {
-						Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
+//						Email.send({from: 'Fantasy Biathlon <noreply@biathlonstats.eu>', to: users[j].emails[0].address, subject: "Biathlon meeting coming up in " + meeting.Organizer, html: emailcontent});
 						SentAddresses.insert({address: users[j].emails[0].address, date: baseDate});
 					}
 				}
@@ -150,19 +150,19 @@ function showChrons() {
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
 	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
-});
 
-Accounts.loginServiceConfiguration.remove({
-	service: "facebook"
-});
+	Accounts.loginServiceConfiguration.remove({
+		service: "facebook"
+	});
 
-if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") {
-	Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
-	Accounts.loginServiceConfiguration.insert(facebookprod);
-}
-else {
-	Accounts.loginServiceConfiguration.insert(facebooklocal);	
-}
+	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") {
+		Accounts.config({sendVerificationEmail: true, forbidClientAccountCreation: false});
+		Accounts.loginServiceConfiguration.insert(facebookprod);
+	}
+	else {
+		Accounts.loginServiceConfiguration.insert(facebooklocal);	
+	}
+});
 
 Meteor.methods({
 /*	// DISABLE THIS IMMEDIATELY!!!!!!!!
@@ -616,6 +616,7 @@ function beforeseasonstart() {
 }
 
 catch(error) {
+	console.log("THIS======================================");
 	console.log(error.stack);
 	ServerLogs.insert({Type: "Error", Message: error.stack, Time: new Date()});
 }
