@@ -51,7 +51,8 @@ Template.loginButtons.events({
 	'submit #login-form': function(event) {
 		if (Session.get('action') === 'login') {
 			Meteor.loginWithPassword({email: $('#login-email').val()}, $('#login-password').val(), function(err) {
-				if (err) { 
+				if (err) {
+					console.log(err);
 					if (err.reason === "Incorrect password") Session.set('error', 'Incorrect password!');
 					else Session.set('error', 'Cannot log you in!');
 				}
