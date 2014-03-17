@@ -79,6 +79,7 @@ Template.loginButtons.events({
 		}
 		else if (Session.get('action') === 'forgot') {
 			Accounts.forgotPassword({email: $('#login-email').val()}, function(err) {
+				console.log(err);
 				if (err) Session.set('error', 'Please enter a valid e-mail.');
 				else {
 					Session.set('error', 'Password reset mail sent.');
