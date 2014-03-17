@@ -296,6 +296,9 @@ Meteor.methods({
 		Results.find({CourseRank: {$exists: false}}).forEach(function(r) {if (!(r.RaceId in missing)) missing[r.RaceId] = 1; else missing[r.RaceId]++;});
 		var whiteList = _.filter(_.keys(missing), function(raceId) {return missing[raceId] >= 10;});
 		return _.pick(missing, whiteList);
+	},
+	sendMailOn: function() {
+		process.env.MAIL_URL = "smtp://fantasybiathlon%40gmail.com:steelroad535@smtp.gmail.com:465/";
 	}
 });
 
