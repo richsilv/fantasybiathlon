@@ -15,6 +15,9 @@ try {
 	var remotestring = SecureData.findOne({Name: 'remotestring'}).Value;
 	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
 	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
+	var emailString = SecureData.findOne({Name: 'emailString'}).Value;
+	process.env.MAIL_URL = emailString;
+	console.log(emailString);
 
 	var MyCron = new Cron();
 	MyCron.addJob(1, function() {
@@ -149,7 +152,8 @@ function showChrons() {
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
-	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = 'smtp://richsilv:b3b8eb83@smtp.webfaction.com:25';
+	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = emailString;
+	else process.env.MAIL_URL = null;
 
 	Accounts.loginServiceConfiguration.remove({
 		service: "facebook"
@@ -298,7 +302,7 @@ Meteor.methods({
 		return _.pick(missing, whiteList);
 	},
 	sendMailOn: function() {
-		process.env.MAIL_URL = "smtp://fantasybiathlon%40gmail.com:steelroad535@smtp.gmail.com:465/";
+		process.env.MAIL_URL = emailString;
 	}
 });
 
