@@ -152,8 +152,8 @@ function showChrons() {
 
 Meteor.startup(function () {
 	Accounts.emailTemplates.from = 'admin <noreply@biathlonstats.eu>';
-	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = emailString;
-	else process.env.MAIL_URL = null;
+//	if (Meteor.absoluteUrl().slice(0,22) !== "http://localhost:3000/") process.env.MAIL_URL = emailString;
+//	else process.env.MAIL_URL = null;
 
 	Accounts.loginServiceConfiguration.remove({
 		service: "facebook"
