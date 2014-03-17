@@ -16,7 +16,7 @@ try {
 	var facebooklocal = SecureData.findOne({Name: 'facebooklocal'}).Value;
 	var facebookprod = SecureData.findOne({Name: 'facebookprod'}).Value;
 	var emailString = SecureData.findOne({Name: 'emailString'}).Value;
-	process.env.MAIL_URL = emailString;
+//	process.env.MAIL_URL = emailString;
 	console.log(emailString);
 
 	var MyCron = new Cron();
