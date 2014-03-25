@@ -51,7 +51,8 @@ Template.loginButtons.events({
 	'submit #login-form': function(event) {
 		if (Session.get('action') === 'login') {
 			Meteor.loginWithPassword({email: $('#login-email').val()}, $('#login-password').val(), function(err) {
-				if (err) { 
+				if (err) {
+					console.log(err);
 					if (err.reason === "Incorrect password") Session.set('error', 'Incorrect password!');
 					else Session.set('error', 'Cannot log you in!');
 				}
@@ -79,6 +80,7 @@ Template.loginButtons.events({
 		}
 		else if (Session.get('action') === 'forgot') {
 			Accounts.forgotPassword({email: $('#login-email').val()}, function(err) {
+				console.log(err);
 				if (err) Session.set('error', 'Please enter a valid e-mail.');
 				else {
 					Session.set('error', 'Password reset mail sent.');
